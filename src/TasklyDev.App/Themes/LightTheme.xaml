@@ -272,6 +272,27 @@
         </Setter>
     </Style>
 
+    <Style x:Key="RoundedStatusMessageBorder" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="Margin" Value="0,9,0,0" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsError}" Value="True">
+                <Setter Property="Background" Value="{DynamicResource DangerSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ErrorBrush}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StatusMessage}" Value="">
+                <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StatusMessage}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="SidebarNavigationButton" TargetType="Button">
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Padding" Value="12,9" />

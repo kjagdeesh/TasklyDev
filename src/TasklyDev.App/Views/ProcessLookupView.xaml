@@ -67,21 +67,23 @@
                          BorderThickness="1"
                          AutomationProperties.Name="Search process name or exact process ID" />
 
-                <TextBlock Text="{Binding StatusMessage}"
-                           Margin="0,10,0,0"
-                           FontSize="12"
-                           TextWrapping="Wrap">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsError}" Value="True">
-                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                <Border Style="{StaticResource RoundedStatusMessageBorder}"
+                        Margin="0,10,0,0">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="12"
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
             </StackPanel>
         </Border>
 
