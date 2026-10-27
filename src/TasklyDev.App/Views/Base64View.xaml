@@ -82,20 +82,19 @@
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center">
-                    <TextBlock Text="VARIANT"
-                               FontSize="10"
-                               FontWeight="Bold"
+                    <TextBlock Text="Encoding variant"
+                               FontSize="12"
+                               FontWeight="SemiBold"
                                Foreground="{DynamicResource MutedTextBrush}"
                                VerticalAlignment="Center"
-                               Margin="0,0,8,0" />
-                    <ComboBox Width="130"
-                              Height="34"
+                               Margin="0,0,10,0" />
+                    <ComboBox Width="164"
                               SelectedValue="{Binding SelectedVariant}"
                               SelectedValuePath="Tag"
                               ToolTip="Base64 alphabet variant">
-                        <ComboBoxItem Content="Standard (+/)" Tag="{x:Static core:Base64Variant.Standard}" />
-                        <ComboBoxItem Content="URL-safe (-_)" Tag="{x:Static core:Base64Variant.UrlSafe}" />
-                        <ComboBoxItem Content="MIME (76 cols)" Tag="{x:Static core:Base64Variant.Mime}" />
+                        <ComboBoxItem Content="Standard" Tag="{x:Static core:Base64Variant.Standard}" />
+                        <ComboBoxItem Content="URL-safe" Tag="{x:Static core:Base64Variant.UrlSafe}" />
+                        <ComboBoxItem Content="MIME (76 chars)" Tag="{x:Static core:Base64Variant.Mime}" />
                     </ComboBox>
                     <CheckBox Content="Padding (=)"
                               IsChecked="{Binding IncludePadding}"
@@ -164,6 +163,7 @@
                         <TextBlock DockPanel.Dock="Right"
                                    Text="{Binding InputCharacterCount, StringFormat={}{0} chars}"
                                    FontSize="11"
+                                   Padding="10,4,0,0"
                                    Foreground="{DynamicResource MutedTextBrush}" />
                     </DockPanel>
                     <DockPanel Grid.Row="1" Margin="0,12,0,10">
