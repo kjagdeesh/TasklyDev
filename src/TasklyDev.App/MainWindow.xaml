@@ -13,6 +13,52 @@
         FontFamily="Segoe UI"
         Foreground="{DynamicResource PrimaryTextBrush}">
     <Window.Resources>
+        <Geometry x:Key="HomeIconGeometry">M3.5 11 L12 4 L20.5 11 M6 9.5 V20 H18 V9.5 M10 20 V14 H14 V20</Geometry>
+        <Geometry x:Key="Base64IconGeometry">M5 3.5 H15 L19 7.5 V20 H5 Z M15 3.5 V8 H19 M8 12 H16 M8 16 H14</Geometry>
+        <Geometry x:Key="NumberBaseIconGeometry">M5 3.5 H19 V20.5 H5 Z M8 7 H16 M8 11 H10 M14 11 H16 M8 15 H10 M14 15 H16 M8 18 H10 M14 18 H16</Geometry>
+        <Geometry x:Key="TimestampIconGeometry">M12 3.5 A8.5 8.5 0 1 0 12 20.5 A8.5 8.5 0 1 0 12 3.5 Z M12 7 V12 L15.5 14</Geometry>
+        <Geometry x:Key="GuidIconGeometry">M4 5 H20 V19 H4 Z M9 10 A2 2 0 1 0 9 14 A2 2 0 1 0 9 10 Z M13 11 H17 M13 14 H17</Geometry>
+        <Geometry x:Key="HashIconGeometry">M9 4 L7 20 M17 4 L15 20 M4 9 H20 M3 15 H19</Geometry>
+        <Geometry x:Key="ColorIconGeometry">M12 3 C9 7 6 10 6 14 A6 6 0 0 0 18 14 C18 10 15 7 12 3 Z</Geometry>
+        <Geometry x:Key="RegexIconGeometry">M8 5 H6 V19 H8 M16 5 H18 V19 H16 M10 9 L14 15 M14 9 L10 15</Geometry>
+        <Geometry x:Key="ProcessIconGeometry">M4 4 H20 V17 H4 Z M8 21 H16 M12 17 V21 M7 13 L10 10 L13 12 L17 7</Geometry>
+        <Geometry x:Key="EnvironmentIconGeometry">M4 5 H20 V19 H4 Z M7 10 L10 12 L7 14 M12 15 H17</Geometry>
+        <Geometry x:Key="SettingsIconGeometry">M12 8.5 A3.5 3.5 0 1 0 12 15.5 A3.5 3.5 0 1 0 12 8.5 Z M12 3 V5 M12 19 V21 M3 12 H5 M19 12 H21 M5.6 5.6 L7 7 M17 17 L18.4 18.4 M18.4 5.6 L17 7 M7 17 L5.6 18.4</Geometry>
+        <Style x:Key="RouteIconPath" TargetType="Path">
+            <Setter Property="Data" Value="{StaticResource Base64IconGeometry}" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="Stroke" Value="{DynamicResource AmberDeepBrush}" />
+            <Setter Property="StrokeThickness" Value="1.7" />
+            <Setter Property="StrokeStartLineCap" Value="Round" />
+            <Setter Property="StrokeEndLineCap" Value="Round" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="number-base">
+                    <Setter Property="Data" Value="{StaticResource NumberBaseIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="timestamp">
+                    <Setter Property="Data" Value="{StaticResource TimestampIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="guid">
+                    <Setter Property="Data" Value="{StaticResource GuidIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="hash">
+                    <Setter Property="Data" Value="{StaticResource HashIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="color">
+                    <Setter Property="Data" Value="{StaticResource ColorIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="regex">
+                    <Setter Property="Data" Value="{StaticResource RegexIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="process">
+                    <Setter Property="Data" Value="{StaticResource ProcessIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="environment">
+                    <Setter Property="Data" Value="{StaticResource EnvironmentIconGeometry}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <DataTemplate x:Key="NavigationItemTemplate">
             <Button Command="{Binding DataContext.OpenRouteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                     CommandParameter="{Binding Route}"
@@ -42,12 +88,12 @@
                             CornerRadius="14"
                             Background="{DynamicResource AmberTintBrush}"
                             HorizontalAlignment="Left">
-                        <TextBlock Text="{Binding Glyph}"
-                                   Foreground="{DynamicResource AmberDeepBrush}"
-                                   FontSize="10"
-                                   FontWeight="SemiBold"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
+                        <Path Width="16"
+                              Height="16"
+                              Tag="{Binding Route}"
+                              Style="{StaticResource RouteIconPath}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Grid.Column="1"
                                Text="{Binding Title}"
@@ -90,12 +136,12 @@
                             CornerRadius="14"
                             Background="{DynamicResource AmberTintBrush}"
                             VerticalAlignment="Top">
-                        <TextBlock Text="{Binding Glyph}"
-                                   Foreground="{DynamicResource AmberDeepBrush}"
-                                   FontSize="11"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
+                        <Path Width="22"
+                              Height="22"
+                              Tag="{Binding Route}"
+                              Style="{StaticResource RouteIconPath}"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
                     </Border>
                     <StackPanel Grid.Column="1" Margin="8,1,0,0">
                         <TextBlock Text="{Binding Name}"
@@ -182,7 +228,23 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⌂" Width="30" FontSize="16" Foreground="{DynamicResource AmberDeepBrush}" />
+                            <Border Width="28"
+                                    Height="28"
+                                    CornerRadius="14"
+                                    Background="{DynamicResource AmberTintBrush}"
+                                    Margin="0,0,2,0">
+                                <Path Data="{StaticResource HomeIconGeometry}"
+                                      Width="16"
+                                      Height="16"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AmberDeepBrush}"
+                                      StrokeThickness="1.7"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                            </Border>
                             <TextBlock Text="Overview" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
@@ -224,7 +286,23 @@
                                 </Style>
                             </Button.Style>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⚙" Width="30" FontSize="15" Foreground="{DynamicResource MutedTextBrush}" />
+                                <Border Width="28"
+                                        Height="28"
+                                        CornerRadius="14"
+                                        Background="{DynamicResource AmberTintBrush}"
+                                        Margin="0,0,2,0">
+                                    <Path Data="{StaticResource SettingsIconGeometry}"
+                                          Width="16"
+                                          Height="16"
+                                          Stretch="Uniform"
+                                          Stroke="{DynamicResource AmberDeepBrush}"
+                                          StrokeThickness="1.7"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                                </Border>
                                 <TextBlock Text="Preferences" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -484,12 +562,12 @@
                                         CornerRadius="16"
                                         Background="{DynamicResource AmberTintBrush}"
                                         HorizontalAlignment="Left">
-                                    <TextBlock Text="{Binding CurrentTool.Glyph}"
-                                               Foreground="{DynamicResource AmberDeepBrush}"
-                                               FontSize="13"
-                                               FontWeight="Bold"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <Path Width="24"
+                                          Height="24"
+                                          Tag="{Binding CurrentTool.Route}"
+                                          Style="{StaticResource RouteIconPath}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
                                 </Border>
                                 <TextBlock Text="{Binding CurrentPageTitle}"
                                            FontSize="20"
