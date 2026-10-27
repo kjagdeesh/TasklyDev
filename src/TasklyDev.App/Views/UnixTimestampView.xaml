@@ -30,9 +30,6 @@
                                 <Setter TargetName="ModeBorder" Property="Background" Value="{DynamicResource AmberBrush}" />
                                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
                             </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="ModeBorder" Property="BorderBrush" Value="{DynamicResource AmberDeepBrush}" />
-                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>

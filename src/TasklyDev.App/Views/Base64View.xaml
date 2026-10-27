@@ -4,6 +4,108 @@
              xmlns:core="clr-namespace:TasklyDev.Core.Encoding;assembly=TasklyDev.Core"
              FontFamily="Segoe UI">
     <UserControl.Resources>
+        <Style x:Key="Base64ActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.86" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Base64PrimaryActionButton" TargetType="Button" BasedOn="{StaticResource Base64ActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style x:Key="Base64PaddingCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckContainer"
+                                Background="{DynamicResource SubtleSurfaceBrush}"
+                                BorderBrush="{DynamicResource OutlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border x:Name="CheckIndicator"
+                                        Width="17"
+                                        Height="17"
+                                        CornerRadius="5"
+                                        Background="{DynamicResource CardSurfaceBrush}"
+                                        BorderBrush="{DynamicResource OutlineBrush}"
+                                        BorderThickness="1"
+                                        VerticalAlignment="Center">
+                                    <Path x:Name="CheckMark"
+                                          Data="M 3 8 L 6.5 11.5 L 13 4.5"
+                                          Width="11"
+                                          Height="9"
+                                          Stretch="Fill"
+                                          Stroke="{DynamicResource PrimaryTextBrush}"
+                                          StrokeThickness="1.8"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          Visibility="Collapsed"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                                </Border>
+                                <ContentPresenter Margin="8,0,0,0"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckContainer" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckIndicator" Property="Background" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="CheckIndicator" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="CheckContainer" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter TargetName="CheckContainer" Property="BorderBrush" Value="{DynamicResource WarmOutlineBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="CheckContainer" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ModeRadioButton" TargetType="RadioButton">
             <Setter Property="Padding" Value="14,9" />
             <Setter Property="Margin" Value="0,0,8,0" />
@@ -29,9 +131,6 @@
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="ModeBorder" Property="Background" Value="{DynamicResource AmberBrush}" />
                                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="ModeBorder" Property="BorderBrush" Value="{DynamicResource AmberDeepBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -99,15 +198,15 @@
                     <CheckBox Content="Padding (=)"
                               IsChecked="{Binding IncludePadding}"
                               IsEnabled="{Binding IsEncoding}"
-                              Margin="14,0,0,0"
+                              Style="{StaticResource Base64PaddingCheckBox}"
+                              Margin="12,0,0,0"
                               VerticalAlignment="Center"
-                              Foreground="{DynamicResource SecondaryTextBrush}"
                               ToolTip="Include standard trailing equals-sign padding when encoding" />
                 </StackPanel>
             </Grid>
         </Border>
 
-        <Border CornerRadius="13"
+        <Border CornerRadius="10"
                 Padding="14,10"
                 Margin="0,0,0,16"
                 AutomationProperties.LiveSetting="Polite">
@@ -169,14 +268,15 @@
                     <DockPanel Grid.Row="1" Margin="0,12,0,10">
                         <Button Content="Load sample"
                                 Command="{Binding LoadSampleCommand}"
-                                Style="{StaticResource SecondaryActionButton}"
+                                Style="{StaticResource Base64ActionButton}"
                                 Margin="0,0,8,0" />
                         <Button Content="Clear"
                                 Command="{Binding ClearCommand}"
-                                Style="{StaticResource SecondaryActionButton}" />
+                                Style="{StaticResource Base64ActionButton}" />
                         <TextBlock DockPanel.Dock="Right"
                                    Text="{Binding InputByteCount, StringFormat={}{0} UTF-8 bytes}"
                                    FontSize="11"
+                                   Padding="10,4,0,0"
                                    Foreground="{DynamicResource MutedTextBrush}"
                                    VerticalAlignment="Center" />
                     </DockPanel>
@@ -214,6 +314,7 @@
                         <TextBlock DockPanel.Dock="Right"
                                    Text="{Binding OutputCharacterCount, StringFormat={}{0} chars}"
                                    FontSize="11"
+                                   Padding="10,4,0,0"
                                    Foreground="{DynamicResource MutedTextBrush}" />
                     </DockPanel>
                     <StackPanel Grid.Row="1"
@@ -221,23 +322,16 @@
                                 Margin="0,12,0,10">
                         <Button Content="{Binding PrimaryActionLabel}"
                                 Command="{Binding RunCommand}"
-                                Margin="0,0,8,0">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
-                                    <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
-                                    <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
-                                    <Setter Property="FontWeight" Value="SemiBold" />
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                                Style="{StaticResource Base64PrimaryActionButton}"
+                                Margin="0,0,8,0" />
                         <Button Content="Swap"
                                 Command="{Binding SwapCommand}"
-                                Style="{StaticResource SecondaryActionButton}"
+                                Style="{StaticResource Base64ActionButton}"
                                 Margin="0,0,8,0"
                                 ToolTip="Move output to input and switch operation" />
                         <Button Content="Copy output"
                                 Command="{Binding CopyOutputCommand}"
-                                Style="{StaticResource SecondaryActionButton}"
+                                Style="{StaticResource Base64ActionButton}"
                                 ToolTip="Copy the output to the clipboard" />
                     </StackPanel>
                     <TextBox Grid.Row="2"

@@ -178,7 +178,6 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
@@ -249,24 +248,29 @@
                         </StackPanel>
                     </Button>
 
-                    <StackPanel Grid.Row="2" Margin="0,20,0,8">
-                        <TextBlock Text="DEVELOPER TOOLS"
-                                   Margin="12,0,0,7"
-                                   FontSize="10"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource MutedTextBrush}" />
-                        <ItemsControl ItemsSource="{Binding DeveloperNavigation}"
-                                      ItemTemplate="{StaticResource NavigationItemTemplate}" />
-                        <TextBlock Text="SYSTEM DIAGNOSTICS"
-                                   Margin="12,18,0,7"
-                                   FontSize="10"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource MutedTextBrush}" />
-                        <ItemsControl ItemsSource="{Binding SystemNavigation}"
-                                      ItemTemplate="{StaticResource NavigationItemTemplate}" />
-                    </StackPanel>
+                    <ScrollViewer Grid.Row="2"
+                                  Margin="0,20,0,8"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <TextBlock Text="DEVELOPER TOOLS"
+                                       Margin="12,0,0,7"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource MutedTextBrush}" />
+                            <ItemsControl ItemsSource="{Binding DeveloperNavigation}"
+                                          ItemTemplate="{StaticResource NavigationItemTemplate}" />
+                            <TextBlock Text="SYSTEM DIAGNOSTICS"
+                                       Margin="12,18,0,7"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource MutedTextBrush}" />
+                            <ItemsControl ItemsSource="{Binding SystemNavigation}"
+                                          ItemTemplate="{StaticResource NavigationItemTemplate}" />
+                        </StackPanel>
+                    </ScrollViewer>
 
-                    <Border Grid.Row="4"
+                    <Border Grid.Row="3"
                             BorderBrush="{DynamicResource OutlineBrush}"
                             BorderThickness="0,1,0,0"
                             Padding="0,12,0,0">
