@@ -25,4 +25,7 @@
     <Color x:Key="SuccessColor">#70D5A5</Color>
     <Color x:Key="SuccessTextColor">#A0EAC5</Color>
     <Color x:Key="PreviewOverlayColor">#CC17191D</Color>
+    <Color x:Key="ScrollBarThumbColor">#505762</Color>
+    <Color x:Key="ScrollBarThumbHoverColor">#707A88</Color>
+    <Color x:Key="ScrollBarThumbPressedColor">#FFD36B</Color>
 </ResourceDictionary>
