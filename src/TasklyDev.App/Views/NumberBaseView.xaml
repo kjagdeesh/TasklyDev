@@ -3,7 +3,45 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FontFamily="Segoe UI">
     <UserControl.Resources>
-        <Style x:Key="PresetButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+        <Style x:Key="NumberBaseActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="NumberBasePrimaryButton" TargetType="Button" BasedOn="{StaticResource NumberBaseActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="PresetButton" TargetType="Button" BasedOn="{StaticResource NumberBaseActionButton}">
             <Setter Property="Padding" Value="12,7" />
             <Setter Property="Margin" Value="0,0,8,0" />
             <Setter Property="Background" Value="{DynamicResource AmberTintBrush}" />
@@ -20,6 +58,23 @@
             <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="VerticalContentAlignment" Value="Top" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
 
@@ -59,11 +114,19 @@
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <TextBlock Text="Base"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource MutedTextBrush}"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,6,0" />
+                            <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                                    BorderBrush="{DynamicResource OutlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Height="40"
+                                    Padding="15,0"
+                                    Margin="15,0,6,0">
+                                <TextBlock Text="Base"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           VerticalAlignment="Center" />
+                            </Border>
                             <ComboBox Width="94"
                                       Height="32"
                                       ItemsSource="{Binding Bases}"
@@ -71,10 +134,18 @@
                                       AutomationProperties.Name="Source number base" />
                         </StackPanel>
                     </DockPanel>
-                    <TextBlock Text="Input value"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               Margin="0,0,0,7" />
+                    <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                            BorderBrush="{DynamicResource CardOutlineBrush}"
+                            BorderThickness="1"
+                            CornerRadius="9"
+                            Padding="9,5"
+                            Margin="0,0,0,7"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="Input value"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" />
+                    </Border>
                     <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource NumberEditor}"
                              MinHeight="220"
@@ -84,11 +155,11 @@
                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                         <Button Content="Load sample"
                                 Command="{Binding LoadSampleCommand}"
-                                Style="{StaticResource SecondaryActionButton}"
+                                Style="{StaticResource NumberBaseActionButton}"
                                 Margin="0,0,8,0" />
                         <Button Content="Clear"
                                 Command="{Binding ClearCommand}"
-                                Style="{StaticResource SecondaryActionButton}" />
+                                Style="{StaticResource NumberBaseActionButton}" />
                     </StackPanel>
                 </StackPanel>
 
@@ -101,12 +172,39 @@
                             Height="46"
                             Background="{DynamicResource AmberBrush}"
                             Foreground="{DynamicResource PrimaryTextBrush}"
-                            BorderThickness="0"
-                            FontSize="23"
+                            BorderBrush="{DynamicResource AmberBrush}"
+                            BorderThickness="1"
+                            FontSize="22"
                             FontWeight="SemiBold"
+                            Cursor="Hand"
                             Command="{Binding SwapBasesCommand}"
                             ToolTip="Swap source and target bases"
-                            AutomationProperties.Name="Swap source and target bases" />
+                            AutomationProperties.Name="Swap source and target bases">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="SwapBorder"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="23">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="SwapBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                        <Setter TargetName="SwapBorder" Property="BorderBrush" Value="{DynamicResource AmberDeepBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="SwapBorder" Property="Opacity" Value="0.82" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter TargetName="SwapBorder" Property="Opacity" Value="0.5" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                     <TextBlock Text="Swap bases"
                                Margin="0,7,0,0"
                                FontSize="11"
@@ -121,11 +219,19 @@
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <TextBlock Text="Base"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource MutedTextBrush}"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,6,0" />
+                            <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                                    BorderBrush="{DynamicResource OutlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Height="40"
+                                    Padding="15,0"
+                                    Margin="15,0,6,0">
+                                <TextBlock Text="Base"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           VerticalAlignment="Center" />
+                            </Border>
                             <ComboBox Width="94"
                                       Height="32"
                                       ItemsSource="{Binding Bases}"
@@ -133,10 +239,18 @@
                                       AutomationProperties.Name="Target number base" />
                         </StackPanel>
                     </DockPanel>
-                    <TextBlock Text="Output value"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               Margin="0,0,0,7" />
+                    <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                            BorderBrush="{DynamicResource CardOutlineBrush}"
+                            BorderThickness="1"
+                            CornerRadius="9"
+                            Padding="9,5"
+                            Margin="0,0,0,7"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="Output value"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" />
+                    </Border>
                     <TextBox Text="{Binding OutputText, Mode=OneWay}"
                              Style="{StaticResource NumberEditor}"
                              MinHeight="220"
@@ -148,14 +262,11 @@
                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                         <Button Content="Convert"
                                 Command="{Binding ConvertCommand}"
-                                Background="{DynamicResource AmberBrush}"
-                                BorderBrush="{DynamicResource AmberBrush}"
-                                FontWeight="SemiBold"
-                                Style="{StaticResource SecondaryActionButton}"
+                                Style="{StaticResource NumberBasePrimaryButton}"
                                 Margin="0,0,8,0" />
                         <Button Content="Copy output"
                                 Command="{Binding CopyOutputCommand}"
-                                Style="{StaticResource SecondaryActionButton}" />
+                                Style="{StaticResource NumberBaseActionButton}" />
                     </StackPanel>
                 </StackPanel>
             </Grid>
