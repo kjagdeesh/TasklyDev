@@ -9,7 +9,7 @@
         MinHeight="700"
         WindowStartupLocation="CenterScreen"
         PreviewKeyDown="Window_PreviewKeyDown"
-        Background="{DynamicResource CanvasBrush}"
+        Background="{DynamicResource WindowSurfaceBrush}"
         FontFamily="Segoe UI"
         Foreground="{DynamicResource PrimaryTextBrush}">
     <Window.Resources>
@@ -113,11 +113,11 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Border Margin="20"
+    <Border Margin="0"
             CornerRadius="28"
             Background="{DynamicResource WindowSurfaceBrush}"
             BorderBrush="{DynamicResource OutlineBrush}"
-            BorderThickness="1">
+            BorderThickness="0">
         <Grid ClipToBounds="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="260" />
