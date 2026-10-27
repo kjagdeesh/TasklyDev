@@ -1,0 +1,211 @@
+<UserControl x:Class="TasklyDev.Views.RegexTesterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <UserControl.Resources>
+        <DataTemplate x:Key="RegexMatchTemplate">
+            <Border Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource OutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="13"
+                    Margin="0,0,0,9">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Background="{DynamicResource AmberTintBrush}"
+                                CornerRadius="8"
+                                Padding="8,4"
+                                VerticalAlignment="Top">
+                            <TextBlock FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AmberDeepBrush}">
+                                <Run Text="Index " />
+                                <Run Text="{Binding Index}" />
+                            </TextBlock>
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding Value}"
+                                   Margin="11,3,0,0"
+                                   FontFamily="Consolas"
+                                   FontSize="12"
+                                   TextWrapping="Wrap" />
+                    </Grid>
+                    <TextBlock Margin="0,7,0,0"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}">
+                        <Run Text="Length: " />
+                        <Run Text="{Binding Length}" />
+                    </TextBlock>
+                    <ItemsControl ItemsSource="{Binding Groups}"
+                                  Margin="0,7,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,2">
+                                    <TextBlock Text="{Binding Name}"
+                                               Width="70"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                                    <TextBlock Text="{Binding Value}"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               TextWrapping="Wrap" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="20"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Pattern"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,7" />
+                <TextBox Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsNotBusy}"
+                         MinHeight="44"
+                         Padding="12,10"
+                         FontFamily="Consolas"
+                         FontSize="14"
+                         Background="{DynamicResource EditorSurfaceBrush}"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         BorderBrush="{DynamicResource OutlineBrush}"
+                         BorderThickness="1"
+                         AutomationProperties.Name="Regular expression pattern" />
+                <TextBlock Text="Sample text"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Margin="0,15,0,7" />
+                <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsNotBusy}"
+                         MinHeight="142"
+                         Padding="12"
+                         FontFamily="Consolas"
+                         FontSize="13"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         Background="{DynamicResource EditorSurfaceBrush}"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         BorderBrush="{DynamicResource OutlineBrush}"
+                         BorderThickness="1"
+                         AutomationProperties.Name="Regular expression sample text" />
+
+                <WrapPanel Margin="0,14,0,0">
+                    <CheckBox Content="Ignore Case"
+                              IsChecked="{Binding IgnoreCase}"
+                              IsEnabled="{Binding IsNotBusy}"
+                              Margin="0,0,18,8"
+                              FontSize="12"
+                              AutomationProperties.Name="Ignore case" />
+                    <CheckBox Content="Multiline"
+                              IsChecked="{Binding Multiline}"
+                              IsEnabled="{Binding IsNotBusy}"
+                              Margin="0,0,18,8"
+                              FontSize="12"
+                              AutomationProperties.Name="Multiline option" />
+                    <CheckBox Content="Singleline"
+                              IsChecked="{Binding Singleline}"
+                              IsEnabled="{Binding IsNotBusy}"
+                              Margin="0,0,0,8"
+                              FontSize="12"
+                              AutomationProperties.Name="Singleline option" />
+                </WrapPanel>
+
+                <DockPanel Margin="0,5,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Test pattern"
+                                Command="{Binding TestCommand}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                Padding="16,9"
+                                Background="{DynamicResource AmberBrush}"
+                                Foreground="{DynamicResource PrimaryTextBrush}"
+                                BorderThickness="0"
+                                FontWeight="SemiBold"
+                                Cursor="Hand"
+                                AutomationProperties.Name="Test regular expression" />
+                        <Button Content="Load sample"
+                                Command="{Binding LoadSampleCommand}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                Margin="8,0,0,0"
+                                Padding="12,8"
+                                Style="{StaticResource SecondaryActionButton}" />
+                        <Button Content="Clear"
+                                Command="{Binding ClearCommand}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                Margin="8,0,0,0"
+                                Padding="12,8"
+                                Style="{StaticResource SecondaryActionButton}" />
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="Finite 250 ms match timeout"
+                               VerticalAlignment="Center"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}" />
+                </DockPanel>
+                <TextBlock Text="{Binding StatusMessage}"
+                           Margin="0,11,0,0"
+                           FontSize="12"
+                           TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsError}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <DockPanel Margin="2,0,0,10">
+            <TextBlock Text="Matches"
+                       FontSize="14"
+                       FontWeight="SemiBold" />
+            <TextBlock DockPanel.Dock="Right"
+                       Text="{Binding Matches.Count, StringFormat={}{0} shown}"
+                       FontSize="11"
+                       Foreground="{DynamicResource MutedTextBrush}" />
+        </DockPanel>
+        <ItemsControl ItemsSource="{Binding Matches}"
+                      ItemTemplate="{StaticResource RegexMatchTemplate}">
+            <ItemsControl.Visibility>
+                <Binding Path="HasMatches" Converter="{StaticResource BoolToVisibility}" />
+            </ItemsControl.Visibility>
+        </ItemsControl>
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                CornerRadius="14"
+                Padding="18"
+                Visibility="{Binding HasNoMatches, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="No matches found."
+                       FontSize="12"
+                       Foreground="{DynamicResource MutedTextBrush}" />
+        </Border>
+        <Border Background="{DynamicResource AmberTintBrush}"
+                CornerRadius="10"
+                Padding="12,9"
+                Margin="0,4,0,0"
+                Visibility="{Binding IsTruncated, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="Only the first 100 matches are shown."
+                       Foreground="{DynamicResource AmberDeepBrush}"
+                       FontSize="12" />
+        </Border>
+    </StackPanel>
+</UserControl>

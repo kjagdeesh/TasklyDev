@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/TasklyDev.App/TasklyDev.App.csproj" />
+  <Project Path="src/TasklyDev.Core/TasklyDev.Core.csproj" />
+  <Project Path="src/TasklyDev.Windows/TasklyDev.Windows.csproj" />
+  <Project Path="tests/TasklyDev.Tests/TasklyDev.Tests.csproj" />
+</Solution>

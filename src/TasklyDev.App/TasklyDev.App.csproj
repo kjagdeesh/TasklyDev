@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>TasklyDev</RootNamespace>
+    <AssemblyName>TasklyDev</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TasklyDev.Core\TasklyDev.Core.csproj" />
+    <ProjectReference Include="..\TasklyDev.Windows\TasklyDev.Windows.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="RELEASE-README.txt" CopyToPublishDirectory="Always" />
+    <None Update="THIRD-PARTY-NOTICES.txt" CopyToPublishDirectory="Always" />
+  </ItemGroup>
+</Project>

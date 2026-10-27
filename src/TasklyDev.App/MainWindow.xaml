@@ -1,0 +1,541 @@
+<Window x:Class="TasklyDev.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:TasklyDev.Views"
+        Title="TasklyDev"
+        Width="1440"
+        Height="960"
+        MinWidth="1080"
+        MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Background="{DynamicResource CanvasBrush}"
+        FontFamily="Segoe UI"
+        Foreground="{DynamicResource PrimaryTextBrush}">
+    <Window.Resources>
+        <DataTemplate x:Key="NavigationItemTemplate">
+            <Button Command="{Binding DataContext.OpenRouteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                    CommandParameter="{Binding Route}"
+                    ToolTip="{Binding Title}"
+                    AutomationProperties.Name="{Binding Title}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavigationButton}">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource CardSurfaceBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="32" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="28"
+                            Height="28"
+                            CornerRadius="14"
+                            Background="{DynamicResource AmberTintBrush}"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="{Binding Glyph}"
+                                   Foreground="{DynamicResource AmberDeepBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Title}"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                    <Ellipse Grid.Column="2"
+                             Width="7"
+                             Height="7"
+                             Fill="{DynamicResource AmberBrush}"
+                             VerticalAlignment="Center">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                </Grid>
+            </Button>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ToolCardTemplate">
+            <Button Style="{StaticResource ToolCardButton}"
+                    Margin="0,0,12,12"
+                    MinHeight="112"
+                    Command="{Binding DataContext.OpenToolCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                    CommandParameter="{Binding Route}"
+                    AutomationProperties.Name="{Binding Name}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="48" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="40"
+                            Height="40"
+                            CornerRadius="14"
+                            Background="{DynamicResource AmberTintBrush}"
+                            VerticalAlignment="Top">
+                        <TextBlock Text="{Binding Glyph}"
+                                   Foreground="{DynamicResource AmberDeepBrush}"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="8,1,0,0">
+                        <TextBlock Text="{Binding Name}"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Description}"
+                                   Margin="0,5,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Button>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border Margin="20"
+            CornerRadius="28"
+            Background="{DynamicResource WindowSurfaceBrush}"
+            BorderBrush="{DynamicResource OutlineBrush}"
+            BorderThickness="1">
+        <Grid ClipToBounds="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Padding="22,24,18,18"
+                    BorderBrush="{DynamicResource OutlineBrush}"
+                    BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="2,0,2,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="42" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="38"
+                                Height="38"
+                                CornerRadius="19"
+                                Background="{DynamicResource AmberBrush}">
+                            <TextBlock Text="&gt;_"
+                                       FontSize="13"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <TextBlock Text="TasklyDev"
+                                       FontSize="17"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" />
+                            <TextBlock Text="LOCAL UTILITY WORKBENCH"
+                                       FontSize="9"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource MutedTextBrush}"
+                                       Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Button Grid.Row="1"
+                            Command="{Binding OpenRouteCommand}"
+                            CommandParameter="home"
+                            ToolTip="Overview">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarNavigationButton}">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding OverviewNavigation.IsActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource CardSurfaceBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⌂" Width="30" FontSize="16" Foreground="{DynamicResource AmberDeepBrush}" />
+                            <TextBlock Text="Overview" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <StackPanel Grid.Row="2" Margin="0,20,0,8">
+                        <TextBlock Text="DEVELOPER TOOLS"
+                                   Margin="12,0,0,7"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}" />
+                        <ItemsControl ItemsSource="{Binding DeveloperNavigation}"
+                                      ItemTemplate="{StaticResource NavigationItemTemplate}" />
+                        <TextBlock Text="SYSTEM DIAGNOSTICS"
+                                   Margin="12,18,0,7"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}" />
+                        <ItemsControl ItemsSource="{Binding SystemNavigation}"
+                                      ItemTemplate="{StaticResource NavigationItemTemplate}" />
+                    </StackPanel>
+
+                    <Border Grid.Row="4"
+                            BorderBrush="{DynamicResource OutlineBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="0,12,0,0">
+                        <Button
+                                Command="{Binding OpenRouteCommand}"
+                                CommandParameter="settings"
+                                ToolTip="Preferences">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SidebarNavigationButton}">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SettingsNavigation.IsActive}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource CardSurfaceBrush}" />
+                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙" Width="30" FontSize="15" Foreground="{DynamicResource MutedTextBrush}" />
+                                <TextBlock Text="Preferences" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1" Margin="32,26,32,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="300" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentPageTitle}"
+                                   FontSize="28"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}" />
+                        <TextBlock Text="{Binding CurrentPageSubtitle}"
+                                   Margin="0,5,12,0"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Grid Grid.Column="1" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Height="42"
+                                Background="{DynamicResource CardSurfaceBrush}"
+                                BorderBrush="{DynamicResource CardOutlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="21"
+                                Padding="14,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="22" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="⌕"
+                                           FontSize="20"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           VerticalAlignment="Center" />
+                                <TextBox x:Name="SearchBox"
+                                         Grid.Column="1"
+                                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         VerticalContentAlignment="Center"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         Foreground="{DynamicResource PrimaryTextBrush}"
+                                         FontSize="12"
+                                         ToolTip="Search tools by name or description"
+                                         AutomationProperties.Name="Search tools" />
+                            </Grid>
+                        </Border>
+                        <Button Grid.Column="1"
+                                Width="42"
+                                Height="42"
+                                Margin="10,0,0,0"
+                                Background="{DynamicResource AmberBrush}"
+                                Foreground="{DynamicResource PrimaryTextBrush}"
+                                BorderThickness="0"
+                                FontSize="21"
+                                FontWeight="Light"
+                                Content="×"
+                                Command="{Binding ClearSearchCommand}"
+                                ToolTip="Clear search"
+                                AutomationProperties.Name="Clear tool search">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasSearchText}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+                </Grid>
+
+                <ScrollViewer Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="0,0,8,0">
+                    <StackPanel>
+                        <StackPanel Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="Find the right tool for the task"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,5" />
+                            <TextBlock Text="Everything is designed to run locally. Choose a tool to open its workspace."
+                                       FontSize="13"
+                                       Foreground="{DynamicResource MutedTextBrush}"
+                                       Margin="0,0,0,22" />
+
+                            <StackPanel Visibility="{Binding HasDeveloperTools, Converter={StaticResource BoolToVisibility}}">
+                                <DockPanel Margin="0,0,0,12">
+                                    <TextBlock Text="Developer tools"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryTextBrush}" />
+                                </DockPanel>
+                                <ItemsControl ItemsSource="{Binding DeveloperTools}"
+                                              ItemTemplate="{StaticResource ToolCardTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="2" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel Visibility="{Binding HasSystemTools, Converter={StaticResource BoolToVisibility}}"
+                                        Margin="0,16,0,0">
+                                <DockPanel Margin="0,0,0,12">
+                                    <TextBlock Text="System diagnostics"
+                                               FontSize="12"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryTextBrush}" />
+                                </DockPanel>
+                                <ItemsControl ItemsSource="{Binding SystemTools}"
+                                              ItemTemplate="{StaticResource ToolCardTemplate}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="2" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <Border Padding="20"
+                                    Background="{DynamicResource CardSurfaceBrush}"
+                                    CornerRadius="18"
+                                    Visibility="{Binding HasNoSearchResults, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="No matching tools"
+                                               FontSize="15"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Try a different name or a keyword such as “date”, “hash”, or “process”."
+                                               Margin="0,5,0,0"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <ContentControl Content="{Binding Base64ViewModel}"
+                                        Visibility="{Binding IsBase64, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:Base64View />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding NumberBaseViewModel}"
+                                        Visibility="{Binding IsNumberBase, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:NumberBaseView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding UnixTimestampViewModel}"
+                                        Visibility="{Binding IsTimestamp, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:UnixTimestampView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding GuidGeneratorViewModel}"
+                                        Visibility="{Binding IsGuidGenerator, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:GuidGeneratorView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding HashCalculatorViewModel}"
+                                        Visibility="{Binding IsHashCalculator, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:HashCalculatorView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding ColorConverterViewModel}"
+                                        Visibility="{Binding IsColorConverter, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:ColorConverterView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding RegexTesterViewModel}"
+                                        Visibility="{Binding IsRegexTester, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:RegexTesterView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding ProcessLookupViewModel}"
+                                        Visibility="{Binding IsProcessLookup, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:ProcessLookupView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding EnvironmentVariableViewModel}"
+                                        Visibility="{Binding IsEnvironmentVariables, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:EnvironmentVariableView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding SettingsViewModel}"
+                                        Visibility="{Binding IsSettings, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:SettingsView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <Border Padding="24"
+                                Background="{DynamicResource CardSurfaceBrush}"
+                                BorderBrush="{DynamicResource OutlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="18"
+                                Visibility="{Binding IsPlaceholder, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel>
+                                <Border Width="48"
+                                        Height="48"
+                                        CornerRadius="16"
+                                        Background="{DynamicResource AmberTintBrush}"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding CurrentTool.Glyph}"
+                                               Foreground="{DynamicResource AmberDeepBrush}"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="{Binding CurrentPageTitle}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Margin="0,18,0,6" />
+                                <TextBlock Text="{Binding CurrentPageSubtitle}"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           TextWrapping="Wrap" />
+                                <Border Background="{DynamicResource AmberTintBrush}"
+                                        CornerRadius="10"
+                                        Padding="12,9"
+                                        Margin="0,20,0,0"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="Workspace shell is ready — tool functionality will be added in its module."
+                                               Foreground="{DynamicResource AmberDeepBrush}"
+                                               FontSize="12"
+                                               TextWrapping="Wrap" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <DockPanel Grid.Row="2"
+                           Margin="0,14,0,0"
+                           LastChildFill="False">
+                    <TextBlock Text="TasklyDev"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               VerticalAlignment="Center" />
+                    <Border DockPanel.Dock="Right"
+                            Background="{DynamicResource SuccessSurfaceBrush}"
+                            CornerRadius="11"
+                            Padding="9,4">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="6" Height="6" Fill="{DynamicResource SuccessBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Local-first"
+                                       Margin="6,0,0,0"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SuccessTextBrush}" />
+                        </StackPanel>
+                    </Border>
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

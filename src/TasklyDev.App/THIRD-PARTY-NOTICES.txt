@@ -1,0 +1,14 @@
+TasklyDev third-party notices
+=============================
+
+The TasklyDev application publish output contains no third-party NuGet
+libraries or separately bundled third-party assets. Its published application
+dependencies are the TasklyDev application, core, and Windows assemblies.
+
+The .NET 10 Windows Desktop Runtime is a separate prerequisite and is not
+included in this framework-dependent package. Microsoft runtime components are
+subject to Microsoft's applicable license terms.
+
+The test project uses xUnit and Microsoft.NET.Test.Sdk packages. Those
+development/test dependencies are not included in the application publish
+output.
