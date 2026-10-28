@@ -1,21 +1,143 @@
 <UserControl x:Class="TasklyDev.Views.EnvironmentVariableView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             FontFamily="Segoe UI">
+             FontFamily="Segoe UI"
+             IsVisibleChanged="EnvironmentVariableView_IsVisibleChanged">
     <UserControl.Resources>
+        <Style x:Key="EnvironmentActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="EnvironmentPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource EnvironmentActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="EnvironmentEditor" TargetType="TextBox">
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="EnvironmentSearchEditor" TargetType="TextBox" BasedOn="{StaticResource EnvironmentEditor}">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style x:Key="EnvironmentValueEditor" TargetType="TextBox" BasedOn="{StaticResource EnvironmentEditor}">
+            <Setter Property="MinHeight" Value="72" />
+            <Setter Property="MaxHeight" Value="160" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
+        </Style>
         <Style x:Key="EnvironmentGridColumnHeader" TargetType="GridViewColumnHeader">
-            <Setter Property="Padding" Value="10,9" />
+            <Setter Property="Padding" Value="12,10" />
             <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="EnvironmentGridRow" TargetType="ListViewItem">
-            <Setter Property="Padding" Value="0,3" />
+            <Setter Property="Padding" Value="8,7" />
             <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
             <Setter Property="BorderThickness" Value="0,0,0,1" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="RowBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <GridViewRowPresenter Content="{TemplateBinding Content}"
+                                                  Columns="{Binding View.Columns, RelativeSource={RelativeSource AncestorType={x:Type ListView}}}"
+                                                  VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RowBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="RowBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="RowBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
 
@@ -43,12 +165,7 @@
                             Command="{Binding RefreshCommand}"
                             IsEnabled="{Binding IsNotBusy}"
                             Margin="14,0,0,0"
-                            Padding="14,9"
-                            Background="{DynamicResource AmberBrush}"
-                            Foreground="{DynamicResource PrimaryTextBrush}"
-                            BorderThickness="0"
-                            FontWeight="SemiBold"
-                            Cursor="Hand"
+                            Style="{StaticResource EnvironmentPrimaryActionButton}"
                             AutomationProperties.Name="Refresh environment variables" />
                 </DockPanel>
 
@@ -61,6 +178,7 @@
                         <TextBlock Text="Scope"
                                    FontSize="12"
                                    FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Margin="0,0,0,7" />
                         <ComboBox ItemsSource="{Binding Scopes}"
                                   SelectedItem="{Binding SelectedScope, Mode=TwoWay}"
@@ -72,14 +190,10 @@
                         <TextBlock Text="Search name or value"
                                    FontSize="12"
                                    FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Margin="0,0,0,7" />
                         <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 MinHeight="38"
-                                 Padding="10,7"
-                                 Background="{DynamicResource EditorSurfaceBrush}"
-                                 Foreground="{DynamicResource PrimaryTextBrush}"
-                                 BorderBrush="{DynamicResource OutlineBrush}"
-                                 BorderThickness="1"
+                                 Style="{StaticResource EnvironmentSearchEditor}"
                                  AutomationProperties.Name="Search environment variable name or value" />
                     </StackPanel>
                 </Grid>
@@ -112,6 +226,9 @@
             <ListView ItemsSource="{Binding Variables}"
                       SelectedItem="{Binding SelectedVariable, Mode=TwoWay}"
                       ItemContainerStyle="{StaticResource EnvironmentGridRow}"
+                      Background="{DynamicResource CardSurfaceBrush}"
+                      Foreground="{DynamicResource PrimaryTextBrush}"
+                      FontSize="12"
                       BorderThickness="0"
                       MaxHeight="390"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -119,7 +236,7 @@
                       AutomationProperties.Name="Environment variable results">
                 <ListView.View>
                     <GridView ColumnHeaderContainerStyle="{StaticResource EnvironmentGridColumnHeader}">
-                        <GridViewColumn Header="Name" Width="220">
+                        <GridViewColumn Header="Name" Width="190">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Name}"
@@ -129,12 +246,12 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Value (preview)" Width="540">
+                        <GridViewColumn Header="Value (preview)" Width="480">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Value}"
                                                TextTrimming="CharacterEllipsis"
-                                               MaxWidth="520"
+                                               MaxWidth="460"
                                                FontFamily="Consolas"
                                                VerticalAlignment="Center" />
                                 </DataTemplate>
@@ -171,20 +288,12 @@
                     <Button DockPanel.Dock="Right"
                             Content="Copy full value"
                             Command="{Binding CopyValueCommand}"
-                            Padding="11,6"
-                            Style="{StaticResource SecondaryActionButton}" />
+                            Style="{StaticResource EnvironmentActionButton}" />
                 </DockPanel>
                 <TextBox Text="{Binding SelectedValue, Mode=OneWay}"
                          IsReadOnly="True"
-                         MinHeight="62"
-                         MaxHeight="150"
-                         Padding="10"
-                         FontFamily="Consolas"
-                         FontSize="12"
-                         TextWrapping="Wrap"
+                         Style="{StaticResource EnvironmentValueEditor}"
                          VerticalScrollBarVisibility="Auto"
-                         Background="{DynamicResource SubtleSurfaceBrush}"
-                         BorderBrush="{DynamicResource OutlineBrush}"
                          AutomationProperties.Name="Full selected environment variable value" />
             </StackPanel>
         </Border>
