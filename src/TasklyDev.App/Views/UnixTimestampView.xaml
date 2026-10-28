@@ -4,6 +4,56 @@
              xmlns:core="clr-namespace:TasklyDev.Core.Time;assembly=TasklyDev.Core"
              FontFamily="Segoe UI">
     <UserControl.Resources>
+        <Style x:Key="TimestampActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="TimestampPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource TimestampActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="TimestampCopyButton" TargetType="Button" BasedOn="{StaticResource TimestampActionButton}">
+            <Setter Property="Width" Value="64" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style x:Key="TimestampFieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
         <Style x:Key="ModeRadioButton" TargetType="RadioButton">
             <Setter Property="Padding" Value="14,9" />
             <Setter Property="Margin" Value="0,0,8,0" />
@@ -39,11 +89,32 @@
         <Style x:Key="TimestampEditor" TargetType="TextBox">
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="15" />
-            <Setter Property="Padding" Value="13" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="MinWidth" Value="160" />
+            <Setter Property="Padding" Value="12,4" />
             <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
 
@@ -76,18 +147,15 @@
                             VerticalAlignment="Center">
                     <Button Content="Now"
                             Command="{Binding NowCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
-                            Background="{DynamicResource AmberBrush}"
-                            BorderBrush="{DynamicResource AmberBrush}"
-                            FontWeight="SemiBold"
+                            Style="{StaticResource TimestampPrimaryActionButton}"
                             Margin="0,0,8,0" />
                     <Button Content="Load sample"
                             Command="{Binding LoadSampleCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
+                            Style="{StaticResource TimestampActionButton}"
                             Margin="0,0,8,0" />
                     <Button Content="Clear"
                             Command="{Binding ClearCommand}"
-                            Style="{StaticResource SecondaryActionButton}" />
+                            Style="{StaticResource TimestampActionButton}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -147,15 +215,13 @@
                                Foreground="{DynamicResource MutedTextBrush}"
                                TextWrapping="Wrap" />
                     <TextBlock Text="Timestamp value"
-                               FontSize="12"
-                               FontWeight="SemiBold"
+                               Style="{StaticResource TimestampFieldLabel}"
                                Margin="0,0,0,7" />
                     <TextBox Text="{Binding TimestampInput, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource TimestampEditor}"
                              AutomationProperties.Name="Unix timestamp value" />
                     <TextBlock Text="Unit"
-                               FontSize="12"
-                               FontWeight="SemiBold"
+                               Style="{StaticResource TimestampFieldLabel}"
                                Margin="0,16,0,7" />
                     <ComboBox Height="36"
                               SelectedValue="{Binding SelectedUnit}"
@@ -166,10 +232,7 @@
                     </ComboBox>
                     <Button Content="Convert timestamp"
                             Command="{Binding ConvertTimestampCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
-                            Background="{DynamicResource AmberBrush}"
-                            BorderBrush="{DynamicResource AmberBrush}"
-                            FontWeight="SemiBold"
+                            Style="{StaticResource TimestampPrimaryActionButton}"
                             HorizontalAlignment="Left"
                             Margin="0,18,0,0" />
                     <TextBlock Text="UTC is used internally; local time is shown separately."
@@ -197,8 +260,7 @@
                                Foreground="{DynamicResource MutedTextBrush}"
                                TextWrapping="Wrap" />
                     <TextBlock Text="Date and time"
-                               FontSize="12"
-                               FontWeight="SemiBold"
+                               Style="{StaticResource TimestampFieldLabel}"
                                Margin="0,0,0,7" />
                     <TextBox Text="{Binding DateTimeInput, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource TimestampEditor}"
@@ -215,10 +277,7 @@
                     </Border>
                     <Button Content="Convert date"
                             Command="{Binding ConvertDateCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
-                            Background="{DynamicResource AmberBrush}"
-                            BorderBrush="{DynamicResource AmberBrush}"
-                            FontWeight="SemiBold"
+                            Style="{StaticResource TimestampPrimaryActionButton}"
                             HorizontalAlignment="Left"
                             Margin="0,18,0,0" />
                 </StackPanel>
@@ -239,20 +298,26 @@
                             <TextBlock DockPanel.Dock="Right"
                                        Text="ISO 8601 · UTC"
                                        FontSize="11"
+                                       Padding="10,4,0,0"
                                        Foreground="{DynamicResource AmberDeepBrush}" />
                         </DockPanel>
-                        <DockPanel>
-                            <TextBox Text="{Binding UtcResult, Mode=OneWay}"
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding UtcResult, Mode=OneWay}"
                                      Style="{StaticResource TimestampEditor}"
                                      IsReadOnly="True"
                                      Background="{DynamicResource CardSurfaceBrush}"
-                                     VerticalContentAlignment="Center"
                                      AutomationProperties.Name="UTC date result" />
                             <Button Content="Copy"
+                                    Grid.Column="1"
                                     Command="{Binding CopyUtcCommand}"
-                                    Style="{StaticResource SecondaryActionButton}"
+                                    Style="{StaticResource TimestampCopyButton}"
                                     Margin="8,0,0,0" />
-                        </DockPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
 
@@ -270,20 +335,26 @@
                             <TextBlock DockPanel.Dock="Right"
                                        Text="{Binding LocalTimeZoneLabel}"
                                        FontSize="11"
+                                       Padding="10,4,0,0"
                                        Foreground="{DynamicResource MutedTextBrush}" />
                         </DockPanel>
-                        <DockPanel>
-                            <TextBox Text="{Binding LocalResult, Mode=OneWay}"
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding LocalResult, Mode=OneWay}"
                                      Style="{StaticResource TimestampEditor}"
                                      IsReadOnly="True"
                                      Background="{DynamicResource SubtleSurfaceBrush}"
-                                     VerticalContentAlignment="Center"
                                      AutomationProperties.Name="Local machine date result" />
                             <Button Content="Copy"
+                                    Grid.Column="1"
                                     Command="{Binding CopyLocalCommand}"
-                                    Style="{StaticResource SecondaryActionButton}"
+                                    Style="{StaticResource TimestampCopyButton}"
                                     Margin="8,0,0,0" />
-                        </DockPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -304,6 +375,7 @@
                         <TextBlock Text="Both units shown explicitly"
                                    DockPanel.Dock="Right"
                                    FontSize="11"
+                                   Padding="10,4,0,0"
                                    Foreground="{DynamicResource MutedTextBrush}" />
                     </DockPanel>
                     <Grid>
@@ -314,37 +386,47 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="Unix seconds"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
+                                       Style="{StaticResource TimestampFieldLabel}"
                                        Margin="0,0,0,7" />
-                            <DockPanel>
-                                <TextBox Text="{Binding SecondsResult, Mode=OneWay}"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding SecondsResult, Mode=OneWay}"
                                          Style="{StaticResource TimestampEditor}"
                                          IsReadOnly="True"
                                          Background="{DynamicResource SubtleSurfaceBrush}"
                                          AutomationProperties.Name="Unix timestamp in seconds" />
                                 <Button Content="Copy"
+                                        Grid.Column="1"
                                         Command="{Binding CopySecondsCommand}"
-                                        Style="{StaticResource SecondaryActionButton}"
+                                        Style="{StaticResource TimestampCopyButton}"
                                         Margin="8,0,0,0" />
-                            </DockPanel>
+                            </Grid>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Unix milliseconds"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
+                                       Style="{StaticResource TimestampFieldLabel}"
                                        Margin="0,0,0,7" />
-                            <DockPanel>
-                                <TextBox Text="{Binding MillisecondsResult, Mode=OneWay}"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding MillisecondsResult, Mode=OneWay}"
                                          Style="{StaticResource TimestampEditor}"
                                          IsReadOnly="True"
                                          Background="{DynamicResource SubtleSurfaceBrush}"
                                          AutomationProperties.Name="Unix timestamp in milliseconds" />
                                 <Button Content="Copy"
+                                        Grid.Column="1"
                                         Command="{Binding CopyMillisecondsCommand}"
-                                        Style="{StaticResource SecondaryActionButton}"
+                                        Style="{StaticResource TimestampCopyButton}"
                                         Margin="8,0,0,0" />
-                            </DockPanel>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                     <DockPanel Margin="0,16,0,0">
@@ -353,13 +435,14 @@
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource AmberDeepBrush}" />
                         <TextBlock Text="{Binding UtcResult}"
-                                   Margin="9,0,0,0"
+                                   Margin="9,2,0,0"
                                    FontFamily="Consolas"
                                    FontSize="11"
                                    VerticalAlignment="Center" />
                         <TextBlock Text="{Binding LocalTimeZoneLabel}"
                                    DockPanel.Dock="Right"
                                    FontSize="11"
+                                   Margin="15,1,0,0"
                                    Foreground="{DynamicResource MutedTextBrush}" />
                     </DockPanel>
                 </StackPanel>

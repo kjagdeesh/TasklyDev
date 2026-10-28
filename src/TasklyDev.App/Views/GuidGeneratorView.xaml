@@ -43,19 +43,24 @@
             <StackPanel>
                 <DockPanel Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="GUID format"
-                                   FontSize="15"
-                                   FontWeight="SemiBold" />
+                        <StackPanel>
+                            <TextBlock Text="GUID format"
+                                       FontSize="15"
+                                       FontWeight="SemiBold" />
+
+                            <TextBlock DockPanel.Dock="Right"
+                                       Text="Maximum 500 per batch"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        
                         <TextBlock Text="Choose the standard .NET Guid string representation."
                                    Margin="0,4,0,0"
                                    FontSize="12"
                                    Foreground="{DynamicResource MutedTextBrush}" />
                     </StackPanel>
-                    <TextBlock DockPanel.Dock="Right"
-                               Text="Maximum 500 per batch"
-                               FontSize="11"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               VerticalAlignment="Center" />
+
                 </DockPanel>
 
                 <Grid Margin="0,0,0,18">
