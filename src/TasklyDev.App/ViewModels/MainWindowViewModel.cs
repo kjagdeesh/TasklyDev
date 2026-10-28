@@ -15,7 +15,6 @@ using TasklyDev.Models;
 using TasklyDev.Services;
 using TasklyDev.Windows.Environment;
 using TasklyDev.Windows.Processes;
-using TasklyDev.Windows.ScreenCapture;
 
 namespace TasklyDev.ViewModels;
 
@@ -28,7 +27,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         new("Unix Timestamp Converter", "Convert explicit seconds or milliseconds to UTC and local time.", "timestamp", "UTC", "Developer Tools"),
         new("GUID Generator", "Generate RFC-compatible GUIDs in common .NET formats.", "guid", "ID", "Developer Tools"),
         new("Hash Calculator", "Calculate MD5, SHA-256, or SHA-512 digests for text or files.", "hash", "#", "Developer Tools"),
-        new("Color Converter & Pixel Picker", "Convert HEX, RGB, and HSL values or sample a screen pixel.", "color", "RGB", "Developer Tools"),
+        new("Color Converter", "Convert HEX, RGB, and HSL values or choose a color from the Windows color dialog.", "color", "RGB", "Developer Tools"),
         new("Regex Tester", "Test .NET regular expressions with captures and a finite timeout.", "regex", ".*", "Developer Tools"),
         new("Process Lookup", "Search a read-only snapshot of running Windows processes.", "process", "PID", "System Diagnostics"),
         new("Environment Variables", "Browse process, user, and machine variables without editing them.", "environment", "$", "System Diagnostics")
@@ -76,7 +75,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ColorConverterViewModel = new ColorConverterViewModel(
             new ColorService(),
             clipboardService,
-            new WpfScreenPixelPickerService(new DesktopPixelService()));
+            new WpfColorPickerService());
         RegexTesterViewModel = new RegexTesterViewModel(new RegexTesterService());
         ProcessLookupViewModel = new ProcessLookupViewModel(new ProcessSnapshotService());
         EnvironmentVariableViewModel = new EnvironmentVariableViewModel(

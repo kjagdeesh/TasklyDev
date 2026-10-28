@@ -74,26 +74,27 @@ public sealed class ColorConverterViewModelTests
     }
 
     [Fact]
-    public async Task ScreenPixelPickUpdatesInputAndConvertedValues()
+    public async Task ColorSelectionUpdatesInputAndConvertedValues()
     {
-        var picker = new FixedPixelPicker(new ColorValue(12, 34, 56), null);
-        var viewModel = CreateViewModel(pixelPicker: picker);
+        var picker = new FixedColorPicker(new ColorValue(12, 34, 56), null);
+        var viewModel = CreateViewModel(colorPicker: picker);
 
-        await viewModel.PickPixelAsync();
+        await viewModel.PickColorAsync();
 
         Assert.Equal("#0C2238", viewModel.InputText);
         Assert.Equal("#0C2238", viewModel.HexValue);
         Assert.False(viewModel.IsError);
-        Assert.Contains("sampled", viewModel.StatusMessage);
-        Assert.False(viewModel.IsPickingPixel);
+        Assert.Contains("selected", viewModel.StatusMessage);
+        Assert.False(viewModel.IsPickingColor);
+        Assert.Equal(new ColorValue(245, 185, 66), picker.InitialColor);
     }
 
     [Fact]
-    public async Task CancellingPixelPickKeepsCurrentColor()
+    public async Task CancellingColorSelectionKeepsCurrentColor()
     {
-        var viewModel = CreateViewModel(pixelPicker: new FixedPixelPicker(null, null));
+        var viewModel = CreateViewModel(colorPicker: new FixedColorPicker(null, null));
 
-        await viewModel.PickPixelAsync();
+        await viewModel.PickColorAsync();
 
         Assert.Equal("#F5B942", viewModel.InputText);
         Assert.Equal("#F5B942", viewModel.HexValue);
@@ -102,20 +103,20 @@ public sealed class ColorConverterViewModelTests
     }
 
     [Fact]
-    public async Task PixelCaptureFailureIsShownInline()
+    public async Task ColorDialogFailureIsShownInline()
     {
-        var viewModel = CreateViewModel(pixelPicker: new FixedPixelPicker(null, new Win32Exception()));
+        var viewModel = CreateViewModel(colorPicker: new FixedColorPicker(null, new Win32Exception()));
 
-        await viewModel.PickPixelAsync();
+        await viewModel.PickColorAsync();
 
         Assert.True(viewModel.IsError);
-        Assert.Contains("could not capture", viewModel.StatusMessage);
+        Assert.Contains("could not open", viewModel.StatusMessage);
     }
 
     private static ColorConverterViewModel CreateViewModel(
         RecordingClipboard? clipboard = null,
-        IScreenPixelPickerService? pixelPicker = null) =>
-        new(new ColorService(), clipboard ?? new RecordingClipboard(), pixelPicker);
+        IColorPickerService? colorPicker = null) =>
+        new(new ColorService(), clipboard ?? new RecordingClipboard(), colorPicker);
 
     private sealed class RecordingClipboard : IClipboardService
     {
@@ -129,9 +130,14 @@ public sealed class ColorConverterViewModelTests
         }
     }
 
-    private sealed class FixedPixelPicker(ColorValue? color, Exception? failure) : IScreenPixelPickerService
+    private sealed class FixedColorPicker(ColorValue? color, Exception? failure) : IColorPickerService
     {
-        public Task<ColorValue?> PickPixelAsync() =>
-            failure is null ? Task.FromResult(color) : Task.FromException<ColorValue?>(failure);
+        public ColorValue? InitialColor { get; private set; }
+
+        public Task<ColorValue?> PickColorAsync(ColorValue initialColor)
+        {
+            InitialColor = initialColor;
+            return failure is null ? Task.FromResult(color) : Task.FromException<ColorValue?>(failure);
+        }
     }
 }

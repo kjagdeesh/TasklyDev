@@ -3,6 +3,83 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FontFamily="Segoe UI">
     <UserControl.Resources>
+        <Style x:Key="ColorActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ColorPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource ColorActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="ColorCopyButton" TargetType="Button" BasedOn="{StaticResource ColorActionButton}">
+            <Setter Property="MinWidth" Value="64" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style x:Key="ColorEditor" TargetType="TextBox">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ColorFieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
         <DrawingBrush x:Key="CheckerboardBrush"
                       TileMode="Tile"
                       Viewport="0,0,16,16"
@@ -39,8 +116,7 @@
                                FontSize="12"
                                Foreground="{DynamicResource MutedTextBrush}" />
                     <TextBlock Text="Input format"
-                               FontSize="12"
-                               FontWeight="SemiBold"
+                               Style="{StaticResource ColorFieldLabel}"
                                Margin="0,0,0,6" />
                     <ComboBox ItemsSource="{Binding InputFormats}"
                               SelectedItem="{Binding SelectedFormat, Mode=TwoWay}"
@@ -48,14 +124,7 @@
                               Margin="0,0,0,11"
                               AutomationProperties.Name="Color input format" />
                     <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
-                             MinHeight="42"
-                             Padding="11,9"
-                             FontFamily="Consolas"
-                             FontSize="13"
-                             Background="{DynamicResource EditorSurfaceBrush}"
-                             Foreground="{DynamicResource PrimaryTextBrush}"
-                             BorderBrush="{DynamicResource OutlineBrush}"
-                             BorderThickness="1"
+                             Style="{StaticResource ColorEditor}"
                              AutomationProperties.Name="Color value input" />
                     <Border Style="{StaticResource RoundedStatusMessageBorder}">
                         <TextBlock Text="{Binding StatusMessage}"
@@ -74,34 +143,26 @@
                         </TextBlock>
                     </Border>
                     <WrapPanel Margin="0,14,0,0">
-                        <Button Content="Pick screen pixel"
-                                Command="{Binding PickPixelCommand}"
-                                IsEnabled="{Binding IsNotPickingPixel}"
-                                Padding="12,7"
+                        <Button Content="Choose color"
+                                Command="{Binding PickColorCommand}"
+                                IsEnabled="{Binding IsNotPickingColor}"
                                 Margin="0,0,8,7"
-                                Background="{DynamicResource AmberBrush}"
-                                Foreground="{DynamicResource PrimaryTextBrush}"
-                                BorderThickness="0"
-                                FontWeight="SemiBold"
-                                Cursor="Hand"
-                                AutomationProperties.Name="Pick a screen pixel" />
+                                Style="{StaticResource ColorPrimaryActionButton}"
+                                AutomationProperties.Name="Choose a color" />
                         <Button Content="Load sample"
                                 Command="{Binding LoadSampleCommand}"
-                                Padding="12,7"
                                 Margin="0,0,8,7"
-                                Style="{StaticResource SecondaryActionButton}" />
+                                Style="{StaticResource ColorActionButton}" />
                         <Button Content="Clear"
                                 Command="{Binding ClearCommand}"
-                                Padding="12,7"
                                 Margin="0,0,0,7"
-                                Style="{StaticResource SecondaryActionButton}" />
+                                Style="{StaticResource ColorActionButton}" />
                     </WrapPanel>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Live preview"
-                               FontSize="12"
-                               FontWeight="SemiBold"
+                               Style="{StaticResource ColorFieldLabel}"
                                Margin="0,0,0,8" />
                     <Border Height="152"
                             Background="{StaticResource CheckerboardBrush}"
@@ -149,21 +210,18 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="HEX" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Text="HEX" Style="{StaticResource ColorFieldLabel}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1"
                              Text="{Binding HexValue, Mode=OneWay}"
                              IsReadOnly="True"
-                             FontFamily="Consolas"
-                             Padding="9,7"
+                             Style="{StaticResource ColorEditor}"
                              Background="{DynamicResource SubtleSurfaceBrush}"
-                             BorderBrush="{DynamicResource OutlineBrush}"
                              AutomationProperties.Name="Converted HEX color" />
                     <Button Grid.Column="2"
                             Content="Copy"
                             Command="{Binding CopyHexCommand}"
                             Margin="9,0,0,0"
-                            Padding="12,6"
-                            Style="{StaticResource SecondaryActionButton}" />
+                            Style="{StaticResource ColorCopyButton}" />
                 </Grid>
                 <Grid Margin="0,0,0,10">
                     <Grid.ColumnDefinitions>
@@ -171,21 +229,18 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="RGB" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Text="RGB" Style="{StaticResource ColorFieldLabel}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1"
                              Text="{Binding RgbValue, Mode=OneWay}"
                              IsReadOnly="True"
-                             FontFamily="Consolas"
-                             Padding="9,7"
+                             Style="{StaticResource ColorEditor}"
                              Background="{DynamicResource SubtleSurfaceBrush}"
-                             BorderBrush="{DynamicResource OutlineBrush}"
                              AutomationProperties.Name="Converted RGB color" />
                     <Button Grid.Column="2"
                             Content="Copy"
                             Command="{Binding CopyRgbCommand}"
                             Margin="9,0,0,0"
-                            Padding="12,6"
-                            Style="{StaticResource SecondaryActionButton}" />
+                            Style="{StaticResource ColorCopyButton}" />
                 </Grid>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -193,21 +248,18 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="HSL" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Text="HSL" Style="{StaticResource ColorFieldLabel}" VerticalAlignment="Center" />
                     <TextBox Grid.Column="1"
                              Text="{Binding HslValue, Mode=OneWay}"
                              IsReadOnly="True"
-                             FontFamily="Consolas"
-                             Padding="9,7"
+                             Style="{StaticResource ColorEditor}"
                              Background="{DynamicResource SubtleSurfaceBrush}"
-                             BorderBrush="{DynamicResource OutlineBrush}"
                              AutomationProperties.Name="Converted HSL color" />
                     <Button Grid.Column="2"
                             Content="Copy"
                             Command="{Binding CopyHslCommand}"
                             Margin="9,0,0,0"
-                            Padding="12,6"
-                            Style="{StaticResource SecondaryActionButton}" />
+                            Style="{StaticResource ColorCopyButton}" />
                 </Grid>
                 <TextBlock Text="Alpha policy: HEX appends AA (#RRGGBBAA); RGB alpha uses 0–255; HSL alpha uses 0–1."
                            FontSize="11"

@@ -92,7 +92,7 @@ public sealed class ShellViewModelTests
 
         Assert.True(viewModel.IsColorConverter);
         Assert.False(viewModel.IsPlaceholder);
-        Assert.Equal("Color Converter & Pixel Picker", viewModel.CurrentPageTitle);
+        Assert.Equal("Color Converter", viewModel.CurrentPageTitle);
     }
 
     [Fact]

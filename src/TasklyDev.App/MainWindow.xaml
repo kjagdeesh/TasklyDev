@@ -364,16 +364,33 @@
                                            FontSize="20"
                                            Foreground="{DynamicResource MutedTextBrush}"
                                            VerticalAlignment="Center" />
-                                <TextBox x:Name="SearchBox"
-                                         Grid.Column="1"
-                                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                         VerticalContentAlignment="Center"
-                                         BorderThickness="0"
-                                         Background="Transparent"
-                                         Foreground="{DynamicResource PrimaryTextBrush}"
-                                         FontSize="12"
-                                         ToolTip="Search tools by name or description"
-                                         AutomationProperties.Name="Search tools" />
+                                <Grid Grid.Column="1">
+                                    <TextBox x:Name="SearchBox"
+                                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             VerticalContentAlignment="Center"
+                                             BorderThickness="0"
+                                             Background="Transparent"
+                                             Foreground="{DynamicResource PrimaryTextBrush}"
+                                             FontSize="12"
+                                             ToolTip="Search tools by name or description"
+                                             AutomationProperties.Name="Search tools" />
+                                    <TextBlock Text="Search tools by name or description..."
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               FontSize="12"
+                                               IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SearchText}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
                             </Grid>
                         </Border>
                         <Button Grid.Column="1"

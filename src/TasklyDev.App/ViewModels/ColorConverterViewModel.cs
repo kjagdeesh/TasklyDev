@@ -11,7 +11,7 @@ public sealed class ColorConverterViewModel : INotifyPropertyChanged
 {
     private readonly IColorService _service;
     private readonly IClipboardService _clipboard;
-    private readonly IScreenPixelPickerService? _pixelPicker;
+    private readonly IColorPickerService? _colorPicker;
     private string _inputText = "#F5B942";
     private string _hexValue = string.Empty;
     private string _rgbValue = string.Empty;
@@ -21,22 +21,22 @@ public sealed class ColorConverterViewModel : INotifyPropertyChanged
     private Brush _previewBrush = new SolidColorBrush(Color.FromRgb(245, 185, 66));
     private bool _isError;
     private bool _hasColor;
-    private bool _isPickingPixel;
+    private bool _isPickingColor;
 
     public ColorConverterViewModel(
         IColorService service,
         IClipboardService clipboard,
-        IScreenPixelPickerService? pixelPicker = null)
+        IColorPickerService? colorPicker = null)
     {
         _service = service;
         _clipboard = clipboard;
-        _pixelPicker = pixelPicker;
+        _colorPicker = colorPicker;
         CopyHexCommand = new RelayCommand(_ => Copy(HexValue));
         CopyRgbCommand = new RelayCommand(_ => Copy(RgbValue));
         CopyHslCommand = new RelayCommand(_ => Copy(HslValue));
         ClearCommand = new RelayCommand(_ => Clear());
         LoadSampleCommand = new RelayCommand(_ => LoadSample());
-        PickPixelCommand = new AsyncRelayCommand(PickPixelAsync);
+        PickColorCommand = new AsyncRelayCommand(PickColorAsync);
         UpdateColor();
     }
 
@@ -47,7 +47,7 @@ public sealed class ColorConverterViewModel : INotifyPropertyChanged
     public ICommand CopyHslCommand { get; }
     public ICommand ClearCommand { get; }
     public ICommand LoadSampleCommand { get; }
-    public ICommand PickPixelCommand { get; }
+    public ICommand PickColorCommand { get; }
     public Array InputFormats => Enum.GetValues<ColorInputFormat>();
 
     public string InputText
@@ -124,50 +124,53 @@ public sealed class ColorConverterViewModel : INotifyPropertyChanged
         private set => SetProperty(ref _hasColor, value);
     }
 
-    public bool IsPickingPixel
+    public bool IsPickingColor
     {
-        get => _isPickingPixel;
+        get => _isPickingColor;
         private set
         {
-            if (SetProperty(ref _isPickingPixel, value))
+            if (SetProperty(ref _isPickingColor, value))
             {
-                OnPropertyChanged(nameof(IsNotPickingPixel));
+                OnPropertyChanged(nameof(IsNotPickingColor));
             }
         }
     }
 
-    public bool IsNotPickingPixel => !IsPickingPixel;
+    public bool IsNotPickingColor => !IsPickingColor;
 
-    public async Task PickPixelAsync()
+    public async Task PickColorAsync()
     {
-        if (_pixelPicker is null)
+        if (_colorPicker is null)
         {
             IsError = true;
-            StatusMessage = "Screen pixel capture is unavailable on this device.";
+            StatusMessage = "Color selection is unavailable on this device.";
             return;
         }
 
-        IsPickingPixel = true;
+        IsPickingColor = true;
         IsError = false;
-        StatusMessage = "Pixel picker active. Click a screen pixel or press Esc to cancel.";
+        StatusMessage = "Choose a color in the Windows color dialog.";
         try
         {
-            var color = await _pixelPicker.PickPixelAsync();
+            var initialColor = HasColor
+                ? _service.ParseHex(HexValue)
+                : new ColorValue(245, 185, 66);
+            var color = await _colorPicker.PickColorAsync(initialColor);
             if (color is null)
             {
                 IsError = false;
-                StatusMessage = "Pixel capture canceled. Your previous color was kept.";
+                StatusMessage = "Color selection canceled. Your previous color was kept.";
                 return;
             }
 
             SelectedFormat = ColorInputFormat.Hex;
             InputText = _service.ToHex(color.Value);
-            StatusMessage = $"Screen pixel sampled: {HexValue}.";
+            StatusMessage = $"Color selected: {HexValue}.";
         }
         catch (Win32Exception)
         {
             IsError = true;
-            StatusMessage = "Windows could not capture that screen pixel. Try again.";
+            StatusMessage = "Windows could not open the color selection dialog. Try again.";
         }
         catch (InvalidOperationException exception)
         {
@@ -176,7 +179,7 @@ public sealed class ColorConverterViewModel : INotifyPropertyChanged
         }
         finally
         {
-            IsPickingPixel = false;
+            IsPickingColor = false;
         }
     }
 
