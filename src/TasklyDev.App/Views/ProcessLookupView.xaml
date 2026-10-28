@@ -38,6 +38,9 @@
             </Setter>
         </Style>
         <Style x:Key="ProcessPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource ProcessActionButton}">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="FontSize" Value="12" />
             <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
@@ -58,73 +61,117 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="12">
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Background="Transparent"
-                                          Focusable="False"
-                                          Margin="{TemplateBinding Padding}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
-                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              Background="Transparent"
+                                              Focusable="False"
+                                              Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                              VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                                <TextBlock x:Name="Placeholder"
+                                           Text="{TemplateBinding Tag}"
+                                           Margin="{TemplateBinding Padding}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           IsHitTestVisible="False"
+                                           Visibility="Collapsed" />
+                            </Grid>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Text" Value="" />
+                                    <Condition Property="IsKeyboardFocused" Value="False" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="ProcessGridColumnHeader" TargetType="GridViewColumnHeader">
-            <Setter Property="Padding" Value="12,10" />
-            <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
+        <Style x:Key="ProcessSortHeaderButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="12,11" />
+            <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="GridViewColumnHeader">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="8"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="ProcessGridRow" TargetType="ListViewItem">
-            <Setter Property="Padding" Value="8,7" />
-            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListViewItem">
-                        <Border x:Name="RowBorder"
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="HeaderBorder"
                                 Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="7"
                                 Padding="{TemplateBinding Padding}">
-                            <GridViewRowPresenter Content="{TemplateBinding Content}"
-                                                  Columns="{Binding View.Columns, RelativeSource={RelativeSource AncestorType={x:Type ListView}}}"
-                                                  VerticalAlignment="Center" />
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RowBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                                <Setter TargetName="HeaderBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
                             </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="RowBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="RowBorder" Property="Opacity" Value="0.5" />
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="HeaderBorder" Property="Opacity" Value="0.8" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+        <DataTemplate x:Key="ProcessRowTemplate">
+            <Border x:Name="ProcessRow"
+                    Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource OutlineBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,10"
+                    MinHeight="58">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="76" />
+                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Name}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Id}"
+                               FontSize="12"
+                               FontFamily="Consolas"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding StartTime}"
+                               FontSize="12"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3"
+                               Text="{Binding ExecutablePath}"
+                               ToolTip="{Binding ExecutablePath}"
+                               FontSize="12"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <Trigger SourceName="ProcessRow" Property="IsMouseOver" Value="True">
+                    <Setter TargetName="ProcessRow" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                </Trigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
     </UserControl.Resources>
 
     <StackPanel>
@@ -162,6 +209,7 @@
                            Margin="0,18,0,7" />
                 <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                          Style="{StaticResource ProcessSearchEditor}"
+                         Tag="Search process name or PID…"
                          AutomationProperties.Name="Search process name or exact process ID" />
 
                 <Border Style="{StaticResource RoundedStatusMessageBorder}"
@@ -197,46 +245,43 @@
         <Border Background="{DynamicResource CardSurfaceBrush}"
                 BorderBrush="{DynamicResource OutlineBrush}"
                 BorderThickness="1"
-                CornerRadius="16"
-                Padding="4"
+                CornerRadius="14"
+                Padding="8"
                 Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibility}}">
-            <ListView ItemsSource="{Binding Processes}"
-                      ItemContainerStyle="{StaticResource ProcessGridRow}"
-                      Background="{DynamicResource CardSurfaceBrush}"
-                      Foreground="{DynamicResource PrimaryTextBrush}"
-                      FontSize="12"
-                      BorderThickness="0"
-                      MaxHeight="540"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      AutomationProperties.Name="Running process results">
-                <ListView.View>
-                    <GridView ColumnHeaderContainerStyle="{StaticResource ProcessGridColumnHeader}">
-                        <GridViewColumn Header="Process name" Width="180">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}"
-                                               FontWeight="SemiBold"
-                                               VerticalAlignment="Center" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="PID" Width="76" DisplayMemberBinding="{Binding Id}" />
-                        <GridViewColumn Header="Start time" Width="160" DisplayMemberBinding="{Binding StartTime}" />
-                        <GridViewColumn Header="Executable path" Width="380">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ExecutablePath}"
-                                               ToolTip="{Binding ExecutablePath}"
-                                               TextTrimming="CharacterEllipsis"
-                                               MaxWidth="360"
-                                               VerticalAlignment="Center" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                        CornerRadius="9"
+                        Margin="0,0,0,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="76" />
+                            <ColumnDefinition Width="160" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="ProcessNameHeader" Content="Process name  ↕" Tag="Name" Click="ProcessGridHeader_Click"
+                                Style="{StaticResource ProcessSortHeaderButton}" />
+                        <Button x:Name="ProcessIdHeader" Grid.Column="1" Content="PID  ↕" Tag="Id" Click="ProcessGridHeader_Click"
+                                Style="{StaticResource ProcessSortHeaderButton}" />
+                        <Button x:Name="ProcessStartHeader" Grid.Column="2" Content="Start time  ↕" Tag="StartTime" Click="ProcessGridHeader_Click"
+                                Style="{StaticResource ProcessSortHeaderButton}" />
+                        <Button x:Name="ProcessPathHeader" Grid.Column="3" Content="Executable path  ↕" Tag="ExecutablePath" Click="ProcessGridHeader_Click"
+                                Style="{StaticResource ProcessSortHeaderButton}" />
+                    </Grid>
+                </Border>
+                <ScrollViewer Grid.Row="1"
+                              MaxHeight="540"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Auto"
+                              AutomationProperties.Name="Running process results">
+                    <ItemsControl ItemsSource="{Binding Processes}"
+                                  ItemTemplate="{StaticResource ProcessRowTemplate}" />
+                </ScrollViewer>
+            </Grid>
         </Border>
 
         <Border Background="{DynamicResource CardSurfaceBrush}"
