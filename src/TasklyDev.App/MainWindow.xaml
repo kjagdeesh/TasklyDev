@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:TasklyDev.Views"
-        Title="TasklyDev"
+        Title="taskly.dev"
         Width="1440"
         Height="960"
         MinWidth="1080"
@@ -182,33 +182,40 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Grid Margin="2,0,2,24">
+                    <Grid Margin="0,0,2,24">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="42" />
+                            <ColumnDefinition Width="32" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="38"
-                                Height="38"
-                                CornerRadius="19"
-                                Background="{DynamicResource AmberBrush}">
-                            <TextBlock Text="&gt;_"
-                                       FontSize="13"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center" />
+                        <Border Width="32"
+                                Height="32">
+                            <Image x:Name="BrandLogo"
+                                   Stretch="UniformToFill"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Loaded="BrandLogo_Loaded"
+                                   AutomationProperties.Name="Taskly.dev logo" />
                         </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
-                            <TextBlock Text="TasklyDev"
-                                       FontSize="17"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource PrimaryTextBrush}" />
-                            <TextBlock Text="LOCAL UTILITY WORKBENCH"
-                                       FontSize="9"
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,5,0"
+                                   FontSize="21"
+                                   FontWeight="Bold">
+                            <Run Text="taskly" Foreground="{DynamicResource PrimaryTextBrush}" />
+                            <Run Text=".dev" Foreground="{DynamicResource AmberBrush}" />
+                        </TextBlock>
+                        <Border Grid.Column="2"
+                                Background="{DynamicResource SubtleSurfaceBrush}"
+                                CornerRadius="12"
+                                Padding="8,4"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SettingsViewModel.Version, StringFormat=v{0}}"
+                                       FontFamily="Consolas"
+                                       FontSize="10"
                                        FontWeight="SemiBold"
-                                       Foreground="{DynamicResource MutedTextBrush}"
-                                       Margin="0,2,0,0" />
-                        </StackPanel>
+                                       Foreground="{DynamicResource MutedTextBrush}" />
+                        </Border>
                     </Grid>
 
                     <Button Grid.Row="1"
@@ -596,27 +603,18 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <DockPanel Grid.Row="2"
+                <!--<DockPanel Grid.Row="2"
                            Margin="0,14,0,0"
                            LastChildFill="False">
-                    <TextBlock Text="TasklyDev"
-                               FontSize="11"
-                               Foreground="{DynamicResource MutedTextBrush}"
-                               VerticalAlignment="Center" />
-                    <Border DockPanel.Dock="Right"
-                            Background="{DynamicResource SuccessSurfaceBrush}"
-                            CornerRadius="11"
-                            Padding="9,4">
-                        <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="{DynamicResource SuccessBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="Local-first"
-                                       Margin="6,0,0,0"
-                                       FontSize="10"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource SuccessTextBrush}" />
-                        </StackPanel>
-                    </Border>
-                </DockPanel>
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Margin="8,0,5,0"
+                               FontSize="12"
+                               FontWeight="Bold">
+                        <Run Text="taskly" Foreground="{DynamicResource PrimaryTextBrush}" />
+                        <Run Text=".dev" Foreground="{DynamicResource AmberBrush}" />
+                    </TextBlock>
+                </DockPanel>-->
             </Grid>
         </Grid>
     </Border>

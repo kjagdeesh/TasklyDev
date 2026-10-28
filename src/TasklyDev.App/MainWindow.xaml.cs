@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using TasklyDev.Services;
 using TasklyDev.ViewModels;
 
@@ -33,6 +34,22 @@ public partial class MainWindow : Window
         }
 
         Closed += (_, _) => _themeService.Dispose();
+    }
+
+    private void BrandLogo_Loaded(object sender, RoutedEventArgs e)
+    {
+        var logoPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "TasklyDevLogo.png");
+        if (!System.IO.File.Exists(logoPath))
+        {
+            return;
+        }
+
+        var logo = new BitmapImage();
+        logo.BeginInit();
+        logo.CacheOption = BitmapCacheOption.OnLoad;
+        logo.UriSource = new Uri(logoPath, UriKind.Absolute);
+        logo.EndInit();
+        BrandLogo.Source = logo;
     }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)

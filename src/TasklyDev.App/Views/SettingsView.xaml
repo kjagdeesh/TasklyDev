@@ -59,23 +59,24 @@
                 CornerRadius="18"
                 Padding="20">
             <StackPanel>
-                <Border Width="48"
-                        Height="48"
-                        CornerRadius="16"
-                        Background="{DynamicResource AmberTintBrush}"
-                        HorizontalAlignment="Left">
-                    <TextBlock Text="&gt;_"
-                               Foreground="{DynamicResource AmberDeepBrush}"
-                               FontFamily="Consolas"
-                               FontSize="14"
-                               FontWeight="Bold"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center" />
-                </Border>
-                <TextBlock Text="{Binding ProductName}"
+                <Image x:Name="SettingsBrandLogo"
+                       Width="108"
+                       Height="108"
+                       Stretch="Uniform"
+                       HorizontalAlignment="Left"
+                       Loaded="SettingsBrandLogo_Loaded"
+                       AutomationProperties.Name="Taskly.dev logo" />
+                <TextBlock VerticalAlignment="Center"
+                           Margin="0,15,5,15"
+                           FontSize="21"
+                           FontWeight="Bold">
+                    <Run Text="taskly" Foreground="{DynamicResource PrimaryTextBrush}" />
+                    <Run Text=".dev" Foreground="{DynamicResource AmberBrush}" />
+                </TextBlock>
+                <!--<TextBlock Text="{Binding ProductName}"
                            FontSize="19"
                            FontWeight="Bold"
-                           Margin="0,13,0,2" />
+                           Margin="0,13,0,2" />-->
                 <TextBlock FontSize="12"
                            Foreground="{DynamicResource MutedTextBrush}">
                     <Run Text="Version " />

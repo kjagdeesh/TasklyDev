@@ -19,4 +19,10 @@
     <None Update="RELEASE-README.txt" CopyToPublishDirectory="Always" />
     <None Update="THIRD-PARTY-NOTICES.txt" CopyToPublishDirectory="Always" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\TasklyDevLogo.png" Condition="Exists('Assets\TasklyDevLogo.png')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
