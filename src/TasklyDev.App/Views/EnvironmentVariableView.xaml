@@ -38,9 +38,9 @@
             </Setter>
         </Style>
         <Style x:Key="EnvironmentPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource EnvironmentActionButton}">
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="10,5" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="FontSize" Value="11" />
             <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
@@ -174,7 +174,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{Binding Name}"
-                               FontFamily="Consolas"
+                               FontFamily="Segoe UI"
                                FontSize="12"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryTextBrush}"
@@ -182,7 +182,7 @@
                                VerticalAlignment="Center" />
                     <TextBlock Grid.Column="1"
                                Text="{Binding Value}"
-                               FontFamily="Consolas"
+                               FontFamily="Segoe UI"
                                FontSize="12"
                                Foreground="{DynamicResource SecondaryTextBrush}"
                                TextTrimming="CharacterEllipsis"
