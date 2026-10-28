@@ -7,49 +7,365 @@
             <Setter Property="MinHeight" Value="36" />
             <Setter Property="Padding" Value="13,8" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="JwtPrimaryButton" TargetType="Button" BasedOn="{StaticResource JwtActionButton}">
             <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
-        <Style x:Key="JwtJsonEditor" TargetType="TextBox">
+        <Style x:Key="JwtTextBox" TargetType="TextBox">
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="EditorBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="EditorBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="EditorBorder" Property="Opacity" Value="0.6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="JwtJsonEditor" TargetType="TextBox" BasedOn="{StaticResource JwtTextBox}">
             <Setter Property="MinHeight" Value="190" />
             <Setter Property="MaxHeight" Value="310" />
-            <Setter Property="Padding" Value="12" />
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="AcceptsReturn" Value="True" />
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
             <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
-            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
         </Style>
     </UserControl.Resources>
 
     <StackPanel>
-        <Border Background="{DynamicResource DangerSurfaceBrush}"
-                BorderBrush="{DynamicResource ErrorBrush}"
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
                 BorderThickness="1"
-                CornerRadius="14"
-                Padding="16"
+                CornerRadius="18"
+                Padding="20"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Width="52"
+                        Height="52"
+                        CornerRadius="15"
+                        Background="{DynamicResource AmberTintBrush}"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="JWT"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontFamily="Consolas"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AmberDeepBrush}" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,12,0">
+                    <TextBlock Text="JWT Decoder &amp; Inspector"
+                               FontSize="20"
+                               FontWeight="Bold" />
+                    <TextBlock Text="Decode token claims or build a signed token locally."
+                               Margin="0,4,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Column="2"
+                        Background="{DynamicResource SuccessSurfaceBrush}"
+                        CornerRadius="10"
+                        Padding="11,7"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="7"
+                                 Height="7"
+                                 Fill="{DynamicResource SuccessBrush}"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,7,0" />
+                        <TextBlock Text="LOCAL ONLY"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource SuccessTextBrush}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="13"
+                Padding="5"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Decode token"
+                        Command="{Binding ShowDecoderCommand}"
+                        Margin="0,0,4,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource JwtActionButton}">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDecoderMode}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                    <Setter Property="Foreground" Value="#191C1F" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="Create token"
+                        Command="{Binding ShowEncoderCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource JwtActionButton}">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEncoderMode}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                    <Setter Property="Foreground" Value="#191C1F" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource AmberTintBrush}"
+                BorderBrush="{DynamicResource WarmOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="14,11"
                 Margin="0,0,0,16"
                 AutomationProperties.LiveSetting="Polite">
-            <StackPanel>
-                <TextBlock Text="Untrusted token data"
-                           FontSize="13"
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="UNVERIFIED"
+                           FontSize="10"
                            FontWeight="Bold"
-                           Foreground="{DynamicResource ErrorBrush}" />
-                <TextBlock Text="{Binding UntrustedDataWarning}"
-                           Margin="0,5,0,0"
+                           Foreground="{DynamicResource AmberDeepBrush}"
+                           VerticalAlignment="Top"
+                           Margin="0,3,12,0" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding UntrustedDataWarning}"
                            FontSize="12"
                            Foreground="{DynamicResource PrimaryTextBrush}"
                            TextWrapping="Wrap" />
-            </StackPanel>
+            </Grid>
         </Border>
+
+        <StackPanel Visibility="{Binding IsEncoderMode, Converter={StaticResource BoolToVisibility}}">
+            <Border Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    Padding="18"
+                    Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="Signing algorithm" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Text="HMAC only · Header alg follows your selection · Computed on this device"
+                                   Margin="0,5,0,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding Algorithms}"
+                              SelectedItem="{Binding SelectedAlgorithm, Mode=TwoWay}"
+                              VerticalAlignment="Center"
+                              MinWidth="160"
+                              AutomationProperties.Name="JWT signing algorithm" />
+                </Grid>
+            </Border>
+
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Background="{DynamicResource CardSurfaceBrush}"
+                        BorderBrush="{DynamicResource CardOutlineBrush}"
+                        BorderThickness="1"
+                        CornerRadius="18"
+                        Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="Header" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10" />
+                        <TextBox Text="{Binding EncoderHeaderJson, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource JwtJsonEditor}"
+                                 AutomationProperties.Name="JWT header JSON to encode" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2"
+                        Background="{DynamicResource CardSurfaceBrush}"
+                        BorderBrush="{DynamicResource CardOutlineBrush}"
+                        BorderThickness="1"
+                        CornerRadius="18"
+                        Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="Payload" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10" />
+                        <TextBox Text="{Binding EncoderPayloadJson, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource JwtJsonEditor}"
+                                 AutomationProperties.Name="JWT payload JSON to encode" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    Padding="18"
+                    Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Signing secret" FontSize="14" FontWeight="SemiBold" />
+                    <TextBlock Text="Anyone with this secret can create tokens that verify with the same key. Use a test secret here."
+                               Margin="0,4,0,10"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               TextWrapping="Wrap" />
+                    <TextBox Text="{Binding EncoderSecret, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource JwtTextBox}"
+                             Padding="12"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             Background="{DynamicResource EditorSurfaceBrush}"
+                             Foreground="{DynamicResource PrimaryTextBrush}"
+                             BorderBrush="{DynamicResource OutlineBrush}"
+                             BorderThickness="1"
+                             AutomationProperties.Name="JWT signing secret" />
+                </StackPanel>
+            </Border>
+
+            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,16">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsEncoderError}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource DangerSurfaceBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding EncoderStatusMessage}" FontSize="12" TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEncoderError}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
+
+            <Border Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    Padding="18">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <TextBlock Text="Encoded JWT" FontSize="14" FontWeight="SemiBold" />
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Open in decoder"
+                                    Command="{Binding DecodeEncodedTokenCommand}"
+                                    Style="{StaticResource JwtActionButton}"
+                                    MinHeight="30"
+                                    Padding="10,5"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Copy token"
+                                    Command="{Binding CopyEncodedTokenCommand}"
+                                    Style="{StaticResource JwtPrimaryButton}"
+                                    MinHeight="30"
+                                    Padding="10,5" />
+                        </StackPanel>
+                    </DockPanel>
+                    <TextBox Text="{Binding EncodedToken, Mode=OneWay}"
+                             Style="{StaticResource JwtTextBox}"
+                             IsReadOnly="True"
+                             MinHeight="90"
+                             Padding="12"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             Background="{DynamicResource EditorSurfaceBrush}"
+                             Foreground="{DynamicResource PrimaryTextBrush}"
+                             BorderBrush="{DynamicResource OutlineBrush}"
+                             BorderThickness="1"
+                             AutomationProperties.Name="Encoded JWT" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <StackPanel Visibility="{Binding IsDecoderMode, Converter={StaticResource BoolToVisibility}}">
 
         <Border Background="{DynamicResource CardSurfaceBrush}"
                 BorderBrush="{DynamicResource CardOutlineBrush}"
@@ -65,13 +381,17 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <DockPanel>
-                    <TextBlock Text="Compact JWT"
+                    <TextBlock Text="Paste a compact token"
                                FontSize="15"
                                FontWeight="SemiBold" />
-                    <TextBlock DockPanel.Dock="Right"
-                               Text="{Binding InputCharacterCount, StringFormat={}{0:N0} characters}"
-                               FontSize="11"
-                               Foreground="{DynamicResource MutedTextBrush}" />
+                    <Border DockPanel.Dock="Right"
+                            CornerRadius="8"
+                            Margin="20,0,0,0"
+                            Padding="9,5">
+                        <TextBlock Text="{Binding InputCharacterCount, StringFormat={}{0:N0} characters}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource MutedTextBrush}" />
+                    </Border>
                 </DockPanel>
                 <TextBlock Grid.Row="1"
                            Text="Decoding stays on this device. The token is not sent, saved, or written to diagnostics."
@@ -81,6 +401,7 @@
                            TextWrapping="Wrap" />
                 <TextBox Grid.Row="2"
                          Text="{Binding TokenText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource JwtTextBox}"
                          MinHeight="86"
                          MaxHeight="150"
                          Padding="12"
@@ -147,22 +468,38 @@
                 Padding="12"
                 Margin="0,0,0,16"
                 Visibility="{Binding HasDecodedContent, Converter={StaticResource BoolToVisibility}}">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Header · decoded"
-                           FontSize="11"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AmberDeepBrush}"
-                           Margin="0,0,18,0" />
-                <TextBlock Text="Payload · decoded"
-                           FontSize="11"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AmberDeepBrush}"
-                           Margin="0,0,18,0" />
-                <TextBlock Text="{Binding SignatureSegmentStatus}"
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Background="{DynamicResource AmberTintBrush}"
+                        CornerRadius="7"
+                        Padding="8,4"
+                        Margin="0,0,8,0">
+                    <TextBlock Text="HEADER"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AmberDeepBrush}" />
+                </Border>
+                <Border Grid.Column="1"
+                        Background="{DynamicResource AmberTintBrush}"
+                        CornerRadius="7"
+                        Padding="8,4"
+                        Margin="0,0,12,0">
+                    <TextBlock Text="PAYLOAD"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AmberDeepBrush}" />
+                </Border>
+                <TextBlock Grid.Column="2"
+                           Text="{Binding SignatureSegmentStatus}"
                            FontSize="11"
                            Foreground="{DynamicResource MutedTextBrush}"
-                           TextWrapping="Wrap" />
-            </StackPanel>
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center" />
+            </Grid>
         </Border>
 
         <Grid Visibility="{Binding HasDecodedContent, Converter={StaticResource BoolToVisibility}}">
@@ -259,9 +596,9 @@
                                         Margin="0,0,0,8">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="160" />
-                                            <ColumnDefinition Width="80" />
-                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="3*" />
                                         </Grid.ColumnDefinitions>
                                         <StackPanel>
                                             <TextBlock Text="{Binding Name}"
@@ -273,15 +610,22 @@
                                                        Foreground="{DynamicResource MutedTextBrush}"
                                                        TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding JsonType}"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource MutedTextBrush}"
-                                                   TextWrapping="Wrap" />
+                                        <Border Grid.Column="1"
+                                                Background="{DynamicResource AmberTintBrush}"
+                                                CornerRadius="6"
+                                                Padding="7,3"
+                                                Margin="10,0">
+                                            <TextBlock Text="{Binding JsonType}"
+                                                       FontSize="10"
+                                                       Height="15"
+                                                       Foreground="{DynamicResource AmberDeepBrush}"
+                                                       TextWrapping="Wrap" />
+                                        </Border>
                                         <TextBlock Grid.Column="2"
                                                    Text="{Binding Value}"
                                                    FontFamily="Consolas"
                                                    FontSize="12"
+                                                   VerticalAlignment="Center"
                                                    TextWrapping="Wrap" />
                                     </Grid>
                                 </Border>
@@ -291,5 +635,6 @@
                 </ScrollViewer>
             </StackPanel>
         </Border>
+        </StackPanel>
     </StackPanel>
 </UserControl>

@@ -10,26 +10,171 @@ namespace TasklyDev.ViewModels;
 public sealed class JwtDecoderViewModel : INotifyPropertyChanged
 {
     private readonly IJwtDecoderService _service;
+    private readonly IJwtEncoderService _encoder;
     private readonly IClipboardService _clipboard;
     private string _tokenText = string.Empty;
     private JwtParseResult? _result;
     private string _statusMessage = "Paste a compact JWT to decode its header and payload locally.";
     private bool _isError;
+    private bool _isEncoderMode;
+    private string _encoderHeaderJson = "{\n  \"alg\": \"HS256\",\n  \"typ\": \"JWT\"\n}";
+    private string _encoderPayloadJson = "{\n  \"sub\": \"1234567890\",\n  \"name\": \"John Doe\",\n  \"iat\": 1516239022\n}";
+    private string _encoderSecret = "your-256-bit-secret";
+    private string _selectedAlgorithm = "HS256";
+    private string _encodedToken = string.Empty;
+    private string _encoderStatusMessage = string.Empty;
+    private bool _isEncoderError;
 
     /// <summary>Creates the JWT decoder view model with decoder and clipboard services.</summary>
-    public JwtDecoderViewModel(IJwtDecoderService service, IClipboardService clipboard)
+    public JwtDecoderViewModel(IJwtDecoderService service, IClipboardService clipboard, IJwtEncoderService? encoder = null)
     {
         _service = service;
         _clipboard = clipboard;
+        _encoder = encoder ?? new JwtEncoderService();
         DecodeCommand = new RelayCommand(_ => Decode());
         CopyHeaderCommand = new RelayCommand(_ => Copy(HeaderJson, "Header"));
         CopyPayloadCommand = new RelayCommand(_ => Copy(PayloadJson, "Payload"));
         ClearCommand = new RelayCommand(_ => Clear());
+        ShowDecoderCommand = new RelayCommand(_ => IsEncoderMode = false);
+        ShowEncoderCommand = new RelayCommand(_ => IsEncoderMode = true);
+        CopyEncodedTokenCommand = new RelayCommand(_ => CopyEncodedToken());
+        DecodeEncodedTokenCommand = new RelayCommand(_ => DecodeEncodedToken());
+        Encode();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>Gets or sets the compact JWT input.</summary>
+    /// <summary>Gets the supported encoder signing algorithms.</summary>
+    public IReadOnlyList<string> Algorithms => _encoder.SupportedAlgorithms;
+
+    /// <summary>Gets or sets whether the encoder tab is shown instead of the decoder tab.</summary>
+    public bool IsEncoderMode
+    {
+        get => _isEncoderMode;
+        set
+        {
+            if (_isEncoderMode == value)
+            {
+                return;
+            }
+
+            _isEncoderMode = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsDecoderMode));
+        }
+    }
+
+    /// <summary>Gets whether the decoder tab is shown.</summary>
+    public bool IsDecoderMode => !_isEncoderMode;
+
+    /// <summary>Gets or sets the header JSON used by the encoder.</summary>
+    public string EncoderHeaderJson
+    {
+        get => _encoderHeaderJson;
+        set
+        {
+            if (_encoderHeaderJson == value)
+            {
+                return;
+            }
+
+            _encoderHeaderJson = value;
+            OnPropertyChanged();
+            Encode();
+        }
+    }
+
+    /// <summary>Gets or sets the payload JSON used by the encoder.</summary>
+    public string EncoderPayloadJson
+    {
+        get => _encoderPayloadJson;
+        set
+        {
+            if (_encoderPayloadJson == value)
+            {
+                return;
+            }
+
+            _encoderPayloadJson = value;
+            OnPropertyChanged();
+            Encode();
+        }
+    }
+
+    /// <summary>Gets or sets the shared secret used to sign the encoded token.</summary>
+    public string EncoderSecret
+    {
+        get => _encoderSecret;
+        set
+        {
+            if (_encoderSecret == value)
+            {
+                return;
+            }
+
+            _encoderSecret = value;
+            OnPropertyChanged();
+            Encode();
+        }
+    }
+
+    /// <summary>Gets or sets the selected signing algorithm and mirrors it into the header.</summary>
+    public string SelectedAlgorithm
+    {
+        get => _selectedAlgorithm;
+        set
+        {
+            if (_selectedAlgorithm == value || string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+
+            _selectedAlgorithm = value;
+            OnPropertyChanged();
+            SyncHeaderAlgorithm();
+            Encode();
+        }
+    }
+
+    private void SyncHeaderAlgorithm()
+    {
+        try
+        {
+            if (System.Text.Json.Nodes.JsonNode.Parse(_encoderHeaderJson) is System.Text.Json.Nodes.JsonObject header)
+            {
+                header["alg"] = _selectedAlgorithm;
+                _encoderHeaderJson = header.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                OnPropertyChanged(nameof(EncoderHeaderJson));
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // Invalid header JSON is reported by the encoder status instead.
+        }
+    }
+
+    /// <summary>Gets the most recently encoded compact token.</summary>
+    public string EncodedToken => _encodedToken;
+
+    /// <summary>Gets the encoder status message.</summary>
+    public string EncoderStatusMessage => _encoderStatusMessage;
+
+    /// <summary>Gets whether the latest encode attempt failed.</summary>
+    public bool IsEncoderError => _isEncoderError;
+
+    /// <summary>Gets the command that shows the decoder tab.</summary>
+    public ICommand ShowDecoderCommand { get; }
+
+    /// <summary>Gets the command that shows the encoder tab.</summary>
+    public ICommand ShowEncoderCommand { get; }
+
+    /// <summary>Gets the command that copies the encoded token.</summary>
+    public ICommand CopyEncodedTokenCommand { get; }
+
+    /// <summary>Gets the command that sends the encoded token to the decoder tab.</summary>
+    public ICommand DecodeEncodedTokenCommand { get; }
+
+    /// <summary>Gets or sets the compact JWT input and decodes it as it changes.</summary>
     public string TokenText
     {
         get => _tokenText;
@@ -43,6 +188,14 @@ public sealed class JwtDecoderViewModel : INotifyPropertyChanged
             _tokenText = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(InputCharacterCount));
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                ResetDecoded();
+            }
+            else
+            {
+                Decode();
+            }
         }
     }
 
@@ -151,6 +304,11 @@ public sealed class JwtDecoderViewModel : INotifyPropertyChanged
     private void Clear()
     {
         TokenText = string.Empty;
+        ResetDecoded();
+    }
+
+    private void ResetDecoded()
+    {
         _result = null;
         OnPropertyChanged(nameof(Result));
         OnPropertyChanged(nameof(HeaderJson));
@@ -160,6 +318,48 @@ public sealed class JwtDecoderViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasDecodedContent));
         IsError = false;
         StatusMessage = "Paste a compact JWT to decode its header and payload locally.";
+    }
+
+    private void Encode()
+    {
+        var result = _encoder.Encode(_encoderHeaderJson, _encoderPayloadJson, _encoderSecret, _selectedAlgorithm);
+        _encodedToken = result.Token;
+        _encoderStatusMessage = result.Message;
+        _isEncoderError = !result.IsValid;
+        OnPropertyChanged(nameof(EncodedToken));
+        OnPropertyChanged(nameof(EncoderStatusMessage));
+        OnPropertyChanged(nameof(IsEncoderError));
+    }
+
+    private void CopyEncodedToken()
+    {
+        if (_encodedToken.Length == 0)
+        {
+            _isEncoderError = true;
+            _encoderStatusMessage = "Fix the header and payload JSON before copying a token.";
+        }
+        else
+        {
+            var copied = _clipboard.TrySetText(_encodedToken);
+            _isEncoderError = !copied;
+            _encoderStatusMessage = copied
+                ? "Encoded JWT copied to the clipboard."
+                : "Clipboard is unavailable or busy. Try copying again.";
+        }
+
+        OnPropertyChanged(nameof(EncoderStatusMessage));
+        OnPropertyChanged(nameof(IsEncoderError));
+    }
+
+    private void DecodeEncodedToken()
+    {
+        if (_encodedToken.Length == 0)
+        {
+            return;
+        }
+
+        TokenText = _encodedToken;
+        IsEncoderMode = false;
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>

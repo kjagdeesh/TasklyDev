@@ -11,8 +11,8 @@ public sealed class JwtDecoderService : IJwtDecoderService
     public const int MaximumTokenLength = 1_048_576;
 
     private const int MaximumJsonDepth = 64;
+    private const int MaximumExpandedNumberLength = 4096;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
-    private static readonly JsonSerializerOptions IndentedJsonOptions = new() { WriteIndented = true };
     private static readonly HashSet<string> TimeClaimNames = new(StringComparer.Ordinal)
     {
         "exp",
@@ -28,6 +28,7 @@ public sealed class JwtDecoderService : IJwtDecoderService
             return Invalid("Enter a compact JWT to inspect.");
         }
 
+        token = NormalizeToken(token);
         if (token.Length > MaximumTokenLength)
         {
             return Invalid($"Token exceeds the {MaximumTokenLength:N0}-character inspection limit.");
@@ -47,8 +48,8 @@ public sealed class JwtDecoderService : IJwtDecoderService
 
             using var header = ParseObject(headerBytes);
             using var payload = ParseObject(payloadBytes);
-            var headerJson = JsonSerializer.Serialize(header.RootElement, IndentedJsonOptions);
-            var payloadJson = JsonSerializer.Serialize(payload.RootElement, IndentedJsonOptions);
+            var headerJson = FormatJson(header.RootElement, indented: true);
+            var payloadJson = FormatJson(payload.RootElement, indented: true);
             var claims = CreateClaims(payload.RootElement);
 
             return new JwtParseResult(
@@ -71,6 +72,17 @@ public sealed class JwtDecoderService : IJwtDecoderService
         {
             return Invalid("Decoded header and payload must be valid JSON objects.");
         }
+    }
+
+    private static string NormalizeToken(string token)
+    {
+        var trimmed = token.Trim().Trim('"', '\'');
+        if (trimmed.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed[7..];
+        }
+
+        return string.Concat(trimmed.Where(character => !char.IsWhiteSpace(character)));
     }
 
     private static JsonDocument ParseObject(byte[] utf8Json)
@@ -96,7 +108,7 @@ public sealed class JwtDecoderService : IJwtDecoderService
             var jsonType = GetJsonType(value.ValueKind);
             var displayValue = value.ValueKind == JsonValueKind.String
                 ? value.GetString() ?? string.Empty
-                : value.GetRawText();
+                : FormatJson(value, indented: false);
             var timeInterpretation = TimeClaimNames.Contains(property.Name)
                 ? InterpretNumericDate(value)
                 : null;
@@ -105,6 +117,125 @@ public sealed class JwtDecoderService : IJwtDecoderService
         }
 
         return claims;
+    }
+
+    private static string FormatJson(JsonElement element, bool indented)
+    {
+        using var buffer = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(
+                   buffer,
+                   new JsonWriterOptions { Indented = indented, MaxDepth = MaximumJsonDepth }))
+        {
+            WriteFormattedElement(writer, element);
+        }
+
+        return StrictUtf8.GetString(buffer.ToArray());
+    }
+
+    private static void WriteFormattedElement(Utf8JsonWriter writer, JsonElement element)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                writer.WriteStartObject();
+                foreach (var property in element.EnumerateObject())
+                {
+                    writer.WritePropertyName(property.Name);
+                    WriteFormattedElement(writer, property.Value);
+                }
+
+                writer.WriteEndObject();
+                break;
+            case JsonValueKind.Array:
+                writer.WriteStartArray();
+                foreach (var item in element.EnumerateArray())
+                {
+                    WriteFormattedElement(writer, item);
+                }
+
+                writer.WriteEndArray();
+                break;
+            case JsonValueKind.Number:
+                writer.WriteRawValue(ExpandExponent(element.GetRawText()));
+                break;
+            default:
+                element.WriteTo(writer);
+                break;
+        }
+    }
+
+    private static string ExpandExponent(string number)
+    {
+        var exponentIndex = number.IndexOfAny(['e', 'E']);
+        if (exponentIndex < 0 ||
+            !long.TryParse(
+                number.AsSpan(exponentIndex + 1),
+                NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture,
+                out var exponent))
+        {
+            return number;
+        }
+
+        if (exponent is > MaximumExpandedNumberLength or < -MaximumExpandedNumberLength)
+        {
+            return number;
+        }
+
+        var mantissa = number.AsSpan(0, exponentIndex);
+        var isNegative = mantissa[0] == '-';
+        if (isNegative)
+        {
+            mantissa = mantissa[1..];
+        }
+
+        var decimalIndex = mantissa.IndexOf('.');
+        var integerDigits = decimalIndex < 0 ? mantissa.Length : decimalIndex;
+        var digits = decimalIndex < 0
+            ? mantissa.ToString()
+            : string.Concat(mantissa[..decimalIndex], mantissa[(decimalIndex + 1)..]);
+        var expandedDecimalIndex = (long)integerDigits + exponent;
+
+        var firstNonZero = 0;
+        while (firstNonZero < digits.Length && digits[firstNonZero] == '0')
+        {
+            firstNonZero++;
+        }
+
+        if (firstNonZero == digits.Length)
+        {
+            return isNegative ? "-0" : "0";
+        }
+
+        digits = digits[firstNonZero..];
+        expandedDecimalIndex -= firstNonZero;
+
+        var outputLength = expandedDecimalIndex <= 0
+            ? 2L - expandedDecimalIndex + digits.Length
+            : Math.Max(expandedDecimalIndex, digits.Length) +
+              (expandedDecimalIndex < digits.Length ? 1 : 0);
+        if (isNegative)
+        {
+            outputLength++;
+        }
+
+        if (outputLength > MaximumExpandedNumberLength)
+        {
+            return number;
+        }
+
+        var sign = isNegative ? "-" : string.Empty;
+        if (expandedDecimalIndex <= 0)
+        {
+            return $"{sign}0.{new string('0', (int)-expandedDecimalIndex)}{digits}";
+        }
+
+        if (expandedDecimalIndex >= digits.Length)
+        {
+            return $"{sign}{digits}{new string('0', (int)(expandedDecimalIndex - digits.Length))}";
+        }
+
+        return $"{sign}{digits.Insert((int)expandedDecimalIndex, ".")}";
     }
 
     private static string? InterpretNumericDate(JsonElement value)

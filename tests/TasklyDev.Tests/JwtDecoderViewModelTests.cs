@@ -8,6 +8,25 @@ namespace TasklyDev.Tests;
 public sealed class JwtDecoderViewModelTests
 {
     [Fact]
+    public void PastingATokenDecodesLiveAndEncoderOutputCanBeSentToDecoder()
+    {
+        var viewModel = CreateViewModel(new RecordingClipboard());
+        viewModel.TokenText = MakeToken("""{"alg":"HS256"}""", """{"sub":"live"}""");
+        Assert.True(viewModel.HasDecodedContent);
+
+        viewModel.IsEncoderMode = true;
+        viewModel.SelectedAlgorithm = "HS512";
+        Assert.Contains("HS512", viewModel.EncoderHeaderJson);
+        Assert.False(viewModel.IsEncoderError);
+        Assert.NotEmpty(viewModel.EncodedToken);
+
+        viewModel.DecodeEncodedTokenCommand.Execute(null);
+        Assert.True(viewModel.IsDecoderMode);
+        Assert.Equal(viewModel.EncodedToken, viewModel.TokenText);
+        Assert.Contains("HS512", viewModel.HeaderJson);
+    }
+
+    [Fact]
     public void DecodeDisplaysJsonClaimsAndPersistentUntrustedWarning()
     {
         var clipboard = new RecordingClipboard();

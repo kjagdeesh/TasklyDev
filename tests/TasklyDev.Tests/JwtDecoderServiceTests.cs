@@ -136,6 +136,22 @@ public sealed class JwtDecoderServiceTests
     }
 
     [Fact]
+    public void ExpandsExponentNotationWithoutLosingNumericPrecision()
+    {
+        var result = _service.Decode(CreateToken(
+            """{"alg":"HS256"}""",
+            """{"large":1.516239022222222e+182,"small":1.25e-4,"zero":0e+12}"""));
+        var expandedLargeNumber = "1516239022222222" + new string('0', 167);
+
+        Assert.True(result.IsValid, result.Message);
+        Assert.Contains($"\"large\": {expandedLargeNumber}", result.PayloadJson);
+        Assert.Contains($"\"small\": 0.000125", result.PayloadJson);
+        Assert.Contains("\"zero\": 0", result.PayloadJson);
+        Assert.Equal(expandedLargeNumber, Assert.Single(result.Claims, claim => claim.Name == "large").Value);
+        Assert.Equal("0.000125", Assert.Single(result.Claims, claim => claim.Name == "small").Value);
+    }
+
+    [Fact]
     public void RejectsOversizedToken()
     {
         var result = _service.Decode(new string('a', JwtDecoderService.MaximumTokenLength + 1));
@@ -152,6 +168,18 @@ public sealed class JwtDecoderServiceTests
 
         Assert.False(result.IsValid);
         Assert.Contains("UTF-8", result.Message);
+    }
+
+    [Fact]
+    public void EnterpriseTokenWithNamespacedClaimsAndArrayAudienceDecodes()
+    {
+        var token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImF1dGgtay04ZjJjOWIifQ.eyJpc3MiOiJodHRwczovL2F1dGguZW50ZXJwcmlzZS5jb20iLCJzdWIiOiJ1c3JfMGhuODl4MnAzayIsImF1ZCI6WyJodHRwczovL2FwaS5lbnRlcnByaXNlLmNvbS92MiIsImh0dHBzOi8vY2xpZW50LmRhc2hib2FyZC5jb20iXSwiZXhwIjoxNzk4NTQxMzAwLCJuYmYiOjE3Njg1NDEzMDAsImlhdCI6MTc2ODU0MTMwMCwianRpIjoiOGYyYzlzOWItNGEyZC00ZjNjLThjMmEtOWIzYzRkNWUzZjJhIiwiYWN0IjoiMzhkOWEyOTMtMzhhMC00OTI5LTk2ZTItZDMyZmE2ZGU3YjBiIiwiY2xpZW50X2lkIjoiYXBwX2Zyb250ZW5kX3BybyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgdXNlcjpkYXRhOnJlYWQgdXNlcjpkYXRhOndyaXRlIGFkbWluOmF1ZGl0IiwiaHR0cHM6Ly9lbnRlcnByaXNlLmNvbS9jbGFpbXMvdXNlcl9tZXRhZGF0YSI6eyJmaXJzdF9uYW1lIjoiQWxleGEiLCJsYXN0X25hbWUiOiJWYW5kZXJiZXJnIiwiZW1haWwiOiJhbGV4YS52QGVudGVycHJpc2UuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX251bWJlciI6IisxNTU1MDE5OTk4OCJ9LCJodHRwczovL2VudGVycHJpc2UuY29tL2NsYWltcy9yb2xlcyI6WyJkZXZlbG9wZXIiLCJhdWRpdG9yIl0sImh0dHBzOi8vY2xpZW50LmRhc2hib2FyZC5jb20vY29udGV4dCI6eyJ0ZW5hbnRfaWQiOiJjdXN0X2FjbWVfY29ycF85OSIsImxvY2F0aW9uIjoiVVMtTlkiLCJpcF9hZGRyZXNzIjoiMTkyLjAuMi42MiIsImRldmljZV9vcyI6Im1hY09TIn19.SlnN1N42iM8Fj1L5LqZt9r0X5Vz8mK2n3P5Qz7w9b1c0Y8N3m5x7z9L1V3b5c7NzlL2b3Y4c5TzdeZmdoS2kxTTVTck1wU1pSMXBUVFZSVFZVNVVVRlpWVTFSU1ZGWlhUVlpXVTFVVVZGWlhWVlpWVVRGU1ZGWlhUVlpXVTFVVVZGWlhWVlpWVVRGU1ZGWlhUVlpXVTFVVVZGWlhWVlpWVVRGU1ZGWlhUVlpXVTFVVVZGWlhWVlpWVVQ";
+
+        var result = _service.Decode(token);
+
+        Assert.True(result.IsValid, result.Message);
+        Assert.Contains("RS256", result.HeaderJson);
+        Assert.Contains("user_metadata", result.PayloadJson);
     }
 
     private static string CreateToken(string headerJson, string payloadJson, string signature = "c2ln") =>
