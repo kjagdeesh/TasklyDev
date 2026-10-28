@@ -105,9 +105,54 @@ public sealed class DotNetInspectionServiceTests
         Assert.Empty(result.Runtimes);
         Assert.Equal("Failed (exit code 1)", result.Diagnostics[1].Status);
         Assert.Equal("Timed out", result.Diagnostics[2].Status);
-        Assert.Equal("Failed (exit code 145)", result.Diagnostics[3].Status);
+        Assert.Equal("Skipped", result.Diagnostics[3].Status);
         Assert.Equal("SDK command failed.", result.Diagnostics[1].Details);
         Assert.Equal("Timed out.", result.Diagnostics[2].Details);
+        Assert.Contains("SDK discovery failed", result.Diagnostics[3].Details);
+        Assert.DoesNotContain(runner.Calls, call => call.Arguments.SequenceEqual(["workload", "list"]));
+    }
+
+    [Fact]
+    public async Task WorkloadCommandFailureIsReportedWhenSdkIsInstalled()
+    {
+        var runner = new FakeDotNetCommandRunner([@"C:\dotnet\dotnet.exe"])
+        {
+            Results =
+            {
+                ["--info"] = Successful("info"),
+                ["--list-sdks"] = Successful("10.0.100 [C:\\dotnet\\sdk]"),
+                ["--list-runtimes"] = Successful(string.Empty),
+                ["workload list"] = Failed(exitCode: 145, stderr: "Workload manifest failed.")
+            }
+        };
+        var service = new DotNetInspectionService(runner);
+
+        var result = await service.InspectAsync();
+
+        Assert.Equal("Failed (exit code 145)", result.Diagnostics[3].Status);
+        Assert.Equal("Workload manifest failed.", result.Diagnostics[3].Details);
+        Assert.Contains(runner.Calls, call => call.Arguments.SequenceEqual(["workload", "list"]));
+    }
+
+    [Fact]
+    public async Task WorkloadCommandIsSkippedWhenHostReportsNoSdk()
+    {
+        var runner = new FakeDotNetCommandRunner([@"C:\dotnet\dotnet.exe"])
+        {
+            Results =
+            {
+                ["--info"] = Successful("info"),
+                ["--list-sdks"] = Successful(string.Empty),
+                ["--list-runtimes"] = Successful(string.Empty)
+            }
+        };
+        var service = new DotNetInspectionService(runner);
+
+        var result = await service.InspectAsync();
+
+        Assert.Equal("Skipped", result.Diagnostics[3].Status);
+        Assert.Contains("no installed SDKs", result.Diagnostics[3].Details);
+        Assert.DoesNotContain(runner.Calls, call => call.Arguments.SequenceEqual(["workload", "list"]));
     }
 
     [Fact]

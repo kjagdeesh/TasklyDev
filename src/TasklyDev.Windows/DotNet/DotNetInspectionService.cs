@@ -55,7 +55,8 @@ public sealed partial class DotNetInspectionService : IDotNetInspectionService
             var info = await RunCommandAsync(dotNetPath, ["--info"], diagnostics, cancellationToken).ConfigureAwait(false);
             var sdkList = await RunCommandAsync(dotNetPath, ["--list-sdks"], diagnostics, cancellationToken).ConfigureAwait(false);
             var runtimeList = await RunCommandAsync(dotNetPath, ["--list-runtimes"], diagnostics, cancellationToken).ConfigureAwait(false);
-            var workloads = await RunCommandAsync(dotNetPath, ["workload", "list"], diagnostics, cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<DotNetSdkInfo> hostSdks =
+                sdkList?.Succeeded == true ? ParseSdks(sdkList.StandardOutput) : Array.Empty<DotNetSdkInfo>();
 
             if (info?.Succeeded == true)
             {
@@ -66,7 +67,7 @@ public sealed partial class DotNetInspectionService : IDotNetInspectionService
             if (sdkList?.Succeeded == true)
             {
                 hasSuccessfulDiscovery = true;
-                sdks.AddRange(ParseSdks(sdkList.StandardOutput));
+                sdks.AddRange(hostSdks);
             }
 
             if (runtimeList?.Succeeded == true)
@@ -75,9 +76,28 @@ public sealed partial class DotNetInspectionService : IDotNetInspectionService
                 runtimes.AddRange(ParseRuntimes(runtimeList.StandardOutput));
             }
 
-            if (workloads?.Succeeded == true)
+            if (hostSdks.Count == 0)
             {
-                workloadOutputs.Add($"[{dotNetPath}]{System.Environment.NewLine}{workloads.StandardOutput}");
+                diagnostics.Add(new DotNetCommandDiagnostic(
+                    $"{dotNetPath} workload list",
+                    "Skipped",
+                    null,
+                    TimeSpan.Zero,
+                    sdkList?.Succeeded == true
+                        ? "This host reported no installed SDKs; dotnet workload list requires an SDK."
+                        : "SDK discovery failed for this host, so the workload command was not run."));
+            }
+            else
+            {
+                var workloads = await RunCommandAsync(
+                    dotNetPath,
+                    ["workload", "list"],
+                    diagnostics,
+                    cancellationToken).ConfigureAwait(false);
+                if (workloads?.Succeeded == true)
+                {
+                    workloadOutputs.Add($"[{dotNetPath}]{System.Environment.NewLine}{workloads.StandardOutput}");
+                }
             }
         }
 
