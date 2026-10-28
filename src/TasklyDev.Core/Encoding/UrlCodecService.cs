@@ -1,18 +1,28 @@
-using System.Buffers;
 using System.Globalization;
 using System.Text;
 
 namespace TasklyDev.Core.Encoding;
 
-/// <summary>Implements strict UTF-8 percent encoding for full URLs, components, and query values.</summary>
+/// <summary>Implements charset-aware percent encoding for full URLs, components, and query values.</summary>
 public sealed class UrlCodecService : IUrlCodecService
 {
     private const string UnreservedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
     private const string ReservedCharacters = ":/?#[]@!$&'()*+,;=";
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
+    private const int MaximumDecodePasses = 16;
+
+    static UrlCodecService() =>
+        System.Text.Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
     /// <inheritdoc />
-    public UrlCodecResult Transform(string input, UrlEncodingMode mode, bool encode)
+    public UrlCodecResult Transform(
+        string input,
+        UrlEncodingMode mode,
+        bool encode,
+        UrlCharacterEncoding characterEncoding = UrlCharacterEncoding.Utf8,
+        UrlLineEnding destinationLineEnding = UrlLineEnding.Lf,
+        bool decodeEachLine = false,
+        bool recursiveDecode = false)
     {
         ArgumentNullException.ThrowIfNull(input);
         if (!Enum.IsDefined(mode))
@@ -20,17 +30,26 @@ public sealed class UrlCodecService : IUrlCodecService
             throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unsupported URL encoding mode.");
         }
 
-        _ = StrictUtf8.GetByteCount(input);
-        var value = mode switch
+        if (!Enum.IsDefined(characterEncoding))
         {
-            UrlEncodingMode.FullUrl when encode => EncodeFullUrl(input),
-            UrlEncodingMode.FullUrl => DecodeFullUrl(input),
-            UrlEncodingMode.UrlComponent when encode => EncodeComponent(input, queryValue: false),
-            UrlEncodingMode.UrlComponent => DecodeComponent(input, plusAsSpace: false),
-            UrlEncodingMode.QueryValue when encode => EncodeComponent(input, queryValue: true),
-            UrlEncodingMode.QueryValue => DecodeComponent(input, plusAsSpace: true),
-            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unsupported URL encoding mode.")
-        };
+            throw new ArgumentOutOfRangeException(nameof(characterEncoding), characterEncoding, "Unsupported character encoding.");
+        }
+
+        if (!Enum.IsDefined(destinationLineEnding))
+        {
+            throw new ArgumentOutOfRangeException(nameof(destinationLineEnding), destinationLineEnding, "Unsupported line separator.");
+        }
+
+        _ = StrictUtf8.GetByteCount(input);
+        var encoding = CreateEncoding(characterEncoding);
+        var value = encode
+            ? TransformSingle(NormalizeLineEndings(input, destinationLineEnding), mode, encode: true, encoding)
+            : DecodeWithOptions(input, mode, encoding, destinationLineEnding, decodeEachLine, recursiveDecode);
+
+        if (!encode)
+        {
+            value = NormalizeLineEndings(value, destinationLineEnding);
+        }
 
         var components = mode == UrlEncodingMode.FullUrl
             ? ParseComponentsForDisplay(value)
@@ -38,7 +57,93 @@ public sealed class UrlCodecService : IUrlCodecService
         return new UrlCodecResult(value, components);
     }
 
-    private static string EncodeFullUrl(string input)
+    private static string TransformSingle(string input, UrlEncodingMode mode, bool encode, System.Text.Encoding encoding) =>
+        mode switch
+        {
+            UrlEncodingMode.FullUrl when encode => EncodeFullUrl(input, encoding),
+            UrlEncodingMode.FullUrl => DecodeFullUrl(input, encoding),
+            UrlEncodingMode.UrlComponent when encode => EncodeComponent(input, queryValue: false, encoding),
+            UrlEncodingMode.UrlComponent => DecodeComponent(input, plusAsSpace: false, encoding),
+            UrlEncodingMode.QueryValue when encode => EncodeComponent(input, queryValue: true, encoding),
+            UrlEncodingMode.QueryValue => DecodeComponent(input, plusAsSpace: true, encoding),
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unsupported URL encoding mode.")
+        };
+
+    private static string DecodeWithOptions(
+        string input,
+        UrlEncodingMode mode,
+        System.Text.Encoding encoding,
+        UrlLineEnding destinationLineEnding,
+        bool decodeEachLine,
+        bool recursiveDecode)
+    {
+        if (!decodeEachLine)
+        {
+            return DecodeRepeatedly(input, mode, encoding, recursiveDecode);
+        }
+
+        var lines = NormalizeLineEndings(input, UrlLineEnding.Lf).Split('\n');
+        for (var index = 0; index < lines.Length; index++)
+        {
+            if (lines[index].Length > 0)
+            {
+                lines[index] = DecodeRepeatedly(lines[index], mode, encoding, recursiveDecode);
+            }
+        }
+
+        return string.Join(GetLineSeparator(destinationLineEnding), lines);
+    }
+
+    private static string DecodeRepeatedly(
+        string input,
+        UrlEncodingMode mode,
+        System.Text.Encoding encoding,
+        bool recursiveDecode)
+    {
+        var decoded = input;
+        var passes = recursiveDecode ? MaximumDecodePasses : 1;
+        for (var pass = 0; pass < passes; pass++)
+        {
+            string next;
+            try
+            {
+                next = TransformSingle(decoded, mode, encode: false, encoding);
+            }
+            catch (FormatException) when (recursiveDecode && pass > 0)
+            {
+                break;
+            }
+
+            if (next == decoded)
+            {
+                break;
+            }
+
+            decoded = next;
+        }
+
+        return decoded;
+    }
+
+    private static System.Text.Encoding CreateEncoding(UrlCharacterEncoding characterEncoding) =>
+        System.Text.Encoding.GetEncoding(
+            (int)characterEncoding,
+            EncoderFallback.ExceptionFallback,
+            DecoderFallback.ExceptionFallback);
+
+    private static string NormalizeLineEndings(string value, UrlLineEnding destinationLineEnding)
+    {
+        var normalized = value.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n');
+        return destinationLineEnding == UrlLineEnding.CrLf
+            ? normalized.Replace("\n", "\r\n", StringComparison.Ordinal)
+            : normalized;
+    }
+
+    private static string GetLineSeparator(UrlLineEnding lineEnding) =>
+        lineEnding == UrlLineEnding.CrLf ? "\r\n" : "\n";
+
+    private static string EncodeFullUrl(string input, System.Text.Encoding encoding)
     {
         ValidatePercentEscapes(input);
         var builder = new StringBuilder(input.Length);
@@ -60,7 +165,7 @@ public sealed class UrlCodecService : IUrlCodecService
             }
 
             var rune = Rune.GetRuneAt(input, index);
-            AppendEscapedRune(builder, rune);
+            AppendEscapedRune(builder, rune, encoding);
             index += rune.Utf16SequenceLength;
         }
 
@@ -73,24 +178,39 @@ public sealed class UrlCodecService : IUrlCodecService
         return value;
     }
 
-    private static string DecodeFullUrl(string input)
+    private static string DecodeFullUrl(string input, System.Text.Encoding encoding)
     {
         ValidatePercentEscapes(input);
-        if (!Uri.TryCreate(input, UriKind.Absolute, out _))
+
+        if (Uri.TryCreate(input, UriKind.Absolute, out _))
         {
-            throw new FormatException("Enter a valid absolute URL, including its scheme.");
+            var decodedAbsoluteUrl = DecodePercentRuns(
+                input,
+                plusAsSpace: false,
+                preserveReservedAscii: true,
+                encoding);
+            if (!Uri.TryCreate(EscapeForUrlValidation(decodedAbsoluteUrl), UriKind.Absolute, out _))
+            {
+                throw new FormatException("Input is not a valid absolute URL.");
+            }
+
+            return decodedAbsoluteUrl;
         }
 
-        var value = DecodePercentRuns(input, plusAsSpace: false, preserveReservedAscii: true);
-        if (!Uri.TryCreate(EscapeForUrlValidation(value), UriKind.Absolute, out _))
+        var decodedWholeUrl = DecodePercentRuns(
+            input,
+            plusAsSpace: false,
+            preserveReservedAscii: false,
+            encoding);
+        if (!Uri.TryCreate(EscapeForUrlValidation(decodedWholeUrl), UriKind.Absolute, out _))
         {
-            throw new FormatException("Input is not a valid absolute URL.");
+            throw new FormatException("Enter a valid absolute URL or a percent-encoded absolute URL.");
         }
 
-        return value;
+        return decodedWholeUrl;
     }
 
-    private static string EncodeComponent(string input, bool queryValue)
+    private static string EncodeComponent(string input, bool queryValue, System.Text.Encoding encoding)
     {
         var builder = new StringBuilder(input.Length);
         foreach (var rune in input.EnumerateRunes())
@@ -105,20 +225,24 @@ public sealed class UrlCodecService : IUrlCodecService
             }
             else
             {
-                AppendEscapedRune(builder, rune);
+                AppendEscapedRune(builder, rune, encoding);
             }
         }
 
         return builder.ToString();
     }
 
-    private static string DecodeComponent(string input, bool plusAsSpace)
+    private static string DecodeComponent(string input, bool plusAsSpace, System.Text.Encoding encoding)
     {
         ValidatePercentEscapes(input);
-        return DecodePercentRuns(input, plusAsSpace, preserveReservedAscii: false);
+        return DecodePercentRuns(input, plusAsSpace, preserveReservedAscii: false, encoding);
     }
 
-    private static string DecodePercentRuns(string input, bool plusAsSpace, bool preserveReservedAscii)
+    private static string DecodePercentRuns(
+        string input,
+        bool plusAsSpace,
+        bool preserveReservedAscii,
+        System.Text.Encoding encoding)
     {
         var builder = new StringBuilder(input.Length);
         for (var index = 0; index < input.Length;)
@@ -149,11 +273,11 @@ public sealed class UrlCodecService : IUrlCodecService
             string decoded;
             try
             {
-                decoded = StrictUtf8.GetString(encodedBytes);
+                decoded = encoding.GetString(encodedBytes);
             }
             catch (DecoderFallbackException exception)
             {
-                throw new FormatException("Percent escapes must contain valid UTF-8.", exception);
+                throw new FormatException($"Percent escapes are not valid {encoding.WebName} data.", exception);
             }
 
             if (!preserveReservedAscii)
@@ -162,29 +286,20 @@ public sealed class UrlCodecService : IUrlCodecService
                 continue;
             }
 
-            var byteIndex = 0;
-            while (byteIndex < bytes.Count)
+            foreach (var rune in decoded.EnumerateRunes())
             {
-                var status = Rune.DecodeFromUtf8(encodedBytes.AsSpan(byteIndex), out var rune, out var consumed);
-                if (status != OperationStatus.Done)
-                {
-                    throw new DecoderFallbackException("Percent escapes do not contain valid UTF-8.");
-                }
-
                 if (rune.IsAscii && ReservedCharacters.Contains((char)rune.Value))
                 {
-                    for (var offset = 0; offset < consumed; offset++)
+                    foreach (var encodedByte in encoding.GetBytes(rune.ToString()))
                     {
                         builder.Append('%');
-                        builder.Append(bytes[byteIndex + offset].ToString("X2", CultureInfo.InvariantCulture));
+                        builder.Append(encodedByte.ToString("X2", CultureInfo.InvariantCulture));
                     }
                 }
                 else
                 {
                     builder.Append(rune.ToString());
                 }
-
-                byteIndex += consumed;
             }
         }
 
@@ -273,14 +388,18 @@ public sealed class UrlCodecService : IUrlCodecService
         }
     }
 
-    private static void AppendEscapedRune(StringBuilder builder, Rune rune)
+    private static void AppendEscapedRune(StringBuilder builder, Rune rune) =>
+        AppendEscapedBytes(builder, StrictUtf8.GetBytes(rune.ToString()));
+
+    private static void AppendEscapedRune(StringBuilder builder, Rune rune, System.Text.Encoding encoding) =>
+        AppendEscapedBytes(builder, encoding.GetBytes(rune.ToString()));
+
+    private static void AppendEscapedBytes(StringBuilder builder, byte[] bytes)
     {
-        Span<byte> bytes = stackalloc byte[4];
-        var byteCount = rune.EncodeToUtf8(bytes);
-        for (var index = 0; index < byteCount; index++)
+        foreach (var value in bytes)
         {
             builder.Append('%');
-            builder.Append(bytes[index].ToString("X2", CultureInfo.InvariantCulture));
+            builder.Append(value.ToString("X2", CultureInfo.InvariantCulture));
         }
     }
 

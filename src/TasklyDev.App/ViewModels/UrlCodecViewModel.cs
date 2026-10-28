@@ -17,7 +17,11 @@ public sealed class UrlCodecViewModel : INotifyPropertyChanged
     private string _statusMessage = "Choose a mode and operation, then enter URL text or a value.";
     private bool _isError;
     private bool _isEncoding = true;
-    private UrlEncodingMode _selectedMode = UrlEncodingMode.UrlComponent;
+    private UrlEncodingMode _selectedMode = UrlEncodingMode.FullUrl;
+    private UrlCharacterEncoding _selectedCharacterEncoding = UrlCharacterEncoding.Utf8;
+    private UrlLineEnding _destinationLineEnding = UrlLineEnding.Lf;
+    private bool _decodeEachLine;
+    private bool _recursiveDecode;
 
     /// <summary>Creates the URL codec view model with transformation and clipboard services.</summary>
     public UrlCodecViewModel(IUrlCodecService service, IClipboardService clipboard)
@@ -36,6 +40,12 @@ public sealed class UrlCodecViewModel : INotifyPropertyChanged
 
     /// <summary>Gets the available URL encoding modes.</summary>
     public Array Modes => Enum.GetValues<UrlEncodingMode>();
+
+    /// <summary>Gets the character encodings available for percent encoding and decoding.</summary>
+    public Array CharacterEncodings => Enum.GetValues<UrlCharacterEncoding>();
+
+    /// <summary>Gets the available destination line separators.</summary>
+    public Array LineEndings => Enum.GetValues<UrlLineEnding>();
 
     /// <summary>Gets or sets the input value.</summary>
     public string InputText
@@ -148,11 +158,75 @@ public sealed class UrlCodecViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>Gets or sets the character encoding used for percent-escaped bytes.</summary>
+    public UrlCharacterEncoding SelectedCharacterEncoding
+    {
+        get => _selectedCharacterEncoding;
+        set
+        {
+            if (_selectedCharacterEncoding == value)
+            {
+                return;
+            }
+
+            _selectedCharacterEncoding = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Gets or sets the destination line separator.</summary>
+    public UrlLineEnding DestinationLineEnding
+    {
+        get => _destinationLineEnding;
+        set
+        {
+            if (_destinationLineEnding == value)
+            {
+                return;
+            }
+
+            _destinationLineEnding = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Gets or sets whether decoding treats each input line as a separate value.</summary>
+    public bool DecodeEachLine
+    {
+        get => _decodeEachLine;
+        set
+        {
+            if (_decodeEachLine == value)
+            {
+                return;
+            }
+
+            _decodeEachLine = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Gets or sets whether decoding repeats until stable or the 16-pass limit is reached.</summary>
+    public bool RecursiveDecode
+    {
+        get => _recursiveDecode;
+        set
+        {
+            if (_recursiveDecode == value)
+            {
+                return;
+            }
+
+            _recursiveDecode = value;
+            OnPropertyChanged();
+        }
+    }
+
     /// <summary>Gets a short explanation of the selected mode's escaping rules.</summary>
     public string ModeDescription => SelectedMode switch
     {
-        UrlEncodingMode.FullUrl => "Requires an absolute URL. Preserves URL delimiters and existing valid percent escapes; decoding keeps escaped reserved characters encoded.",
-        UrlEncodingMode.UrlComponent => "Encodes one value using UTF-8 percent escapes; a literal plus sign stays a plus when decoding.",
+        UrlEncodingMode.FullUrl => "Processes a regular or whole-URL percent-encoded absolute URL. Decoding a regular URL preserves escaped reserved characters.",
+        UrlEncodingMode.UrlComponent => "Encodes one value using the selected character encoding; a literal plus sign stays a plus when decoding.",
         UrlEncodingMode.QueryValue => "Encodes one query value. Spaces become + and a literal plus is encoded as %2B.",
         _ => string.Empty
     };
@@ -205,7 +279,14 @@ public sealed class UrlCodecViewModel : INotifyPropertyChanged
     {
         try
         {
-            var result = _service.Transform(InputText, SelectedMode, encode);
+            var result = _service.Transform(
+                InputText,
+                SelectedMode,
+                encode,
+                SelectedCharacterEncoding,
+                DestinationLineEnding,
+                DecodeEachLine,
+                RecursiveDecode);
             OutputText = result.Value;
             SetComponents(result.Components);
             SetStatus(
@@ -218,15 +299,15 @@ public sealed class UrlCodecViewModel : INotifyPropertyChanged
             SetComponents(null);
             SetStatus(
                 SelectedMode == UrlEncodingMode.FullUrl
-                    ? "Input must be a valid absolute URL with well-formed percent escapes."
-                    : "Input contains malformed percent escapes or invalid UTF-8.",
+                    ? "Enter a valid absolute URL or percent-encoded absolute URL; malformed percent escapes and invalid character bytes are rejected."
+                    : "Input contains malformed percent escapes or bytes invalid in the selected character encoding.",
                 isError: true);
         }
         catch (EncoderFallbackException)
         {
             OutputText = string.Empty;
             SetComponents(null);
-            SetStatus("Input contains text that cannot be represented as valid UTF-8.", isError: true);
+            SetStatus("Input contains text that cannot be represented in the selected character encoding.", isError: true);
         }
     }
 

@@ -55,13 +55,15 @@ Version reporting is conservative: **Unknown** does not imply invalid input, and
 
 ### URL Encoder / Decoder
 
-This tool is appended at the bottom of **Developer Tools**. Choose **Encode** or **Decode**, then select a mode:
+This tool is appended at the bottom of **Developer Tools** and starts in **Full URL** mode. Choose **Encode** or **Decode**, then select a mode and expand **Advanced options** as needed:
 
-- **Full URL** requires an absolute URL. Encoding preserves URL delimiters and existing valid percent escapes while escaping spaces and Unicode as UTF-8. Decoding converts escaped text but leaves percent-encoded reserved delimiters such as `%2F` encoded so they cannot silently change URL structure. Parsed scheme, authority, path, query, and fragment are shown when available.
+- **Full URL** accepts a regular absolute URL or a whole URL percent-encoded as a component. Encoding preserves URL delimiters and existing valid percent escapes while escaping spaces and Unicode as UTF-8. Decoding a regular URL leaves escaped reserved delimiters such as `%2F` encoded so they cannot silently change URL structure; decoding a whole-URL-encoded value restores its encoded URL delimiters. Parsed scheme, authority, path, query, and fragment are shown when available.
 - **URL Component** encodes one value, preserving only RFC 3986 unreserved characters. When decoding, `+` remains a literal plus.
 - **Query Value** encodes one query value: spaces become `+`, literal plus signs become `%2B`, and query separators are escaped. Decoding converts `+` back to a space.
 
-Malformed percent escapes and invalid UTF-8 are reported instead of being silently replaced. **Swap** moves the output to the input and reverses the operation; **Copy output** copies the current result; **Clear** resets both fields.
+Choose a character set for percent-encoded text: UTF-8, US-ASCII, ISO-8859-1, Windows-1252, or UTF-16LE. Unsupported characters or invalid encoded byte sequences are reported instead of silently replaced. Choose **LF (Unix)** or **CRLF (Windows)** as the destination line separator; the chosen separator is normalized before encoding and after decoding. During decoding, **Decode each line separately** treats each input line as its own value, and **Decode recursively** applies up to 16 decoding passes.
+
+**Swap** moves the output to the input and reverses the operation; **Copy output** copies the current result; **Clear** resets both fields.
 
 ### JWT Encoder & Decoder
 

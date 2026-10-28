@@ -8,6 +8,37 @@ namespace TasklyDev.Tests;
 public sealed class UrlCodecViewModelTests
 {
     [Fact]
+    public void StartsInFullUrlModeAndDecodesAWholeUrlEncodedAsAComponent()
+    {
+        var viewModel = CreateViewModel();
+
+        Assert.Equal(UrlEncodingMode.FullUrl, viewModel.SelectedMode);
+        viewModel.IsEncoding = false;
+        viewModel.InputText = "https%3A%2F%2Fexample.com%2Fsearch%3Fq%3DSample%2BTest";
+
+        viewModel.RunCommand.Execute(null);
+
+        Assert.Equal("https://example.com/search?q=Sample+Test", viewModel.OutputText);
+        Assert.True(viewModel.HasComponents);
+        Assert.False(viewModel.IsError);
+    }
+
+    [Fact]
+    public void RunCommandPassesCharacterEncodingAndDestinationLineEnding()
+    {
+        var viewModel = CreateViewModel();
+        viewModel.SelectedMode = UrlEncodingMode.UrlComponent;
+        viewModel.SelectedCharacterEncoding = UrlCharacterEncoding.Iso88591;
+        viewModel.DestinationLineEnding = UrlLineEnding.CrLf;
+        viewModel.InputText = "café\nnext";
+
+        viewModel.RunCommand.Execute(null);
+
+        Assert.Equal("caf%E9%0D%0Anext", viewModel.OutputText);
+        Assert.False(viewModel.IsError);
+    }
+
+    [Fact]
     public void RunCommandEncodesAndReportsModeDescription()
     {
         var viewModel = CreateViewModel();
@@ -69,6 +100,7 @@ public sealed class UrlCodecViewModelTests
     public void SwapMovesOutputAndTogglesOperation()
     {
         var viewModel = CreateViewModel();
+        viewModel.SelectedMode = UrlEncodingMode.UrlComponent;
         viewModel.InputText = "space here";
         viewModel.RunCommand.Execute(null);
         var encoded = viewModel.OutputText;
@@ -85,6 +117,7 @@ public sealed class UrlCodecViewModelTests
     {
         var clipboard = new RecordingClipboard { Succeeds = false };
         var viewModel = CreateViewModel(clipboard);
+        viewModel.SelectedMode = UrlEncodingMode.UrlComponent;
         viewModel.InputText = "copy me";
         viewModel.RunCommand.Execute(null);
 

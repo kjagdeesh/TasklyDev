@@ -93,6 +93,20 @@ public sealed class UrlCodecServiceTests
         Assert.Contains("q=hello%20world", result.Components.Query);
     }
 
+    [Fact]
+    public void FullUrlDecodeAcceptsEntireUrlPercentEncodedAsAComponent()
+    {
+        var result = _service.Transform(
+            "https%3A%2F%2Fexample.com%2Fsearch%3Fq%3DSample%2BTest%26token%3Dabc%253A123",
+            UrlEncodingMode.FullUrl,
+            encode: false);
+
+        Assert.Equal("https://example.com/search?q=Sample+Test&token=abc%3A123", result.Value);
+        Assert.NotNull(result.Components);
+        Assert.Equal("https", result.Components.Scheme);
+        Assert.Equal("example.com", result.Components.Authority);
+    }
+
     [Theory]
     [InlineData("https://example.com/%")]
     [InlineData("https://example.com/%2")]
@@ -116,5 +130,69 @@ public sealed class UrlCodecServiceTests
     {
         Assert.Throws<EncoderFallbackException>(() =>
             _service.Transform("\uD800", UrlEncodingMode.UrlComponent, encode: true));
+    }
+
+    [Theory]
+    [InlineData(UrlCharacterEncoding.Utf8, "caf%C3%A9")]
+    [InlineData(UrlCharacterEncoding.Iso88591, "caf%E9")]
+    [InlineData(UrlCharacterEncoding.Windows1252, "caf%E9")]
+    [InlineData(UrlCharacterEncoding.Utf16LittleEndian, "caf%E9%00")]
+    public void EncodesAndDecodesWithSelectedCharacterEncoding(UrlCharacterEncoding encoding, string expected)
+    {
+        var encoded = _service.Transform(
+            "café",
+            UrlEncodingMode.UrlComponent,
+            encode: true,
+            characterEncoding: encoding);
+        var decoded = _service.Transform(
+            encoded.Value,
+            UrlEncodingMode.UrlComponent,
+            encode: false,
+            characterEncoding: encoding);
+
+        Assert.Equal(expected, encoded.Value);
+        Assert.Equal("café", decoded.Value);
+    }
+
+    [Fact]
+    public void RejectsCharactersThatCannotBeRepresentedBySelectedEncoding()
+    {
+        Assert.Throws<EncoderFallbackException>(() =>
+            _service.Transform(
+                "café",
+                UrlEncodingMode.UrlComponent,
+                encode: true,
+                characterEncoding: UrlCharacterEncoding.Ascii));
+    }
+
+    [Fact]
+    public void NormalizesEncodedLineEndingsToSelectedDestination()
+    {
+        var encoded = _service.Transform(
+            "first\r\nsecond\rthird\n",
+            UrlEncodingMode.UrlComponent,
+            encode: true,
+            destinationLineEnding: UrlLineEnding.CrLf);
+        var decoded = _service.Transform(
+            "first%0Asecond%0Athird",
+            UrlEncodingMode.UrlComponent,
+            encode: false,
+            destinationLineEnding: UrlLineEnding.CrLf);
+
+        Assert.Equal("first%0D%0Asecond%0D%0Athird%0D%0A", encoded.Value);
+        Assert.Equal("first\r\nsecond\r\nthird", decoded.Value);
+    }
+
+    [Fact]
+    public void DecodesIndependentLinesAndRepeatedEncodingLayers()
+    {
+        var result = _service.Transform(
+            "one%2520two\nthree%2520four",
+            UrlEncodingMode.UrlComponent,
+            encode: false,
+            decodeEachLine: true,
+            recursiveDecode: true);
+
+        Assert.Equal("one two\nthree four", result.Value);
     }
 }

@@ -8,6 +8,33 @@
             <Setter Property="MinHeight" Value="36" />
             <Setter Property="Padding" Value="13,8" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="UrlPrimaryButton" TargetType="Button" BasedOn="{StaticResource UrlActionButton}">
             <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
@@ -15,7 +42,7 @@
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
         <Style x:Key="UrlEditor" TargetType="TextBox">
-            <Setter Property="MinHeight" Value="190" />
+            <Setter Property="MinHeight" Value="220" />
             <Setter Property="Padding" Value="12" />
             <Setter Property="FontFamily" Value="Consolas" />
             <Setter Property="FontSize" Value="13" />
@@ -27,6 +54,33 @@
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="EditorBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="EditorBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="EditorBorder" Property="Opacity" Value="0.6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="UrlModeRadioButton" TargetType="RadioButton">
             <Setter Property="Padding" Value="14,9" />
@@ -62,6 +116,61 @@
     </UserControl.Resources>
 
     <StackPanel>
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="20"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Width="52"
+                        Height="52"
+                        CornerRadius="15"
+                        Background="{DynamicResource AmberTintBrush}"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="URL"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontFamily="Consolas"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AmberDeepBrush}" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,12,0">
+                    <TextBlock Text="URL Encoder / Decoder"
+                               FontSize="20"
+                               FontWeight="Bold" />
+                    <TextBlock Text="Encode or decode a full URL, a component, or a query value."
+                               Margin="0,4,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Column="2"
+                        Background="{DynamicResource SuccessSurfaceBrush}"
+                        CornerRadius="10"
+                        Padding="11,7"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="7"
+                                 Height="7"
+                                 Fill="{DynamicResource SuccessBrush}"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,7,0" />
+                        <TextBlock Text="LOCAL ONLY"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource SuccessTextBrush}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
         <Border Background="{DynamicResource CardSurfaceBrush}"
                 BorderBrush="{DynamicResource CardOutlineBrush}"
                 BorderThickness="1"
@@ -112,6 +221,80 @@
                    FontSize="12"
                    Foreground="{DynamicResource MutedTextBrush}"
                    TextWrapping="Wrap" />
+
+        <Expander Header="Advanced options"
+                  IsExpanded="True"
+                  Margin="0,0,0,16"
+                  AutomationProperties.Name="URL codec advanced options">
+            <Border Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="16"
+                    Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Character encoding"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,6" />
+                        <ComboBox SelectedValue="{Binding SelectedCharacterEncoding}"
+                                  SelectedValuePath="Tag"
+                                  AutomationProperties.Name="Character encoding">
+                            <ComboBoxItem Content="UTF-8" Tag="{x:Static core:UrlCharacterEncoding.Utf8}" />
+                            <ComboBoxItem Content="US-ASCII" Tag="{x:Static core:UrlCharacterEncoding.Ascii}" />
+                            <ComboBoxItem Content="ISO-8859-1 (Latin-1)" Tag="{x:Static core:UrlCharacterEncoding.Iso88591}" />
+                            <ComboBoxItem Content="Windows-1252" Tag="{x:Static core:UrlCharacterEncoding.Windows1252}" />
+                            <ComboBoxItem Content="UTF-16LE" Tag="{x:Static core:UrlCharacterEncoding.Utf16LittleEndian}" />
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Destination line separator"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,6" />
+                        <ComboBox SelectedValue="{Binding DestinationLineEnding}"
+                                  SelectedValuePath="Tag"
+                                  AutomationProperties.Name="Destination line separator">
+                            <ComboBoxItem Content="LF (Unix)" Tag="{x:Static core:UrlLineEnding.Lf}" />
+                            <ComboBoxItem Content="CRLF (Windows)" Tag="{x:Static core:UrlLineEnding.CrLf}" />
+                        </ComboBox>
+                    </StackPanel>
+                    <CheckBox Grid.Row="1"
+                              Content="Decode each line separately"
+                              IsChecked="{Binding DecodeEachLine}"
+                              IsEnabled="{Binding IsDecoding}"
+                              Margin="0,14,12,0"
+                              Foreground="{DynamicResource SecondaryTextBrush}"
+                              AutomationProperties.Name="Decode each line separately" />
+                    <CheckBox Grid.Row="1"
+                              Grid.Column="2"
+                              Content="Decode recursively (up to 16 times)"
+                              IsChecked="{Binding RecursiveDecode}"
+                              IsEnabled="{Binding IsDecoding}"
+                              Margin="0,14,0,0"
+                              Foreground="{DynamicResource SecondaryTextBrush}"
+                              AutomationProperties.Name="Decode recursively" />
+                    <TextBlock Grid.Row="2"
+                               Grid.ColumnSpan="3"
+                               Text="The selected character set applies to percent-encoded bytes. The destination line separator is normalized before encoding and after decoding."
+                               Margin="0,10,0,0"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+        </Expander>
 
         <Border CornerRadius="10"
                 Padding="14,10"

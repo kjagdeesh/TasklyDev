@@ -39,7 +39,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         new("Color Converter", "Convert HEX, RGB, and HSL values or choose a color from the Windows color dialog.", "color", "RGB", "Developer Tools"),
         new("Regex Tester", "Test .NET regular expressions with captures and a finite timeout.", "regex", ".*", "Developer Tools"),
         new("UUID / GUID Validator & Parser", "Validate, normalize, and inspect supported UUID/GUID formats.", "uuid-parser", "ID", "Developer Tools"),
-        new("URL Encoder / Decoder", "Encode or decode a full URL, URL component, or query value using explicit rules.", "url-codec", "URL", "Developer Tools"),
+        new("URL Encoder / Decoder", "Encode or decode full URLs, including URLs percent-encoded as a whole, components, and query values.", "url-codec", "URL", "Developer Tools"),
         new("JWT Encoder & Decoder", "Create HMAC-signed JWTs or decode token headers and claims locally.", "jwt-decoder", "JWT", "Developer Tools"),
         new("Process Lookup", "Search a read-only snapshot of running Windows processes.", "process", "PID", "System Diagnostics"),
         new("Environment Variables", "Browse process, user, and machine variables without editing them.", "environment", "$", "System Diagnostics"),
