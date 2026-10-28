@@ -50,6 +50,7 @@ public partial class MainWindow : Window
         logo.UriSource = new Uri(logoPath, UriKind.Absolute);
         logo.EndInit();
         BrandLogo.Source = logo;
+        Icon = logo;
     }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)

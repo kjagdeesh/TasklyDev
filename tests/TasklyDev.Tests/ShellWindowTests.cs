@@ -34,8 +34,12 @@ public sealed class ShellWindowTests
                 var environmentVariableView = new EnvironmentVariableView();
                 var settingsView = new SettingsView();
 
-                Assert.Equal("TasklyDev", window.Title);
-                Assert.Equal(1440, window.Width);
+                Assert.Equal("taskly.dev", window.Title);
+                Assert.Equal(WindowStyle.SingleBorderWindow, window.WindowStyle);
+                Assert.Equal(ResizeMode.CanResize, window.ResizeMode);
+                Assert.Equal(WindowState.Normal, window.WindowState);
+                Assert.True(window.ShowInTaskbar);
+                Assert.Equal(1320, window.Width);
                 Assert.NotNull(base64View);
                 Assert.NotNull(numberBaseView);
                 Assert.NotNull(unixTimestampView);
