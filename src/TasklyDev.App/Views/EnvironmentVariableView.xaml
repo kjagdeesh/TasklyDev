@@ -269,6 +269,36 @@
             </StackPanel>
         </Border>
 
+        <Border Background="{DynamicResource AmberTintBrush}"
+                CornerRadius="10"
+                Padding="12,9"
+                Margin="0,0,0,15">
+            <TextBlock Text="Environment variables can contain credentials, tokens, or private paths. Review values carefully before sharing. TasklyDev does not edit or persist them."
+               Foreground="{DynamicResource AmberDeepBrush}"
+               FontSize="12"
+               TextWrapping="Wrap" />
+        </Border>
+
+        <DockPanel Margin="2,0,2,8"
+                   Visibility="{Binding HasLoaded, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="Environment variable results"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource PrimaryTextBrush}" />
+            <TextBlock DockPanel.Dock="Right"
+                       FontSize="11"
+                       Margin="20,2,0,0"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       VerticalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="Showing {0} of {1} variables">
+                        <Binding Path="Variables.Count" />
+                        <Binding Path="SnapshotCount" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DockPanel>
+
         <Border Background="{DynamicResource CardSurfaceBrush}"
                 BorderBrush="{DynamicResource OutlineBrush}"
                 BorderThickness="1"
@@ -345,14 +375,5 @@
             </StackPanel>
         </Border>
 
-        <Border Background="{DynamicResource AmberTintBrush}"
-                CornerRadius="10"
-                Padding="12,9"
-                Margin="0,14,0,0">
-            <TextBlock Text="Environment variables can contain credentials, tokens, or private paths. Review values carefully before sharing. TasklyDev does not edit or persist them."
-                       Foreground="{DynamicResource AmberDeepBrush}"
-                       FontSize="12"
-                       TextWrapping="Wrap" />
-        </Border>
     </StackPanel>
 </UserControl>
