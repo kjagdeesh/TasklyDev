@@ -8,6 +8,7 @@ using TasklyDev.Windows.Environment;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Loads, filters, sorts, and copies environment variables from a selected scope.</summary>
 public sealed class EnvironmentVariableViewModel : INotifyPropertyChanged
 {
     private readonly IEnvironmentVariableService _service;
@@ -21,6 +22,7 @@ public sealed class EnvironmentVariableViewModel : INotifyPropertyChanged
     private bool _hasLoaded;
     private bool _isError;
 
+    /// <summary>Creates the environment-variable browser with data and clipboard services.</summary>
     public EnvironmentVariableViewModel(IEnvironmentVariableService service, IClipboardService clipboard)
     {
         _service = service;
@@ -129,6 +131,7 @@ public sealed class EnvironmentVariableViewModel : INotifyPropertyChanged
     public bool HasNoResults => HasLoaded && !IsError && !HasResults;
     public int SnapshotCount => _snapshot.Count;
 
+    /// <summary>Asynchronously reloads variables for the currently selected scope.</summary>
     public async Task RefreshAsync()
     {
         if (IsBusy)

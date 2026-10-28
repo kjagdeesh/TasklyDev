@@ -3,8 +3,10 @@ using System.Security;
 
 namespace TasklyDev.Windows.Environment;
 
+/// <summary>Reads and sorts process, user, and machine environment variables.</summary>
 public sealed class EnvironmentVariableService : IEnvironmentVariableService
 {
+    /// <inheritdoc />
     public IReadOnlyList<EnvironmentVariableEntry> GetVariables(EnvironmentVariableScope scope)
     {
         var target = scope switch

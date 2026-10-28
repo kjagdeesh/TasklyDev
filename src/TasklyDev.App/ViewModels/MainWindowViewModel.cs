@@ -18,6 +18,7 @@ using TasklyDev.Windows.Processes;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates shell navigation, tool search, and the application's screen view models.</summary>
 public sealed class MainWindowViewModel : INotifyPropertyChanged
 {
     private static readonly ToolDefinition[] Tools =
@@ -43,6 +44,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _currentPageSubtitle = "A focused set of local tools for everyday development tasks.";
     private ToolDefinition? _currentTool;
 
+    /// <summary>Creates the shell view models and navigates to the initial Overview screen.</summary>
     public MainWindowViewModel(IClipboardService? clipboard = null, IThemeService? themeService = null)
     {
         var clipboardService = clipboard ?? new WpfClipboardService();

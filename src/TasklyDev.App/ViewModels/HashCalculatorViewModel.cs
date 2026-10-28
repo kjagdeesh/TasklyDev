@@ -10,6 +10,7 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates text/file hash input, asynchronous calculation, cancellation, and results.</summary>
 public sealed class HashCalculatorViewModel : INotifyPropertyChanged
 {
     private static readonly HashAlgorithmKind[] AllAlgorithms =
@@ -31,6 +32,7 @@ public sealed class HashCalculatorViewModel : INotifyPropertyChanged
     private bool _isError;
     private CancellationTokenSource? _cancellationTokenSource;
 
+    /// <summary>Creates the hash calculator with hashing, clipboard, and file-picker services.</summary>
     public HashCalculatorViewModel(
         IHashService service,
         IClipboardService clipboard,
@@ -191,6 +193,7 @@ public sealed class HashCalculatorViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>Calculates the selected digest algorithms for the active text or file input.</summary>
     public async Task CalculateAsync()
     {
         Results.Clear();

@@ -6,13 +6,16 @@ using TasklyDev.ViewModels;
 
 namespace TasklyDev.Views;
 
+/// <summary>Renders, refreshes, and sorts the process snapshot screen.</summary>
 public partial class ProcessLookupView : UserControl
 {
+    /// <summary>Creates the process lookup controls and refreshes the snapshot when shown.</summary>
     public ProcessLookupView()
     {
         InitializeComponent();
     }
 
+    /// <summary>Reloads process data when the screen becomes visible.</summary>
     private void ProcessLookupView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (e.NewValue is true && DataContext is ProcessLookupViewModel viewModel)
@@ -21,6 +24,7 @@ public partial class ProcessLookupView : UserControl
         }
     }
 
+    /// <summary>Sorts the process rows by the clicked table column.</summary>
     private void ProcessGridHeader_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button header ||
@@ -47,6 +51,7 @@ public partial class ProcessLookupView : UserControl
         header.Content = $"{SortHeaderText(sortProperty)}  {(isDescending ? '↓' : '↑')}";
     }
 
+    /// <summary>Maps a process property name to its table-header label.</summary>
     private static string SortHeaderText(string? propertyName) => propertyName switch
     {
         "Name" => "Process name",

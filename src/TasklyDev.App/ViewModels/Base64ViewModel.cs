@@ -7,6 +7,7 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates Base64 input, encoding options, output, and clipboard actions.</summary>
 public sealed class Base64ViewModel : INotifyPropertyChanged
 {
     private readonly IBase64Service _service;
@@ -22,6 +23,7 @@ public sealed class Base64ViewModel : INotifyPropertyChanged
     private bool _includePadding = true;
     private Base64Variant _selectedVariant;
 
+    /// <summary>Creates the Base64 tool view model with its encoding and clipboard services.</summary>
     public Base64ViewModel(IBase64Service service, IClipboardService clipboard)
     {
         _service = service;

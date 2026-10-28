@@ -6,6 +6,7 @@ using TasklyDev.ViewModels;
 
 namespace TasklyDev.Services;
 
+/// <summary>Applies WPF theme resources and optionally follows the Windows app theme.</summary>
 public sealed class WpfThemeService : IThemeService, IDisposable
 {
     private const string PersonalizationKey = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
@@ -14,6 +15,8 @@ public sealed class WpfThemeService : IThemeService, IDisposable
     private ThemePreference _preference = ThemePreference.System;
     private bool _disposed;
 
+    /// <summary>Creates a theme service for the supplied application or the current WPF application.</summary>
+    /// <param name="application">Application whose merged resources will be updated.</param>
     public WpfThemeService(Application? application = null)
     {
         _application = application ?? Application.Current;
@@ -28,6 +31,7 @@ public sealed class WpfThemeService : IThemeService, IDisposable
     public event EventHandler? SystemThemeChanged;
     public event EventHandler? SystemThemeReadFailed;
 
+    /// <inheritdoc />
     public void SetPreference(ThemePreference preference)
     {
         if (!Enum.IsDefined(preference))
@@ -39,6 +43,7 @@ public sealed class WpfThemeService : IThemeService, IDisposable
         _preference = preference;
     }
 
+    /// <summary>Applies the service's initial theme preference to the WPF resources.</summary>
     public void ApplyInitialPreference() => ApplyTheme(ResolveTheme(_preference));
 
     private static ThemePreference ResolveTheme(ThemePreference preference)
@@ -119,6 +124,7 @@ public sealed class WpfThemeService : IThemeService, IDisposable
         }));
     }
 
+    /// <summary>Unsubscribes from Windows theme notifications.</summary>
     public void Dispose()
     {
         if (_disposed)

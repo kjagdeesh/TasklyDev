@@ -7,6 +7,7 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates timestamp/date conversion, result presentation, and copy actions.</summary>
 public sealed class UnixTimestampViewModel : INotifyPropertyChanged
 {
     private readonly ITimestampService _service;
@@ -22,6 +23,7 @@ public sealed class UnixTimestampViewModel : INotifyPropertyChanged
     private bool _isTimestampMode = true;
     private bool _isError;
 
+    /// <summary>Creates the timestamp converter with conversion and clipboard services.</summary>
     public UnixTimestampViewModel(ITimestampService service, IClipboardService clipboard)
     {
         _service = service;

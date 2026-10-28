@@ -6,10 +6,12 @@ using TasklyDev.ViewModels;
 
 namespace TasklyDev;
 
+/// <summary>Hosts the application shell, tool navigation, and shared theme resources.</summary>
 public partial class MainWindow : Window
 {
     private readonly WpfThemeService _themeService;
 
+    /// <summary>Creates the main window, view models, and initial theme state.</summary>
     public MainWindow()
     {
         InitializeComponent();

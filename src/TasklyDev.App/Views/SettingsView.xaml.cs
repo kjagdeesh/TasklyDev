@@ -4,13 +4,16 @@ using System.Windows.Media.Imaging;
 
 namespace TasklyDev.Views;
 
+/// <summary>Renders appearance preferences and application information.</summary>
 public partial class SettingsView : UserControl
 {
+    /// <summary>Creates and initializes the settings controls.</summary>
     public SettingsView()
     {
         InitializeComponent();
     }
 
+    /// <summary>Loads the optional application logo from the installed Assets folder.</summary>
     private void SettingsBrandLogo_Loaded(object sender, RoutedEventArgs e)
     {
         var logoPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "TasklyDevLogo.png");

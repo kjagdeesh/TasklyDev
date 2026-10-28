@@ -3,8 +3,10 @@ using System.Diagnostics;
 
 namespace TasklyDev.Windows.Processes;
 
+/// <summary>Collects process metadata without requesting elevated access.</summary>
 public sealed class ProcessSnapshotService : IProcessSnapshotService
 {
+    /// <inheritdoc />
     public IReadOnlyList<ProcessSnapshotEntry> GetSnapshot()
     {
         var snapshot = new List<ProcessSnapshotEntry>();

@@ -6,6 +6,7 @@ using TasklyDev.Core.Colors;
 
 namespace TasklyDev.Services;
 
+/// <summary>Displays the native Windows color-selection dialog owned by the main window.</summary>
 public sealed class WpfColorPickerService : IColorPickerService
 {
     private const uint CcRgbInit = 0x00000001;
@@ -13,6 +14,7 @@ public sealed class WpfColorPickerService : IColorPickerService
     private const uint CcAnyColor = 0x00000100;
     private const int CustomColorCount = 16;
 
+    /// <inheritdoc />
     public Task<ColorValue?> PickColorAsync(ColorValue initialColor)
     {
         var customColors = Marshal.AllocHGlobal(sizeof(uint) * CustomColorCount);
@@ -63,6 +65,7 @@ public sealed class WpfColorPickerService : IColorPickerService
             : IntPtr.Zero;
     }
 
+    // Win32 COLORREF stores red in the least-significant byte, followed by green and blue.
     private static uint ToColorRef(ColorValue color) =>
         (uint)(color.Red | (color.Green << 8) | (color.Blue << 16));
 

@@ -7,6 +7,7 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates color parsing, converted output, preview state, and color selection.</summary>
 public sealed class ColorConverterViewModel : INotifyPropertyChanged
 {
     private readonly IColorService _service;
@@ -23,6 +24,7 @@ public sealed class ColorConverterViewModel : INotifyPropertyChanged
     private bool _hasColor;
     private bool _isPickingColor;
 
+    /// <summary>Creates the converter with color, clipboard, and optional color-picker services.</summary>
     public ColorConverterViewModel(
         IColorService service,
         IClipboardService clipboard,
@@ -138,6 +140,7 @@ public sealed class ColorConverterViewModel : INotifyPropertyChanged
 
     public bool IsNotPickingColor => !IsPickingColor;
 
+    /// <summary>Opens the color dialog and updates the input when a color is selected.</summary>
     public async Task PickColorAsync()
     {
         if (_colorPicker is null)

@@ -4,6 +4,7 @@ using TasklyDev.Core.Colors;
 
 namespace TasklyDev.Windows.ScreenCapture;
 
+/// <summary>Uses Windows APIs to read desktop bounds, cursor position, and pixel colors.</summary>
 public sealed class DesktopPixelService : IDesktopPixelService
 {
     private const int SmXVirtualScreen = 76;
@@ -12,6 +13,7 @@ public sealed class DesktopPixelService : IDesktopPixelService
     private const int SmCyVirtualScreen = 79;
     private const uint InvalidColorRef = uint.MaxValue;
 
+    /// <inheritdoc />
     public VirtualDesktopBounds GetVirtualDesktopBounds()
     {
         var bounds = new VirtualDesktopBounds(
@@ -27,6 +29,7 @@ public sealed class DesktopPixelService : IDesktopPixelService
         return bounds;
     }
 
+    /// <inheritdoc />
     public (int X, int Y) GetCursorPosition()
     {
         if (!GetCursorPos(out var point))
@@ -37,6 +40,7 @@ public sealed class DesktopPixelService : IDesktopPixelService
         return (point.X, point.Y);
     }
 
+    /// <inheritdoc />
     public ColorValue SamplePixel(int x, int y)
     {
         var bounds = GetVirtualDesktopBounds();

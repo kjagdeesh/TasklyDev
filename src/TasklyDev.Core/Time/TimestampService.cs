@@ -3,8 +3,10 @@ using System.Text.RegularExpressions;
 
 namespace TasklyDev.Core.Time;
 
+/// <summary>Implements Unix timestamp conversion and explicit-offset ISO 8601 parsing.</summary>
 public sealed partial class TimestampService : ITimestampService
 {
+    /// <inheritdoc />
     public DateTimeOffset FromUnixTimestamp(long timestamp, UnixTimestampUnit unit) =>
         unit switch
         {
@@ -13,6 +15,7 @@ public sealed partial class TimestampService : ITimestampService
             _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Unsupported Unix timestamp unit.")
         };
 
+    /// <inheritdoc />
     public long ToUnixTimestamp(DateTimeOffset dateTime, UnixTimestampUnit unit) =>
         unit switch
         {
@@ -21,6 +24,7 @@ public sealed partial class TimestampService : ITimestampService
             _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Unsupported Unix timestamp unit.")
         };
 
+    /// <inheritdoc />
     public DateTimeOffset ParseIso8601WithOffset(string value)
     {
         ArgumentNullException.ThrowIfNull(value);

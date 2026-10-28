@@ -3,8 +3,10 @@ using System.Text.RegularExpressions;
 
 namespace TasklyDev.Core.Colors;
 
+/// <summary>Parses supported CSS-like color strings and converts between color spaces.</summary>
 public sealed partial class ColorService : IColorService
 {
+    /// <inheritdoc />
     public ColorValue ParseHex(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -32,6 +34,7 @@ public sealed partial class ColorService : IColorService
         return new ColorValue(red, green, blue, alpha);
     }
 
+    /// <inheritdoc />
     public ColorValue ParseRgb(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -55,6 +58,7 @@ public sealed partial class ColorService : IColorService
         return new ColorValue(red, green, blue, alpha);
     }
 
+    /// <inheritdoc />
     public ColorValue ParseHsl(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -101,16 +105,19 @@ public sealed partial class ColorService : IColorService
         return new ColorValue(ToByte((r1 + m) * 255), ToByte((g1 + m) * 255), ToByte((b1 + m) * 255), alpha);
     }
 
+    /// <inheritdoc />
     public string ToHex(ColorValue color) =>
         color.Alpha == byte.MaxValue
             ? $"#{color.Red:X2}{color.Green:X2}{color.Blue:X2}"
             : $"#{color.Red:X2}{color.Green:X2}{color.Blue:X2}{color.Alpha:X2}";
 
+    /// <inheritdoc />
     public string ToRgb(ColorValue color) =>
         color.Alpha == byte.MaxValue
             ? string.Create(CultureInfo.InvariantCulture, $"rgb({color.Red}, {color.Green}, {color.Blue})")
             : string.Create(CultureInfo.InvariantCulture, $"rgba({color.Red}, {color.Green}, {color.Blue}, {color.Alpha})");
 
+    /// <inheritdoc />
     public string ToHsl(ColorValue color)
     {
         var hsl = ToHslValue(color);
@@ -123,6 +130,7 @@ public sealed partial class ColorService : IColorService
             : $"hsla({hue}, {saturation}%, {lightness}%, {(color.Alpha / 255d).ToString("0.###", CultureInfo.InvariantCulture)})";
     }
 
+    /// <inheritdoc />
     public HslValue ToHslValue(ColorValue color)
     {
         var red = color.Red / 255d;

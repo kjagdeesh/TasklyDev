@@ -3,12 +3,16 @@ using System.Text.RegularExpressions;
 
 namespace TasklyDev.Core.RegularExpressions;
 
+/// <summary>Evaluates .NET regular expressions with a finite execution timeout.</summary>
 public sealed class RegexTesterService : IRegexTesterService
 {
+    /// <summary>The maximum number of matches returned in a single result.</summary>
     public const int MaximumDisplayedMatches = 100;
     private static readonly TimeSpan DefaultMatchTimeout = TimeSpan.FromMilliseconds(250);
     private readonly TimeSpan _matchTimeout;
 
+    /// <summary>Creates a tester with the default timeout or a supplied finite timeout.</summary>
+    /// <param name="matchTimeout">Optional maximum evaluation time; defaults to 250 milliseconds.</param>
     public RegexTesterService(TimeSpan? matchTimeout = null)
     {
         _matchTimeout = matchTimeout ?? DefaultMatchTimeout;
@@ -18,6 +22,7 @@ public sealed class RegexTesterService : IRegexTesterService
         }
     }
 
+    /// <inheritdoc />
     public RegexTestResult Test(string pattern, string input, bool ignoreCase, bool multiline, bool singleline)
     {
         ArgumentNullException.ThrowIfNull(pattern);

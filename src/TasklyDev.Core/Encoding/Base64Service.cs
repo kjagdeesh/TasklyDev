@@ -2,11 +2,13 @@ using System.Text;
 
 namespace TasklyDev.Core.Encoding;
 
+/// <summary>Provides strict UTF-8 Base64 encoding and decoding.</summary>
 public sealed class Base64Service : IBase64Service
 {
     private const int MimeLineLength = 76;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
+    /// <inheritdoc />
     public string EncodeUtf8(string text, Base64Variant variant, bool includePadding)
     {
         ArgumentNullException.ThrowIfNull(text);
@@ -25,6 +27,7 @@ public sealed class Base64Service : IBase64Service
         return variant == Base64Variant.Mime ? WrapMimeLines(encoded) : encoded;
     }
 
+    /// <inheritdoc />
     public string DecodeUtf8(string encoded, Base64Variant variant)
     {
         ArgumentNullException.ThrowIfNull(encoded);
@@ -37,6 +40,7 @@ public sealed class Base64Service : IBase64Service
         return StrictUtf8.GetString(bytes);
     }
 
+    // URL-safe Base64 may omit padding, so restore it only when its length is valid.
     private static string NormalizeUrlSafe(string encoded)
     {
         var normalized = encoded.Replace('-', '+').Replace('_', '/');

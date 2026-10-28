@@ -3,10 +3,12 @@ using System.Text;
 
 namespace TasklyDev.Core.Hashing;
 
+/// <summary>Computes MD5, SHA-256, or SHA-512 digests for text and byte streams.</summary>
 public sealed class HashService : IHashService
 {
     private const int BufferSize = 81920;
 
+    /// <inheritdoc />
     public IReadOnlyList<HashDigest> ComputeText(string text, IReadOnlyCollection<HashAlgorithmKind> algorithms)
     {
         ArgumentNullException.ThrowIfNull(text);
@@ -18,6 +20,7 @@ public sealed class HashService : IHashService
             .ToArray();
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<HashDigest>> ComputeFileAsync(
         string filePath,
         IReadOnlyCollection<HashAlgorithmKind> algorithms,
@@ -36,6 +39,7 @@ public sealed class HashService : IHashService
         return await ComputeStreamAsync(stream, algorithms, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<HashDigest>> ComputeStreamAsync(
         Stream input,
         IReadOnlyCollection<HashAlgorithmKind> algorithms,

@@ -8,6 +8,7 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates GUID generation options, generated rows, and clipboard actions.</summary>
 public sealed class GuidGeneratorViewModel : INotifyPropertyChanged
 {
     private readonly IGuidService _service;
@@ -18,6 +19,7 @@ public sealed class GuidGeneratorViewModel : INotifyPropertyChanged
     private string _statusMessage = "Choose a format and quantity, then generate identifiers.";
     private bool _isError;
 
+    /// <summary>Creates the GUID generator with generation and clipboard services.</summary>
     public GuidGeneratorViewModel(IGuidService service, IClipboardService clipboard)
     {
         _service = service;

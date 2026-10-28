@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Represents a sidebar destination and its active navigation state.</summary>
 public sealed class NavigationItem(string title, string route, string glyph) : INotifyPropertyChanged
 {
     private bool _isActive;

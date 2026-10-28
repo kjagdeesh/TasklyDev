@@ -6,13 +6,16 @@ using TasklyDev.ViewModels;
 
 namespace TasklyDev.Views;
 
+/// <summary>Renders, refreshes, and sorts environment-variable results.</summary>
 public partial class EnvironmentVariableView : UserControl
 {
+    /// <summary>Creates the environment-variable browser controls.</summary>
     public EnvironmentVariableView()
     {
         InitializeComponent();
     }
 
+    /// <summary>Reloads variables when the screen becomes visible.</summary>
     private void EnvironmentVariableView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (e.NewValue is true && DataContext is EnvironmentVariableViewModel viewModel)
@@ -21,6 +24,7 @@ public partial class EnvironmentVariableView : UserControl
         }
     }
 
+    /// <summary>Sorts the environment-variable rows by the clicked table column.</summary>
     private void EnvironmentGridHeader_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button header ||
@@ -47,6 +51,7 @@ public partial class EnvironmentVariableView : UserControl
         header.Content = $"{SortHeaderText(sortProperty)}  {(isDescending ? '↓' : '↑')}";
     }
 
+    /// <summary>Maps an environment-variable property name to its table-header label.</summary>
     private static string SortHeaderText(string? propertyName) => propertyName switch
     {
         "Name" => "Name",

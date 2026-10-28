@@ -2,10 +2,12 @@ using System.Numerics;
 
 namespace TasklyDev.Core.Conversion;
 
+/// <summary>Converts integers of arbitrary size between bases 2 through 36.</summary>
 public sealed class NumberBaseService : INumberBaseService
 {
     private const string Digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    /// <inheritdoc />
     public string Convert(string input, int sourceBase, int targetBase)
     {
         ArgumentNullException.ThrowIfNull(input);

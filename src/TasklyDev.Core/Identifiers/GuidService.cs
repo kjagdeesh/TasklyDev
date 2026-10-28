@@ -1,9 +1,12 @@
 namespace TasklyDev.Core.Identifiers;
 
+/// <summary>Generates RFC-compatible GUID values in supported .NET string formats.</summary>
 public sealed class GuidService : IGuidService
 {
+    /// <summary>The maximum number of GUIDs that can be generated in one batch.</summary>
     public const int MaximumBatchSize = 500;
 
+    /// <inheritdoc />
     public IReadOnlyList<string> Generate(int quantity, GuidOutputFormat format, bool uppercase = false)
     {
         if (quantity is < 1 or > MaximumBatchSize)

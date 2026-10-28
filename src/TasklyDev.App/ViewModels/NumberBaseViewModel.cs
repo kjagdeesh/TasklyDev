@@ -7,6 +7,7 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates number-base selection, integer conversion, and output copying.</summary>
 public sealed class NumberBaseViewModel : INotifyPropertyChanged
 {
     private readonly INumberBaseService _service;
@@ -18,6 +19,7 @@ public sealed class NumberBaseViewModel : INotifyPropertyChanged
     private string _statusMessage = "Enter an integer and select its source and target bases.";
     private bool _isError;
 
+    /// <summary>Creates the number-base converter with conversion and clipboard services.</summary>
     public NumberBaseViewModel(INumberBaseService service, IClipboardService clipboard)
     {
         _service = service;

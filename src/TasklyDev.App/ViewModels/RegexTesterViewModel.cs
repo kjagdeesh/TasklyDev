@@ -7,6 +7,7 @@ using TasklyDev.Core.RegularExpressions;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Coordinates regular-expression options, test input, match results, and status.</summary>
 public sealed class RegexTesterViewModel : INotifyPropertyChanged
 {
     private readonly IRegexTesterService _service;
@@ -21,6 +22,7 @@ public sealed class RegexTesterViewModel : INotifyPropertyChanged
     private bool _hasTested;
     private bool _isTruncated;
 
+    /// <summary>Creates the regex tester view model with its matching service.</summary>
     public RegexTesterViewModel(IRegexTesterService service)
     {
         _service = service;
@@ -112,6 +114,7 @@ public sealed class RegexTesterViewModel : INotifyPropertyChanged
         private set => SetProperty(ref _isTruncated, value);
     }
 
+    /// <summary>Tests the current pattern and input using the selected regex options.</summary>
     public async Task TestAsync()
     {
         if (string.IsNullOrWhiteSpace(Pattern))

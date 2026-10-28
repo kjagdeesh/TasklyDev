@@ -6,6 +6,7 @@ using TasklyDev.Windows.Processes;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Loads, filters, and sorts a read-only snapshot of running processes.</summary>
 public sealed class ProcessLookupViewModel : INotifyPropertyChanged
 {
     private readonly IProcessSnapshotService _service;
@@ -16,6 +17,7 @@ public sealed class ProcessLookupViewModel : INotifyPropertyChanged
     private bool _hasSnapshot;
     private bool _isError;
 
+    /// <summary>Creates the process lookup view model with its snapshot service.</summary>
     public ProcessLookupViewModel(IProcessSnapshotService service)
     {
         _service = service;
@@ -89,6 +91,7 @@ public sealed class ProcessLookupViewModel : INotifyPropertyChanged
     public bool HasNoResults => HasSnapshot && !IsError && !HasResults;
     public int SnapshotCount => _snapshot.Count;
 
+    /// <summary>Asynchronously reloads the process snapshot and reapplies the active filter.</summary>
     public async Task RefreshAsync()
     {
         if (IsBusy)

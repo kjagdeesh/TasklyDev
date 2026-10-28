@@ -6,6 +6,7 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+/// <summary>Exposes theme preferences and application information to the settings screen.</summary>
 public sealed class SettingsViewModel : INotifyPropertyChanged
 {
     private readonly IThemeService _themeService;
@@ -13,6 +14,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string _statusMessage = string.Empty;
     private bool _isError;
 
+    /// <summary>Creates the settings view model and subscribes to system-theme notifications.</summary>
     public SettingsViewModel(IThemeService themeService)
     {
         _themeService = themeService;
@@ -104,6 +106,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     private void OnSystemThemeReadFailed(object? sender, EventArgs e) => SetSystemThemeUnavailable();
 
+    /// <summary>Reports that the Windows theme preference could not be read.</summary>
     public void SetSystemThemeUnavailable()
     {
         IsError = true;
