@@ -40,7 +40,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         new("Regex Tester", "Test .NET regular expressions with captures and a finite timeout.", "regex", ".*", "Developer Tools"),
         new("UUID / GUID Validator & Parser", "Validate, normalize, and inspect supported UUID/GUID formats.", "uuid-parser", "ID", "Developer Tools"),
         new("URL Encoder / Decoder", "Encode or decode a full URL, URL component, or query value using explicit rules.", "url-codec", "URL", "Developer Tools"),
-        new("JWT Decoder & Inspector", "Decode JWT header and claims locally without verifying the signature.", "jwt-decoder", "JWT", "Developer Tools"),
+        new("JWT Encoder & Decoder", "Create HMAC-signed JWTs or decode token headers and claims locally.", "jwt-decoder", "JWT", "Developer Tools"),
         new("Process Lookup", "Search a read-only snapshot of running Windows processes.", "process", "PID", "System Diagnostics"),
         new("Environment Variables", "Browse process, user, and machine variables without editing them.", "environment", "$", "System Diagnostics"),
         new(".NET SDK & Workload Inspector", "Inspect SDKs, runtimes, workloads, and dotnet host information installed on this machine.", "dotnet-inspector", ".NET", "System Diagnostics"),

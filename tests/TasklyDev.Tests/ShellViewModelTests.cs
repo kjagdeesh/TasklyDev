@@ -108,7 +108,7 @@ public sealed class ShellViewModelTests
 
         Assert.True(viewModel.IsJwtDecoder);
         Assert.False(viewModel.IsPlaceholder);
-        Assert.Equal("JWT Decoder & Inspector", viewModel.CurrentPageTitle);
+        Assert.Equal("JWT Encoder & Decoder", viewModel.CurrentPageTitle);
         Assert.Equal("jwt-decoder", viewModel.DeveloperNavigation.Last().Route);
     }
 

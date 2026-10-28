@@ -40,6 +40,14 @@
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
+        <Style x:Key="JwtCopyButton" TargetType="Button" BasedOn="{StaticResource JwtActionButton}">
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="MinWidth" Value="76" />
+            <Setter Property="Padding" Value="8,5" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+        </Style>
         <Style x:Key="JwtTextBox" TargetType="TextBox">
             <Setter Property="Padding" Value="12" />
             <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
@@ -113,7 +121,7 @@
                                Foreground="{DynamicResource AmberDeepBrush}" />
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,12,0">
-                    <TextBlock Text="JWT Decoder &amp; Inspector"
+                    <TextBlock Text="JWT Encoder &amp; Decoder"
                                FontSize="20"
                                FontWeight="Bold" />
                     <TextBlock Text="Decode token claims or build a signed token locally."
@@ -523,13 +531,15 @@
                     <DockPanel Margin="0,0,0,10">
                         <TextBlock Text="Header"
                                    FontSize="14"
+                                   Margin="0,7,0,0"
                                    FontWeight="SemiBold" />
                         <Button DockPanel.Dock="Right"
                                 Content="Copy JSON"
                                 Command="{Binding CopyHeaderCommand}"
-                                Style="{StaticResource JwtActionButton}"
-                                MinHeight="30"
-                                Padding="10,5" />
+                                Style="{StaticResource JwtCopyButton}"
+                                ToolTip="Copy header JSON"
+                                Width="120"
+                                AutomationProperties.Name="Copy header JSON" />
                     </DockPanel>
                     <TextBox Grid.Row="1"
                              Text="{Binding HeaderJson, Mode=OneWay}"
@@ -553,13 +563,15 @@
                     <DockPanel Margin="0,0,0,10">
                         <TextBlock Text="Payload"
                                    FontSize="14"
+                                   Margin="0,7,0,0"
                                    FontWeight="SemiBold" />
                         <Button DockPanel.Dock="Right"
                                 Content="Copy JSON"
                                 Command="{Binding CopyPayloadCommand}"
-                                Style="{StaticResource JwtActionButton}"
-                                MinHeight="30"
-                                Padding="10,5" />
+                                Style="{StaticResource JwtCopyButton}"
+                                Width="120"
+                                ToolTip="Copy payload JSON"
+                                AutomationProperties.Name="Copy payload JSON" />
                     </DockPanel>
                     <TextBox Grid.Row="1"
                              Text="{Binding PayloadJson, Mode=OneWay}"

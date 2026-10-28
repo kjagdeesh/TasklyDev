@@ -63,11 +63,13 @@ This tool is appended at the bottom of **Developer Tools**. Choose **Encode** or
 
 Malformed percent escapes and invalid UTF-8 are reported instead of being silently replaced. **Swap** moves the output to the input and reverses the operation; **Copy output** copies the current result; **Clear** resets both fields.
 
-### JWT Decoder & Inspector
+### JWT Encoder & Decoder
 
-This tool is appended at the bottom of **Developer Tools**. Paste a compact JWT and select **Decode locally** to display formatted header and payload JSON plus a summary of payload claims. The recognized numeric `exp`, `nbf`, and `iat` claims include informational UTC and local times. Nonnumeric or out-of-range time claims are identified without treating the token as malformed. Header and payload JSON can be copied separately; **Clear** removes the input and decoded data.
+This tool is appended at the bottom of **Developer Tools**. **Decode token** accepts a compact JWT and displays formatted header and payload JSON plus a summary of payload claims as you paste or type. The recognized numeric `exp`, `nbf`, and `iat` claims include informational UTC and local times. Nonnumeric or out-of-range time claims are identified without treating the token as malformed. Header and payload JSON can be copied separately; **Clear** removes the input and decoded data.
 
-The warning on the screen is intentional and remains visible: decoding does **not** validate the signature, issuer, audience, expiration policy, or token trustworthiness. The signature segment is only shown as present/empty and is never cryptographically checked. Parsing occurs locally, the token is not sent or persisted, and error messages do not include token contents.
+Choose **Create token** to provide header JSON, payload JSON, a shared secret, and an HMAC signing algorithm (HS256, HS384, or HS512). The encoder produces the compact token locally; it does not store or send the secret. Anyone with the secret can create tokens that verify with that key, so use a test secret.
+
+The warning on the screen is intentional and remains visible: decoding does **not** validate the signature, issuer, audience, expiration policy, or token trustworthiness. The signature segment is only shown as present/empty and is never cryptographically checked. Parsing and encoding occur locally; tokens are not sent or persisted, and error messages do not include token contents.
 
 ### Hash Calculator
 
