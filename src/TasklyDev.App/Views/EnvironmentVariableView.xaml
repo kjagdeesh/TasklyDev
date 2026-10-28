@@ -38,12 +38,47 @@
             </Setter>
         </Style>
         <Style x:Key="EnvironmentPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource EnvironmentActionButton}">
-            <Setter Property="MinHeight" Value="28" />
-            <Setter Property="Padding" Value="8,3" />
-            <Setter Property="FontSize" Value="11" />
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
             <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AmberDeepBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource AmberDeepBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.82" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource WarmOutlineBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="EnvironmentEditor" TargetType="TextBox">
             <Setter Property="Padding" Value="12,5" />
@@ -212,13 +247,35 @@
                                    TextWrapping="Wrap" />
                     </StackPanel>
                     <Button DockPanel.Dock="Right"
-                            Content="Refresh"
                             Command="{Binding RefreshCommand}"
                             IsEnabled="{Binding IsNotBusy}"
                             Margin="14,0,0,0"
-                            Width="100"
+                            Width="126"
                             Style="{StaticResource EnvironmentPrimaryActionButton}"
-                            AutomationProperties.Name="Refresh environment variables" />
+                            ToolTip="Reload the environment variables for the selected scope"
+                            AutomationProperties.Name="Refresh environment variables">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="&#xE72C;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="13"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                            <TextBlock VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Refresh" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                                <Setter Property="Text" Value="Refreshing..." />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Button>
                 </DockPanel>
 
                 <Grid Margin="0,18,0,0">
