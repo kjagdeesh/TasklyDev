@@ -194,10 +194,11 @@
                                    TextWrapping="Wrap" />
                     </StackPanel>
                     <Button DockPanel.Dock="Right"
-                            Content="Refresh snapshot"
+                            Content="Refresh Snapshot"
                             Command="{Binding RefreshCommand}"
                             IsEnabled="{Binding IsNotBusy}"
                             Margin="14,0,0,0"
+                            Width="200"
                             Style="{StaticResource ProcessPrimaryActionButton}"
                             AutomationProperties.Name="Refresh process snapshot" />
                 </DockPanel>

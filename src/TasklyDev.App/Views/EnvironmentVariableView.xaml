@@ -216,6 +216,7 @@
                             Command="{Binding RefreshCommand}"
                             IsEnabled="{Binding IsNotBusy}"
                             Margin="14,0,0,0"
+                            Width="100"
                             Style="{StaticResource EnvironmentPrimaryActionButton}"
                             AutomationProperties.Name="Refresh environment variables" />
                 </DockPanel>

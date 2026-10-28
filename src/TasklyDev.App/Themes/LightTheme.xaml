@@ -149,7 +149,8 @@
                             CornerRadius="8"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter VerticalAlignment="Center"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
@@ -194,6 +195,7 @@
                                           ClickMode="Press"
                                           Focusable="False"
                                           Background="Transparent"
+                                          Foreground="{TemplateBinding Foreground}"
                                           BorderThickness="0"
                                           Padding="{TemplateBinding Padding}"
                                           HorizontalContentAlignment="Stretch">
@@ -210,6 +212,7 @@
                                                                   ContentTemplate="{Binding SelectionBoxItemTemplate, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
                                                                   ContentStringFormat="{Binding SelectionBoxItemStringFormat, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
                                                                   VerticalAlignment="Center"
+                                                                  TextElement.Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
                                                                   RecognizesAccessKey="True" />
                                                 <Path Grid.Column="1"
                                                       Data="M 2 4 L 6 8 L 10 4"
