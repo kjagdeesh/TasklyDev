@@ -3,6 +3,93 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FontFamily="Segoe UI">
     <UserControl.Resources>
+        <Style x:Key="HashActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="HashPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource HashActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="HashCopyButton" TargetType="Button" BasedOn="{StaticResource HashActionButton}">
+            <Setter Property="MinWidth" Value="64" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style x:Key="HashTextEditor" TargetType="TextBox">
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="HashResultEditor" TargetType="TextBox" BasedOn="{StaticResource HashTextEditor}">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource CardSurfaceBrush}" />
+            <Setter Property="IsReadOnly" Value="True" />
+        </Style>
+        <Style x:Key="HashFileEditor" TargetType="TextBox" BasedOn="{StaticResource HashResultEditor}">
+            <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
+        </Style>
+        <Style x:Key="HashFieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
         <DataTemplate x:Key="HashResultTemplate">
             <Border Background="{DynamicResource SubtleSurfaceBrush}"
                     CornerRadius="12"
@@ -16,25 +103,16 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{Binding Algorithm}"
                                Width="82"
-                               FontSize="12"
-                               FontWeight="SemiBold"
+                               Style="{StaticResource HashFieldLabel}"
                                VerticalAlignment="Center" />
                     <TextBox Grid.Column="1"
                              Text="{Binding HexValue, Mode=OneWay}"
-                             IsReadOnly="True"
-                             FontFamily="Consolas"
-                             FontSize="12"
-                             Padding="8,6"
-                             Background="{DynamicResource CardSurfaceBrush}"
-                             BorderBrush="{DynamicResource OutlineBrush}"
-                             BorderThickness="1"
-                             VerticalContentAlignment="Center"
+                             Style="{StaticResource HashResultEditor}"
                              AutomationProperties.Name="{Binding Algorithm}" />
                     <Button Grid.Column="2"
                             Content="Copy"
-                            Padding="11,6"
                             Margin="9,0,0,0"
-                            Style="{StaticResource SecondaryActionButton}"
+                            Style="{StaticResource HashCopyButton}"
                             Command="{Binding DataContext.CopyDigestCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{Binding}"
                             AutomationProperties.Name="Copy hash digest" />
@@ -93,7 +171,7 @@
                                    FontSize="12"
                                    Foreground="{DynamicResource MutedTextBrush}" />
                     </StackPanel>
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="30,0,0,0">
                         <RadioButton Content="Text"
                                      GroupName="HashInputMode"
                                      IsChecked="{Binding IsTextMode, Mode=TwoWay}"
@@ -114,26 +192,19 @@
                     </Grid.RowDefinitions>
                     <DockPanel Margin="0,0,0,7">
                         <TextBlock Text="Input text (UTF-8)"
-                                   FontSize="12"
-                                   FontWeight="SemiBold" />
-                        <TextBlock DockPanel.Dock="Right"
+                                   Style="{StaticResource HashFieldLabel}" />
+                        <TextBlock DockPanel.Dock="Right" Margin="20,0,0,0"
                                    Text="{Binding InputByteCount, StringFormat={}{0} UTF-8 bytes}"
                                    FontSize="11"
                                    Foreground="{DynamicResource MutedTextBrush}" />
                     </DockPanel>
                     <TextBox Grid.Row="1"
                              Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource HashTextEditor}"
                              MinHeight="150"
-                             Padding="12"
-                             FontFamily="Consolas"
-                             FontSize="13"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
-                             Background="{DynamicResource EditorSurfaceBrush}"
-                             Foreground="{DynamicResource PrimaryTextBrush}"
-                             BorderBrush="{DynamicResource OutlineBrush}"
-                             BorderThickness="1"
                              AutomationProperties.Name="Text to hash" />
                 </Grid>
 
@@ -144,22 +215,17 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <TextBlock Text="Local file"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
+                                   Style="{StaticResource HashFieldLabel}"
                                    Margin="0,0,0,7" />
                         <TextBox Text="{Binding FilePath, Mode=OneWay}"
-                                 IsReadOnly="True"
-                                 Padding="11,8"
-                                 Background="{DynamicResource SubtleSurfaceBrush}"
-                                 BorderBrush="{DynamicResource OutlineBrush}"
-                                 BorderThickness="1"
+                                 Style="{StaticResource HashFileEditor}"
                                  ToolTip="{Binding FilePath}"
                                  AutomationProperties.Name="Selected file path" />
                     </StackPanel>
                     <Button Grid.Column="1"
                             Content="Browse…"
                             Command="{Binding BrowseFileCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
+                            Style="{StaticResource HashActionButton}"
                             Margin="10,22,0,0"
                             AutomationProperties.Name="Browse for a file to hash" />
                 </Grid>
@@ -174,8 +240,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Algorithm"
-                               FontSize="12"
-                               FontWeight="SemiBold"
+                               Style="{StaticResource HashFieldLabel}"
                                VerticalAlignment="Center"
                                Margin="0,0,9,0" />
                     <ComboBox Grid.Column="1"
@@ -187,20 +252,17 @@
                             Content="Calculate hashes"
                             Command="{Binding CalculateCommand}"
                             IsEnabled="{Binding IsNotBusy}"
-                            Style="{StaticResource SecondaryActionButton}"
-                            Background="{DynamicResource AmberBrush}"
-                            BorderBrush="{DynamicResource AmberBrush}"
-                            FontWeight="SemiBold"
+                            Style="{StaticResource HashPrimaryActionButton}"
                             Margin="0,0,8,0" />
                     <Button Grid.Column="4"
                             Content="Cancel"
                             Command="{Binding CancelCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
+                            Style="{StaticResource HashActionButton}"
                             Margin="0,0,8,0" />
                     <Button Grid.Column="5"
                             Content="Clear"
                             Command="{Binding ClearCommand}"
-                            Style="{StaticResource SecondaryActionButton}" />
+                            Style="{StaticResource HashActionButton}" />
                 </Grid>
 
                 <TextBlock Text="MD5 is included for legacy checksum compatibility only. Do not use MD5 for security-sensitive integrity or password storage."
@@ -267,6 +329,7 @@
                     <TextBlock Text="Lowercase hexadecimal"
                                DockPanel.Dock="Right"
                                FontSize="11"
+                               Margin="20,4,0,0"
                                Foreground="{DynamicResource MutedTextBrush}" />
                 </DockPanel>
                 <Border Padding="18"
