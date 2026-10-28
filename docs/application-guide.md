@@ -91,6 +91,26 @@ Matching uses .NET regular-expression semantics and a finite 250 ms timeout to l
 
 ## System diagnostics
 
+### .NET SDK & Workload Inspector
+
+This tool is appended to **System Diagnostics** and performs read-only discovery on the current machine. Select **Refresh** to inspect `dotnet` hosts found through `PATH`, `DOTNET_ROOT` environment variables, standard Program Files locations, and the current user's `.dotnet` folder. Each discovered host is inspected for SDKs, runtimes, workloads, and host details; duplicate SDK/runtime entries are consolidated.
+
+The page shows the resolved host paths, discovered SDK/runtime versions and install locations, raw host/workload details, and per-command status and timing. Commands run from the Windows System directory with a 15-second timeout. This is not a recursive search of every disk location, does not select an SDK for a project or read project `global.json` files, and cannot install, update, repair, or remove .NET components. If no host is found or a command fails, review the status and diagnostics rather than treating missing data as an empty successful result.
+
+### System Information
+
+This tool is appended to **System Diagnostics** and collects a read-only, timestamped snapshot of Windows product/release/build, OS and process architecture, machine name, processor model/count, physical memory, fixed-volume capacity, system uptime, and .NET runtime/version. Each field identifies its source and explicitly reports when data is unavailable or partial; the app does not request elevation.
+
+Select **Refresh** to collect a new snapshot. **Copy summary** copies the current report to the clipboard. **Export TXT** and **Export JSON** open a Windows Save As dialog and write the chosen report locally. As selected for this feature, neither screen values, clipboard summaries, nor exported reports redact collected values. Reports can include machine names and storage details; check the contents and destination before sharing. Nothing is exported unless the user chooses an action and destination.
+
+### Clipboard History
+
+Clipboard History captures **plain text only** and remains disabled until the user checks the disclosure and selects **Start capture**. Clipboard text may contain passwords, tokens, or private messages. Captured entry text is encrypted with Windows DPAPI for the current user and stored in a JSON file under LocalAppData; text is not logged or uploaded.
+
+The history supports search, preview, copy, pin/unpin, deleting one entry, and clearing all entries after confirmation. It is limited to 5,000 entries, 90 days, 1 MB per entry, and 100 MB total. Pinned entries are exempt from age cleanup but count toward entry and storage limits. The oldest unpinned entries are removed when needed; incoming text is skipped when capacity cannot be made. Duplicates and oversized entries are skipped.
+
+**Pause** temporarily stops monitoring; **Resume** uses the prior opt-in; **Stop and disable** stops monitoring and clears the remembered opt-in without deleting saved entries. Closing the window hides TasklyDev to the system tray and capture continues. **Quit TasklyDev** in the tray menu stops the process and retains the saved history and opt-in for the next launch. Review this behavior before enabling capture on a shared device.
+
 ### Process Lookup
 
 The page loads a process snapshot when opened. Select **Refresh Snapshot** to read it again. Search by process name or exact process ID; the result count updates as the list is filtered.
@@ -115,7 +135,7 @@ The About card shows the application logo, product/version information, and .NET
 
 ## Data handling
 
-Taskly.Dev performs utility work locally and does not send telemetry or upload tool inputs. Inputs and environment-variable values are not persisted by the application. Copy actions deliberately transfer the selected output to the Windows clipboard; check sensitive values before copying or sharing them.
+Taskly.Dev performs utility work locally and does not send telemetry or upload tool inputs. Inputs and environment-variable values are not persisted by the application. Clipboard History is the exception: after explicit opt-in, plain-text clipboard entries are encrypted for the current Windows user and persisted locally under the limits described above. System Information reports are written only after the user selects an export action and destination; they are unredacted. Copy actions deliberately transfer the selected output to the Windows clipboard; check sensitive values before copying or sharing them.
 
 ## Troubleshooting
 

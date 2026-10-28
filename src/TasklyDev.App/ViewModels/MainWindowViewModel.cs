@@ -12,10 +12,17 @@ using TasklyDev.Core.Hashing;
 using TasklyDev.Core.RegularExpressions;
 using TasklyDev.Core.Time;
 using TasklyDev.Core.Tokens;
+using TasklyDev.Core.SystemInformation;
+using TasklyDev.Core.ClipboardHistory;
+using TasklyDev.Core.Certificates;
 using TasklyDev.Models;
 using TasklyDev.Services;
+using TasklyDev.Windows.DotNet;
 using TasklyDev.Windows.Environment;
 using TasklyDev.Windows.Processes;
+using TasklyDev.Windows.SystemInformation;
+using TasklyDev.Windows.ClipboardHistory;
+using TasklyDev.Windows.Certificates;
 
 namespace TasklyDev.ViewModels;
 
@@ -35,7 +42,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         new("URL Encoder / Decoder", "Encode or decode a full URL, URL component, or query value using explicit rules.", "url-codec", "URL", "Developer Tools"),
         new("JWT Decoder & Inspector", "Decode JWT header and claims locally without verifying the signature.", "jwt-decoder", "JWT", "Developer Tools"),
         new("Process Lookup", "Search a read-only snapshot of running Windows processes.", "process", "PID", "System Diagnostics"),
-        new("Environment Variables", "Browse process, user, and machine variables without editing them.", "environment", "$", "System Diagnostics")
+        new("Environment Variables", "Browse process, user, and machine variables without editing them.", "environment", "$", "System Diagnostics"),
+        new(".NET SDK & Workload Inspector", "Inspect SDKs, runtimes, workloads, and dotnet host information installed on this machine.", "dotnet-inspector", ".NET", "System Diagnostics"),
+        new("System Information", "Review operating-system, hardware, storage, uptime, and .NET runtime details.", "system-info", "SYS", "System Diagnostics"),
+        new("Certificate Inspector", "Inspect public certificates from files and Windows stores using local trust policy.", "certificate-inspector", "CERT", "System Diagnostics"),
+        new("Clipboard History", "Capture and search encrypted plain-text history after explicit opt-in.", "clipboard-history", "CLIP", "System Diagnostics")
     ];
 
     private readonly ObservableCollection<NavigationItem> _developerNavigation = [];
@@ -49,7 +60,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private ToolDefinition? _currentTool;
 
     /// <summary>Creates the shell view models and navigates to the initial Overview screen.</summary>
-    public MainWindowViewModel(IClipboardService? clipboard = null, IThemeService? themeService = null)
+    public MainWindowViewModel(
+        IClipboardService? clipboard = null,
+        IThemeService? themeService = null,
+        IClipboardHistoryService? clipboardHistoryService = null,
+        IClipboardHistoryConfirmationService? clipboardHistoryConfirmation = null,
+        ICertificateInspectorService? certificateInspectorService = null,
+        ICertificateFilePickerService? certificateFilePickerService = null)
     {
         var clipboardService = clipboard ?? new WpfClipboardService();
         OpenRouteCommand = new RelayCommand(parameter =>
@@ -90,6 +107,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         EnvironmentVariableViewModel = new EnvironmentVariableViewModel(
             new EnvironmentVariableService(),
             clipboardService);
+        DotNetInspectorViewModel = new DotNetInspectorViewModel(new DotNetInspectionService());
+        SystemInformationViewModel = new SystemInformationViewModel(
+            new SystemInformationService(),
+            clipboardService,
+            new WpfSystemInformationReportExportService());
+        ClipboardHistoryViewModel = new ClipboardHistoryViewModel(
+            clipboardHistoryService ?? new ClipboardHistoryService(),
+            clipboardService,
+            clipboardHistoryConfirmation ?? new WpfClipboardHistoryConfirmationService());
+        CertificateInspectorViewModel = new CertificateInspectorViewModel(
+            certificateInspectorService ?? new CertificateInspectorService(),
+            certificateFilePickerService ?? new WpfCertificateFilePickerService());
         SettingsViewModel = new SettingsViewModel(themeService ?? new WpfThemeService());
         foreach (var tool in Tools)
         {
@@ -119,6 +148,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RegexTesterViewModel RegexTesterViewModel { get; }
     public ProcessLookupViewModel ProcessLookupViewModel { get; }
     public EnvironmentVariableViewModel EnvironmentVariableViewModel { get; }
+    /// <summary>Gets the machine-wide .NET SDK, runtime, and workload inspection screen model.</summary>
+    public DotNetInspectorViewModel DotNetInspectorViewModel { get; }
+    /// <summary>Gets the read-only system-information screen model and report actions.</summary>
+    public SystemInformationViewModel SystemInformationViewModel { get; }
+    /// <summary>Gets the opt-in encrypted clipboard-history model.</summary>
+    public ClipboardHistoryViewModel ClipboardHistoryViewModel { get; }
+    /// <summary>Gets the local public-certificate inspection screen model.</summary>
+    public CertificateInspectorViewModel CertificateInspectorViewModel { get; }
     public SettingsViewModel SettingsViewModel { get; }
     public NavigationItem SettingsNavigation { get; }
     public ObservableCollection<NavigationItem> DeveloperNavigation => _developerNavigation;
@@ -169,8 +206,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsRegexTester => _currentRoute == "regex";
     public bool IsProcessLookup => _currentRoute == "process";
     public bool IsEnvironmentVariables => _currentRoute == "environment";
+    /// <summary>Gets whether the machine-wide .NET inspector route is active.</summary>
+    public bool IsDotNetInspector => _currentRoute == "dotnet-inspector";
+    /// <summary>Gets whether the System Information route is active.</summary>
+    public bool IsSystemInformation => _currentRoute == "system-info";
+    /// <summary>Gets whether the Clipboard History route is active.</summary>
+    public bool IsClipboardHistory => _currentRoute == "clipboard-history";
+    /// <summary>Gets whether the Certificate Inspector route is active.</summary>
+    public bool IsCertificateInspector => _currentRoute == "certificate-inspector";
     public bool IsSettings => _currentRoute == "settings";
-    public bool IsPlaceholder => !IsHome && !IsBase64 && !IsNumberBase && !IsTimestamp && !IsGuidGenerator && !IsGuidParser && !IsUrlCodec && !IsJwtDecoder && !IsHashCalculator && !IsColorConverter && !IsRegexTester && !IsProcessLookup && !IsEnvironmentVariables && !IsSettings;
+    public bool IsPlaceholder => !IsHome && !IsBase64 && !IsNumberBase && !IsTimestamp && !IsGuidGenerator && !IsGuidParser && !IsUrlCodec && !IsJwtDecoder && !IsHashCalculator && !IsColorConverter && !IsRegexTester && !IsProcessLookup && !IsEnvironmentVariables && !IsDotNetInspector && !IsSystemInformation && !IsClipboardHistory && !IsCertificateInspector && !IsSettings;
     public bool HasDeveloperTools => _developerTools.Count > 0;
     public bool HasSystemTools => _systemTools.Count > 0;
     public bool HasSearchResults => HasDeveloperTools || HasSystemTools;
@@ -230,6 +275,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             item.IsActive = item.Route == route;
         }
 
+        if (route is "clipboard-history" or "certificate-inspector")
+        {
+            var systemItem = _systemNavigation.FirstOrDefault(item => item.Route == route);
+            if (systemItem is not null)
+            {
+                _systemNavigation.Remove(systemItem);
+                _systemNavigation.Add(systemItem);
+            }
+        }
+
         if (route == "home")
         {
             CurrentPageTitle = "Utilities Workbench";
@@ -263,6 +318,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsRegexTester));
         OnPropertyChanged(nameof(IsProcessLookup));
         OnPropertyChanged(nameof(IsEnvironmentVariables));
+        OnPropertyChanged(nameof(IsDotNetInspector));
+        OnPropertyChanged(nameof(IsSystemInformation));
+        OnPropertyChanged(nameof(IsClipboardHistory));
+        OnPropertyChanged(nameof(IsCertificateInspector));
         OnPropertyChanged(nameof(IsSettings));
         OnPropertyChanged(nameof(IsPlaceholder));
     }

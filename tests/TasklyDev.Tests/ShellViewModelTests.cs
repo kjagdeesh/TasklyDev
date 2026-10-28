@@ -12,8 +12,9 @@ public sealed class ShellViewModelTests
 
         Assert.True(viewModel.IsHome);
         Assert.Equal(10, viewModel.DeveloperTools.Count);
-        Assert.Equal(2, viewModel.SystemTools.Count);
+        Assert.Equal(6, viewModel.SystemTools.Count);
         Assert.Equal("jwt-decoder", viewModel.DeveloperNavigation.Last().Route);
+        Assert.Equal("clipboard-history", viewModel.SystemNavigation.Last().Route);
         Assert.True(viewModel.OverviewNavigation.IsActive);
     }
 
@@ -109,6 +110,58 @@ public sealed class ShellViewModelTests
         Assert.False(viewModel.IsPlaceholder);
         Assert.Equal("JWT Decoder & Inspector", viewModel.CurrentPageTitle);
         Assert.Equal("jwt-decoder", viewModel.DeveloperNavigation.Last().Route);
+    }
+
+    [Fact]
+    public void DotNetInspectorRouteOpensMachineLevelInspectorAtBottomOfSystemDiagnostics()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenRouteCommand.Execute("dotnet-inspector");
+
+        Assert.True(viewModel.IsDotNetInspector);
+        Assert.False(viewModel.IsPlaceholder);
+        Assert.Equal(".NET SDK & Workload Inspector", viewModel.CurrentPageTitle);
+        Assert.Equal("dotnet-inspector", viewModel.SystemNavigation[^4].Route);
+    }
+
+    [Fact]
+    public void SystemInformationRouteOpensTheReadOnlyInspectorAtBottomOfSystemDiagnostics()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenToolCommand.Execute("system-info");
+
+        Assert.True(viewModel.IsSystemInformation);
+        Assert.False(viewModel.IsPlaceholder);
+        Assert.Equal("System Information", viewModel.CurrentPageTitle);
+        Assert.Equal("system-info", viewModel.SystemNavigation[^3].Route);
+    }
+
+    [Fact]
+    public void ClipboardHistoryRouteOpensTheEncryptedHistoryScreenAtBottomOfSystemDiagnostics()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenToolCommand.Execute("clipboard-history");
+
+        Assert.True(viewModel.IsClipboardHistory);
+        Assert.False(viewModel.IsPlaceholder);
+        Assert.Equal("Clipboard History", viewModel.CurrentPageTitle);
+        Assert.Equal("clipboard-history", viewModel.SystemNavigation.Last().Route);
+    }
+
+    [Fact]
+    public void CertificateInspectorRouteOpensTheReadOnlyCertificateScreenAtBottomOfSystemDiagnostics()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenToolCommand.Execute("certificate-inspector");
+
+        Assert.True(viewModel.IsCertificateInspector);
+        Assert.False(viewModel.IsPlaceholder);
+        Assert.Equal("Certificate Inspector", viewModel.CurrentPageTitle);
+        Assert.Equal("certificate-inspector", viewModel.SystemNavigation.Last().Route);
     }
 
     [Fact]

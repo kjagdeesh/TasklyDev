@@ -1,0 +1,213 @@
+<UserControl x:Class="TasklyDev.Views.CertificateInspectorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <UserControl.Resources>
+        <Style x:Key="CertificateActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,8,8" />
+        </Style>
+        <Style x:Key="CertificatePrimaryButton" TargetType="Button" BasedOn="{StaticResource CertificateActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="CertificateValueText" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <Border Background="{DynamicResource AmberTintBrush}"
+                BorderBrush="{DynamicResource WarmOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="15"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Public certificate inspection"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AmberDeepBrush}" />
+                <TextBlock Text="Reads public certificate fields only. Validity dates and local Windows chain trust are reported separately. Revocation and network checks are disabled; private keys are never imported or exported."
+                           Margin="0,5,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Inspect a public certificate file"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10" />
+                <WrapPanel>
+                    <Button Content="Choose certificate file…"
+                            Command="{Binding BrowseCertificateCommand}"
+                            IsEnabled="{Binding IsNotBusy}"
+                            Style="{StaticResource CertificatePrimaryButton}" />
+                    <TextBlock Text="{Binding SelectedFilePath, TargetNullValue=No file selected}"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxWidth="720" />
+                </WrapPanel>
+                <TextBlock Text="Supported public formats: .cer, .crt, .der, and .pem. PEM files containing private-key material are rejected."
+                           FontSize="11"
+                           Foreground="{DynamicResource MutedTextBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Browse a Windows personal store"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10" />
+                <WrapPanel>
+                    <ComboBox ItemsSource="{Binding StoreScopes}"
+                              SelectedItem="{Binding SelectedStoreScope, Mode=TwoWay}"
+                              MinWidth="170"
+                              MinHeight="36"
+                              Margin="0,0,8,8"
+                              Padding="8,5" />
+                    <Button Content="Load certificates"
+                            Command="{Binding LoadStoreCommand}"
+                            IsEnabled="{Binding IsNotBusy}"
+                            Style="{StaticResource CertificatePrimaryButton}" />
+                    <Button Content="Inspect selected"
+                            Command="{Binding InspectSelectedStoreCertificateCommand}"
+                            IsEnabled="{Binding CanInspectSelectedStoreCertificate}"
+                            Style="{StaticResource CertificateActionButton}" />
+                </WrapPanel>
+                <ListBox ItemsSource="{Binding StoreCertificates}"
+                         SelectedItem="{Binding SelectedStoreCertificate, Mode=TwoWay}"
+                         MaxHeight="190"
+                         Background="{DynamicResource EditorSurfaceBrush}"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         BorderBrush="{DynamicResource OutlineBrush}"
+                         BorderThickness="1"
+                         AutomationProperties.Name="Certificates in selected Windows personal store">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="4">
+                                <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Thumbprint, StringFormat=Thumbprint: {0}}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding NotAfter, StringFormat=Expires: {0:yyyy-MM-dd}}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource MutedTextBrush}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="{Binding StatusMessage}"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap" />
+                <TextBlock Text="Local chain building does not contact the network. A successful date check does not imply a trusted chain."
+                           Margin="0,5,0,0"
+                           FontSize="11"
+                           Foreground="{DynamicResource MutedTextBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Visibility="{Binding HasInspection, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel DataContext="{Binding Inspection}">
+                <TextBlock Text="Certificate details"
+                           FontSize="17"
+                           FontWeight="Bold"
+                           Margin="0,0,0,14" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Source" FontWeight="SemiBold" />
+                    <TextBlock Grid.Column="1" Text="{Binding Source}" Style="{StaticResource CertificateValueText}" />
+                    <TextBlock Grid.Row="1" Text="Subject" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Subject}" Style="{StaticResource CertificateValueText}" />
+                    <TextBlock Grid.Row="2" Text="Issuer" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Issuer}" Style="{StaticResource CertificateValueText}" />
+                    <TextBlock Grid.Row="3" Text="Thumbprint" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Thumbprint}" Style="{StaticResource CertificateValueText}" />
+                    <TextBlock Grid.Row="4" Text="Validity dates" FontWeight="SemiBold" />
+                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding NotBefore, StringFormat=Not before: {0:yyyy-MM-dd HH:mm:ss zzz}}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding NotAfter, StringFormat=Not after: {0:yyyy-MM-dd HH:mm:ss zzz}}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding DateValidityStatus}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="5" Text="Local chain trust" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ChainTrustStatus}" Style="{StaticResource CertificateValueText}" />
+                    <TextBlock Grid.Row="6" Text="Revocation" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding RevocationStatus}" Style="{StaticResource CertificateValueText}" />
+                    <TextBlock Grid.Row="7" Text="Public key / signature" FontWeight="SemiBold" />
+                    <StackPanel Grid.Row="7" Grid.Column="1" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding PublicKeyAlgorithm, StringFormat=Public key: {0}}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding SignatureAlgorithm, StringFormat=Signature: {0}}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="8" Text="Subject Alternative Names" FontWeight="SemiBold" />
+                    <ItemsControl Grid.Row="8" Grid.Column="1" ItemsSource="{Binding SubjectAlternativeNames}" Margin="0,0,0,8" />
+                    <TextBlock Grid.Row="9" Text="Key Usage" FontWeight="SemiBold" />
+                    <ItemsControl Grid.Row="9" Grid.Column="1" ItemsSource="{Binding KeyUsages}" Margin="0,0,0,8" />
+                </Grid>
+                <TextBlock Text="Chain status"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Margin="0,8,0,6" />
+                <ItemsControl ItemsSource="{Binding ChainStatuses}" />
+                <TextBlock Text="Chain subjects"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Margin="0,8,0,6" />
+                <ItemsControl ItemsSource="{Binding ChainSubjects}" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,517 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Windows.Input;
+using TasklyDev.Core.ClipboardHistory;
+using TasklyDev.Services;
+
+namespace TasklyDev.ViewModels;
+
+/// <summary>Coordinates explicit clipboard capture, encrypted history, search, and entry actions.</summary>
+public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
+{
+    private const int MaximumPendingClipboardItems = 32;
+    private readonly IClipboardHistoryService _service;
+    private readonly IClipboardService _clipboard;
+    private readonly IClipboardHistoryConfirmationService _confirmation;
+    private readonly Queue<string> _pendingClipboardItems = new();
+    private ClipboardHistoryEntry? _selectedEntry;
+    private string _searchText = string.Empty;
+    private string _statusMessage = "Clipboard capture is off. Start capture only after reviewing the disclosure.";
+    private string _storagePath = string.Empty;
+    private string _storageUsage = "History storage not loaded.";
+    private DateTimeOffset? _lastUpdatedAt;
+    private ClipboardCaptureState _captureState;
+    private bool _isBusy;
+    private bool _hasLoaded;
+    private bool _isError;
+    private bool _consentConfirmed;
+    private bool _isDrainingClipboardQueue;
+
+    /// <summary>Creates the clipboard-history model and its user actions.</summary>
+    public ClipboardHistoryViewModel(
+        IClipboardHistoryService service,
+        IClipboardService clipboard,
+        IClipboardHistoryConfirmationService confirmation)
+    {
+        _service = service;
+        _clipboard = clipboard;
+        _confirmation = confirmation;
+        RefreshCommand = new AsyncRelayCommand(RefreshAsync);
+        StartCaptureCommand = new AsyncRelayCommand(StartCaptureAsync);
+        PauseCaptureCommand = new AsyncRelayCommand(PauseCaptureAsync);
+        ResumeCaptureCommand = new AsyncRelayCommand(ResumeCaptureAsync);
+        DisableCaptureCommand = new AsyncRelayCommand(DisableCaptureAsync);
+        CopySelectedCommand = new RelayCommand(_ => CopySelected());
+        TogglePinSelectedCommand = new AsyncRelayCommand(TogglePinSelectedAsync);
+        DeleteSelectedCommand = new AsyncRelayCommand(DeleteSelectedAsync);
+        ClearAllCommand = new AsyncRelayCommand(ClearAllAsync);
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler<bool>? CaptureStateChanged;
+
+    /// <summary>Gets the complete local history in newest-first order.</summary>
+    public ObservableCollection<ClipboardHistoryEntry> Entries { get; } = [];
+
+    /// <summary>Gets the history entries that match the search query.</summary>
+    public ObservableCollection<ClipboardHistoryEntry> FilteredEntries { get; } = [];
+
+    public ICommand RefreshCommand { get; }
+    public ICommand StartCaptureCommand { get; }
+    public ICommand PauseCaptureCommand { get; }
+    public ICommand ResumeCaptureCommand { get; }
+    public ICommand DisableCaptureCommand { get; }
+    public ICommand CopySelectedCommand { get; }
+    public ICommand TogglePinSelectedCommand { get; }
+    public ICommand DeleteSelectedCommand { get; }
+    public ICommand ClearAllCommand { get; }
+
+    /// <summary>Gets or sets the history text filter.</summary>
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            if (SetProperty(ref _searchText, value))
+            {
+                ApplyFilter();
+            }
+        }
+    }
+
+    /// <summary>Gets or sets explicit confirmation of the capture disclosure.</summary>
+    public bool ConsentConfirmed
+    {
+        get => _consentConfirmed;
+        set
+        {
+            if (SetProperty(ref _consentConfirmed, value))
+            {
+                OnPropertyChanged(nameof(CanStartCapture));
+            }
+        }
+    }
+
+    /// <summary>Gets the persisted capture state.</summary>
+    public ClipboardCaptureState CaptureState
+    {
+        get => _captureState;
+        private set
+        {
+            if (SetProperty(ref _captureState, value))
+            {
+                OnPropertyChanged(nameof(IsCapturing));
+                OnPropertyChanged(nameof(IsPaused));
+                OnPropertyChanged(nameof(IsCaptureDisabled));
+                OnPropertyChanged(nameof(CanStartCapture));
+                OnPropertyChanged(nameof(CanUseSelectedEntry));
+                if (!IsCapturing)
+                {
+                    _pendingClipboardItems.Clear();
+                }
+
+                CaptureStateChanged?.Invoke(this, IsCapturing);
+            }
+        }
+    }
+
+    /// <summary>Gets whether clipboard capture is actively enabled.</summary>
+    public bool IsCapturing => CaptureState == ClipboardCaptureState.Capturing;
+
+    /// <summary>Gets whether capture is paused.</summary>
+    public bool IsPaused => CaptureState == ClipboardCaptureState.Paused;
+
+    /// <summary>Gets whether capture is disabled.</summary>
+    public bool IsCaptureDisabled => CaptureState == ClipboardCaptureState.Disabled;
+
+    /// <summary>Gets the current storage status or action result.</summary>
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        private set => SetProperty(ref _statusMessage, value);
+    }
+
+    /// <summary>Gets the encrypted JSON storage file location.</summary>
+    public string StoragePath
+    {
+        get => _storagePath;
+        private set => SetProperty(ref _storagePath, value);
+    }
+
+    /// <summary>Gets current storage size and entry count.</summary>
+    public string StorageUsage
+    {
+        get => _storageUsage;
+        private set => SetProperty(ref _storageUsage, value);
+    }
+
+    /// <summary>Gets the time at which history was most recently updated.</summary>
+    public DateTimeOffset? LastUpdatedAt
+    {
+        get => _lastUpdatedAt;
+        private set => SetProperty(ref _lastUpdatedAt, value);
+    }
+
+    /// <summary>Gets whether a history operation is in progress.</summary>
+    public bool IsBusy
+    {
+        get => _isBusy;
+        private set
+        {
+            if (SetProperty(ref _isBusy, value))
+            {
+                OnPropertyChanged(nameof(IsNotBusy));
+                OnPropertyChanged(nameof(CanStartCapture));
+                OnPropertyChanged(nameof(CanUseSelectedEntry));
+            }
+        }
+    }
+
+    /// <summary>Gets whether history has been loaded at least once.</summary>
+    public bool HasLoaded
+    {
+        get => _hasLoaded;
+        private set => SetProperty(ref _hasLoaded, value);
+    }
+
+    /// <summary>Gets whether the latest storage operation failed.</summary>
+    public bool IsError
+    {
+        get => _isError;
+        private set => SetProperty(ref _isError, value);
+    }
+
+    /// <summary>Gets whether buttons can be used.</summary>
+    public bool IsNotBusy => !IsBusy;
+
+    /// <summary>Gets whether explicit consent and the idle state allow capture to start.</summary>
+    public bool CanStartCapture => ConsentConfirmed && IsNotBusy && IsCaptureDisabled;
+
+    /// <summary>Gets whether selected-entry actions are currently available.</summary>
+    public bool CanUseSelectedEntry => HasSelectedEntry && IsNotBusy;
+
+    /// <summary>Gets whether no history entries are present after a load.</summary>
+    public bool HasNoEntries => HasLoaded && Entries.Count == 0;
+
+    /// <summary>Gets whether a non-empty search query matches no entries.</summary>
+    public bool HasNoSearchResults => HasLoaded && Entries.Count > 0 && FilteredEntries.Count == 0 && SearchText.Length > 0;
+
+    /// <summary>Loads saved history and resumes capture only for a prior explicit opt-in.</summary>
+    public Task InitializeAsync() => RefreshAsync();
+
+    /// <summary>Reloads the persisted history and capture state.</summary>
+    public async Task RefreshAsync()
+    {
+        await RunStoreOperationAsync(
+            () => _service.LoadAsync(),
+            "History refreshed.",
+            updateCaptureState: true).ConfigureAwait(true);
+    }
+
+    /// <summary>Captures a text value supplied by the active Windows clipboard listener.</summary>
+    public async Task CaptureTextAsync(string text)
+    {
+        if (!IsCapturing)
+        {
+            return;
+        }
+
+        if (_pendingClipboardItems.Count >= MaximumPendingClipboardItems)
+        {
+            ReportClipboardReadFailure("The history writer is busy; this clipboard update was skipped.");
+            return;
+        }
+
+        _pendingClipboardItems.Enqueue(text);
+        await DrainPendingClipboardItemsAsync().ConfigureAwait(true);
+    }
+
+    /// <summary>Reports a clipboard-read failure without exposing clipboard contents.</summary>
+    public void ReportClipboardReadFailure(string message)
+    {
+        StatusMessage = $"Clipboard text could not be read: {message}";
+        IsError = true;
+    }
+
+    /// <summary>Reports that clipboard text exceeded the per-entry size limit.</summary>
+    public void ReportOversizedClipboardText() =>
+        ReportClipboardTextSkipped("Clipboard text exceeded the 1 MB entry limit and was skipped.");
+
+    /// <summary>Reports a clipboard value that the configured policy intentionally skipped.</summary>
+    public void ReportClipboardTextSkipped(string message)
+    {
+        StatusMessage = message;
+        IsError = false;
+    }
+
+    /// <summary>Starts capture only after the user checks the explicit consent control.</summary>
+    public async Task StartCaptureAsync()
+    {
+        if (!ConsentConfirmed)
+        {
+            StatusMessage = "Confirm the capture disclosure before starting clipboard history.";
+            IsError = true;
+            return;
+        }
+
+        await RunStoreOperationAsync(
+            () => _service.SetCaptureStateAsync(ClipboardCaptureState.Capturing),
+            "Clipboard capture started.",
+            updateCaptureState: true).ConfigureAwait(true);
+        if (IsCapturing)
+        {
+            ConsentConfirmed = false;
+        }
+    }
+
+    /// <summary>Pauses capture while retaining the user's prior opt-in and saved history.</summary>
+    public Task PauseCaptureAsync() =>
+        RunStoreOperationAsync(
+            () => _service.SetCaptureStateAsync(ClipboardCaptureState.Paused),
+            "Clipboard capture paused.",
+            updateCaptureState: true);
+
+    /// <summary>Resumes capture under the prior explicit opt-in.</summary>
+    public Task ResumeCaptureAsync() =>
+        RunStoreOperationAsync(
+            () => _service.SetCaptureStateAsync(ClipboardCaptureState.Capturing),
+            "Clipboard capture resumed.",
+            updateCaptureState: true);
+
+    /// <summary>Disables capture and clears the remembered opt-in without deleting history.</summary>
+    public async Task DisableCaptureAsync()
+    {
+        await RunStoreOperationAsync(
+            () => _service.SetCaptureStateAsync(ClipboardCaptureState.Disabled),
+            "Clipboard capture disabled; saved history was retained.",
+            updateCaptureState: true).ConfigureAwait(true);
+        ConsentConfirmed = false;
+    }
+
+    /// <summary>Copies the selected entry without logging or persisting additional data.</summary>
+    public void CopySelected()
+    {
+        if (SelectedEntry is null)
+        {
+            StatusMessage = "Select a history entry before copying.";
+            IsError = true;
+            return;
+        }
+
+        if (_clipboard.TrySetText(SelectedEntry.Text))
+        {
+            StatusMessage = "Selected text copied to the clipboard.";
+            IsError = false;
+        }
+        else
+        {
+            StatusMessage = "Clipboard access is unavailable; the selected text was not copied.";
+            IsError = true;
+        }
+    }
+
+    /// <summary>Updates the selected entry's pin state.</summary>
+    public Task TogglePinSelectedAsync()
+    {
+        if (SelectedEntry is null)
+        {
+            StatusMessage = "Select a history entry before changing its pin state.";
+            IsError = true;
+            return Task.CompletedTask;
+        }
+
+        var id = SelectedEntry.Id;
+        var isPinned = !SelectedEntry.IsPinned;
+        return RunStoreOperationAsync(
+            () => _service.SetPinnedAsync(id, isPinned),
+            isPinned ? "History entry pinned." : "History entry unpinned.",
+            updateCaptureState: false);
+    }
+
+    /// <summary>Deletes the selected entry from local encrypted storage.</summary>
+    public Task DeleteSelectedAsync()
+    {
+        if (SelectedEntry is null)
+        {
+            StatusMessage = "Select a history entry before deleting it.";
+            IsError = true;
+            return Task.CompletedTask;
+        }
+
+        var id = SelectedEntry.Id;
+        return RunStoreOperationAsync(
+            () => _service.DeleteAsync(id),
+            "History entry deleted.",
+            updateCaptureState: false);
+    }
+
+    /// <summary>Confirms and deletes every history entry while preserving capture state.</summary>
+    public Task ClearAllAsync()
+    {
+        if (!_confirmation.ConfirmClearHistory())
+        {
+            StatusMessage = "Clear history was canceled.";
+            IsError = false;
+            return Task.CompletedTask;
+        }
+
+        return RunStoreOperationAsync(
+            () => _service.ClearAsync(),
+            "All history entries were deleted.",
+            updateCaptureState: false);
+    }
+
+    /// <summary>Gets or sets the selected history entry.</summary>
+    public ClipboardHistoryEntry? SelectedEntry
+    {
+        get => _selectedEntry;
+        set
+        {
+            if (SetProperty(ref _selectedEntry, value))
+            {
+                OnPropertyChanged(nameof(HasSelectedEntry));
+                OnPropertyChanged(nameof(SelectedEntryIsPinned));
+                OnPropertyChanged(nameof(SelectedEntryPinAction));
+                OnPropertyChanged(nameof(CanUseSelectedEntry));
+            }
+        }
+    }
+
+    /// <summary>Gets whether an entry is selected.</summary>
+    public bool HasSelectedEntry => SelectedEntry is not null;
+
+    /// <summary>Gets whether the selected entry is pinned.</summary>
+    public bool SelectedEntryIsPinned => SelectedEntry?.IsPinned == true;
+
+    /// <summary>Gets the selected-entry pin button label.</summary>
+    public string SelectedEntryPinAction => SelectedEntryIsPinned ? "Unpin" : "Pin";
+
+    private async Task RunStoreOperationAsync(
+        Func<Task<ClipboardHistorySnapshot>> operation,
+        string fallbackStatus,
+        bool updateCaptureState)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        IsError = false;
+        try
+        {
+            var snapshot = await operation().ConfigureAwait(true);
+            ApplySnapshot(snapshot, updateCaptureState);
+            if (snapshot.StatusMessage.Length == 0)
+            {
+                StatusMessage = fallbackStatus;
+            }
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or
+                CryptographicException or JsonException or System.Security.SecurityException or
+                System.ComponentModel.Win32Exception or FormatException)
+        {
+            StatusMessage = $"Clipboard history storage failed: {exception.Message}";
+            IsError = true;
+        }
+        finally
+        {
+            IsBusy = false;
+            if (!_isDrainingClipboardQueue && _pendingClipboardItems.Count > 0 && IsCapturing)
+            {
+                await DrainPendingClipboardItemsAsync().ConfigureAwait(true);
+            }
+        }
+    }
+
+    private async Task DrainPendingClipboardItemsAsync()
+    {
+        if (_isDrainingClipboardQueue || IsBusy || !IsCapturing)
+        {
+            return;
+        }
+
+        _isDrainingClipboardQueue = true;
+        try
+        {
+            while (_pendingClipboardItems.Count > 0 && IsCapturing)
+            {
+                var text = _pendingClipboardItems.Dequeue();
+                await RunStoreOperationAsync(
+                    () => _service.CaptureAsync(text),
+                    "Clipboard text processed.",
+                    updateCaptureState: false).ConfigureAwait(true);
+            }
+        }
+        finally
+        {
+            _isDrainingClipboardQueue = false;
+        }
+    }
+
+    private void ApplySnapshot(ClipboardHistorySnapshot snapshot, bool updateCaptureState)
+    {
+        var selectedId = SelectedEntry?.Id;
+        Entries.Clear();
+        foreach (var entry in snapshot.Entries)
+        {
+            Entries.Add(entry);
+        }
+
+        StoragePath = snapshot.StoragePath;
+        StorageUsage = $"{Entries.Count:N0} entries · {snapshot.StorageSizeBytes / 1024d / 1024d:N2} MB of 100 MB";
+        LastUpdatedAt = DateTimeOffset.Now;
+        StatusMessage = snapshot.StatusMessage;
+        IsError = snapshot.StatusMessage.Contains("failed", StringComparison.OrdinalIgnoreCase) ||
+                  snapshot.StatusMessage.Contains("skipped", StringComparison.OrdinalIgnoreCase) ||
+                  snapshot.StatusMessage.Contains("ignored", StringComparison.OrdinalIgnoreCase);
+        HasLoaded = true;
+        if (updateCaptureState)
+        {
+            CaptureState = snapshot.CaptureState;
+        }
+
+        SelectedEntry = selectedId is null
+            ? null
+            : Entries.FirstOrDefault(entry => entry.Id == selectedId);
+        ApplyFilter();
+        OnPropertyChanged(nameof(HasNoEntries));
+        OnPropertyChanged(nameof(HasNoSearchResults));
+    }
+
+    private void ApplyFilter()
+    {
+        var term = SearchText.Trim();
+        var filtered = Entries.Where(entry =>
+            term.Length == 0 ||
+            entry.Text.Contains(term, StringComparison.OrdinalIgnoreCase));
+        FilteredEntries.Clear();
+        foreach (var entry in filtered)
+        {
+            FilteredEntries.Add(entry);
+        }
+
+        OnPropertyChanged(nameof(HasNoEntries));
+        OnPropertyChanged(nameof(HasNoSearchResults));
+    }
+
+    private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+}

@@ -2,9 +2,13 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Media;
+using System.Text;
 using TasklyDev;
+using TasklyDev.Core.ClipboardHistory;
+using TasklyDev.Services;
 using TasklyDev.ViewModels;
 using TasklyDev.Views;
+using TasklyDev.Windows.ClipboardHistory;
 using Xunit;
 
 namespace TasklyDev.Tests;
@@ -15,13 +19,19 @@ public sealed class ShellWindowTests
     public void MainWindowLoadsItsResourcesAndTitle()
     {
         Exception? loadFailure = null;
+        var historyDirectory = Path.Combine(Path.GetTempPath(), $"TasklyClipboardShellTest-{Guid.NewGuid():N}");
         var thread = new Thread(() =>
         {
             try
             {
                 var app = new App();
                 app.InitializeComponent();
-                var window = new MainWindow();
+                var testViewModel = new MainWindowViewModel(
+                    clipboardHistoryService: new ClipboardHistoryService(
+                        Path.Combine(historyDirectory, "clipboard-history.json"),
+                        new TestTextProtector()),
+                    clipboardHistoryConfirmation: new TestClipboardHistoryConfirmationService());
+                var window = new MainWindow(testViewModel);
                 var windowViewModel = Assert.IsType<MainWindowViewModel>(window.DataContext);
                 var base64View = new Base64View();
                 var numberBaseView = new NumberBaseView();
@@ -35,6 +45,10 @@ public sealed class ShellWindowTests
                 var regexTesterView = new RegexTesterView();
                 var processLookupView = new ProcessLookupView();
                 var environmentVariableView = new EnvironmentVariableView();
+                var dotNetInspectorView = new DotNetInspectorView();
+                var systemInformationView = new SystemInformationView();
+                var clipboardHistoryView = new ClipboardHistoryView();
+                var certificateInspectorView = new CertificateInspectorView();
                 var settingsView = new SettingsView();
 
                 Assert.Equal("taskly.dev", window.Title);
@@ -55,13 +69,17 @@ public sealed class ShellWindowTests
                 Assert.NotNull(regexTesterView);
                 Assert.NotNull(processLookupView);
                 Assert.NotNull(environmentVariableView);
+                Assert.NotNull(dotNetInspectorView);
+                Assert.NotNull(systemInformationView);
+                Assert.NotNull(clipboardHistoryView);
+                Assert.NotNull(certificateInspectorView);
                 Assert.NotNull(settingsView);
 
                 window.Show();
                 foreach (var route in new[]
                          {
                              "base64", "number-base", "timestamp", "guid", "uuid-parser", "url-codec", "jwt-decoder", "hash",
-                             "color", "regex", "process", "environment", "settings"
+                             "color", "regex", "process", "environment", "clipboard-history", "certificate-inspector", "settings"
                          })
                 {
                     windowViewModel.OpenToolCommand.Execute(route);
@@ -88,6 +106,24 @@ public sealed class ShellWindowTests
         thread.Start();
         thread.Join();
 
+        if (Directory.Exists(historyDirectory))
+        {
+            Directory.Delete(historyDirectory, recursive: true);
+        }
+
         Assert.Null(loadFailure);
+    }
+
+    private sealed class TestTextProtector : IClipboardTextProtector
+    {
+        public string Protect(string text) => Convert.ToBase64String(Encoding.UTF8.GetBytes(text));
+
+        public string Unprotect(string protectedText) =>
+            Encoding.UTF8.GetString(Convert.FromBase64String(protectedText));
+    }
+
+    private sealed class TestClipboardHistoryConfirmationService : IClipboardHistoryConfirmationService
+    {
+        public bool ConfirmClearHistory() => true;
     }
 }

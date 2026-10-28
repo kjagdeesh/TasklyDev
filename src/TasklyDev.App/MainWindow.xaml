@@ -30,6 +30,10 @@
         <Geometry x:Key="RegexIconGeometry">M7 4 H5 V20 H7 M17 4 H19 V20 H17 M9 13 L12 7 L15 13 M12 15 V20 M9 16.5 L15 19 M15 16.5 L9 19</Geometry>
         <Geometry x:Key="ProcessIconGeometry">M4 4 H20 V17 H4 Z M8 21 H16 M12 17 V21 M7 13 L10 10 L13 12 L17 7</Geometry>
         <Geometry x:Key="EnvironmentIconGeometry">M4 5 H20 V19 H4 Z M7 9 L10 12 L7 15 M12 15 H17</Geometry>
+        <Geometry x:Key="DotNetIconGeometry">M4 5 H20 V19 H4 Z M7 9 H10 M7 12 H10 M7 15 H10 M13 9 L17 15 M17 9 L13 15</Geometry>
+        <Geometry x:Key="SystemInfoIconGeometry">M3 4 H21 V17 H3 Z M8 21 H16 M12 17 V21 M8 8 H16 M8 11 H16 M8 14 H13</Geometry>
+        <Geometry x:Key="ClipboardHistoryIconGeometry">M8 4 H5 V21 H19 V4 H16 M9 3 H15 V7 H9 Z M8 11 H16 M8 14 H16 M8 17 H13</Geometry>
+        <Geometry x:Key="CertificateIconGeometry">M6 3.5 H18 V20.5 L12 17.5 L6 20.5 Z M9 8 H15 M9 11 H15 M9 14 H13</Geometry>
         <Geometry x:Key="SettingsIconGeometry">M12 8.5 A3.5 3.5 0 1 0 12 15.5 A3.5 3.5 0 1 0 12 8.5 Z M12 3 V5 M12 19 V21 M3 12 H5 M19 12 H21 M5.6 5.6 L7 7 M17 17 L18.4 18.4 M18.4 5.6 L17 7 M7 17 L5.6 18.4</Geometry>
         <Style x:Key="RouteIconPath" TargetType="Path">
             <Setter Property="Data" Value="{StaticResource Base64IconGeometry}" />
@@ -72,6 +76,18 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="environment">
                     <Setter Property="Data" Value="{StaticResource EnvironmentIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="dotnet-inspector">
+                    <Setter Property="Data" Value="{StaticResource DotNetIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="system-info">
+                    <Setter Property="Data" Value="{StaticResource SystemInfoIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="clipboard-history">
+                    <Setter Property="Data" Value="{StaticResource ClipboardHistoryIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="certificate-inspector">
+                    <Setter Property="Data" Value="{StaticResource CertificateIconGeometry}" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -608,6 +624,42 @@
                             <ContentControl.ContentTemplate>
                                 <DataTemplate>
                                     <views:EnvironmentVariableView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding DotNetInspectorViewModel}"
+                                        Visibility="{Binding IsDotNetInspector, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:DotNetInspectorView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding SystemInformationViewModel}"
+                                        Visibility="{Binding IsSystemInformation, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:SystemInformationView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding ClipboardHistoryViewModel}"
+                                        Visibility="{Binding IsClipboardHistory, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:ClipboardHistoryView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding CertificateInspectorViewModel}"
+                                        Visibility="{Binding IsCertificateInspector, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:CertificateInspectorView />
                                 </DataTemplate>
                             </ContentControl.ContentTemplate>
                         </ContentControl>

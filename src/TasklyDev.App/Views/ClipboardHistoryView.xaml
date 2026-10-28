@@ -1,0 +1,251 @@
+<UserControl x:Class="TasklyDev.Views.ClipboardHistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <UserControl.Resources>
+        <Style x:Key="ClipboardHistoryButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,8,8" />
+        </Style>
+        <Style x:Key="ClipboardHistoryPrimaryButton" TargetType="Button" BasedOn="{StaticResource ClipboardHistoryButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="ClipboardHistorySearchBox" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="Padding" Value="11,8" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <Border Background="{DynamicResource AmberTintBrush}"
+                BorderBrush="{DynamicResource WarmOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="15"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Clipboard capture is off until you opt in"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AmberDeepBrush}" />
+                <TextBlock Text="Only plain text is captured. Clipboard text may contain passwords, tokens, or private messages. Entries are encrypted for this Windows user using DPAPI and stored in a LocalAppData JSON file. The app does not log or upload clipboard contents. Closing the window hides TasklyDev to the tray and capture continues; choose Quit in the tray menu to stop the process."
+                           Margin="0,5,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <DockPanel>
+                    <StackPanel>
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding LastUpdatedAt, StringFormat=Last updated: {0:yyyy-MM-dd HH:mm:ss zzz}, TargetNullValue=History not loaded}"
+                                   Margin="0,5,0,0"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource MutedTextBrush}" />
+                    </StackPanel>
+                    <Button DockPanel.Dock="Right"
+                            Content="Refresh history"
+                            Command="{Binding RefreshCommand}"
+                            IsEnabled="{Binding IsNotBusy}"
+                            Style="{StaticResource ClipboardHistoryPrimaryButton}"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center" />
+                </DockPanel>
+
+                <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                        BorderBrush="{DynamicResource OutlineBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="13"
+                        Margin="0,14,0,8">
+                    <StackPanel>
+                        <TextBlock Text="Capture state"
+                                   FontSize="12"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding CaptureState}"
+                                   Margin="0,4,0,0"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource AmberDeepBrush}" />
+                        <CheckBox IsChecked="{Binding ConsentConfirmed, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsCaptureDisabled}"
+                                  Margin="0,10,0,8">
+                            <TextBlock Text="I understand clipboard text may contain sensitive information and consent to storing it encrypted on this device."
+                                       TextWrapping="Wrap" />
+                        </CheckBox>
+                        <WrapPanel>
+                            <Button Content="Start capture"
+                                    Command="{Binding StartCaptureCommand}"
+                                    IsEnabled="{Binding CanStartCapture}"
+                                    Style="{StaticResource ClipboardHistoryPrimaryButton}"
+                                    Visibility="{Binding IsCaptureDisabled, Converter={StaticResource BoolToVisibility}}" />
+                            <Button Content="Pause"
+                                    Command="{Binding PauseCaptureCommand}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    Style="{StaticResource ClipboardHistoryButton}"
+                                    Visibility="{Binding IsCapturing, Converter={StaticResource BoolToVisibility}}" />
+                            <Button Content="Resume"
+                                    Command="{Binding ResumeCaptureCommand}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    Style="{StaticResource ClipboardHistoryPrimaryButton}"
+                                    Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibility}}" />
+                            <Button Content="Stop and disable"
+                                    Command="{Binding DisableCaptureCommand}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    Style="{StaticResource ClipboardHistoryButton}"
+                                    Visibility="{Binding IsCapturing, Converter={StaticResource BoolToVisibility}}" />
+                            <Button Content="Stop and disable"
+                                    Command="{Binding DisableCaptureCommand}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    Style="{StaticResource ClipboardHistoryButton}"
+                                    Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibility}}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Policy: plain text only · 90 days · up to 5,000 entries · 1 MB per entry · 100 MB total. Pinned entries skip age cleanup but still count toward size and entry limits. When limits are reached, oldest unpinned entries are removed; if all entries are pinned, the incoming text is skipped."
+                           Margin="0,6,0,0"
+                           FontSize="11"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           TextWrapping="Wrap" />
+                <TextBlock Text="{Binding StorageUsage}"
+                           Margin="0,8,0,0"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource SecondaryTextBrush}" />
+                <TextBlock Text="{Binding StoragePath}"
+                           Margin="0,3,0,0"
+                           FontFamily="Consolas"
+                           FontSize="10"
+                           Foreground="{DynamicResource MutedTextBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <DockPanel Margin="0,0,0,12">
+                    <TextBlock Text="History"
+                               FontSize="15"
+                               FontWeight="SemiBold" />
+                    <Button DockPanel.Dock="Right"
+                            Content="Clear all"
+                            Command="{Binding ClearAllCommand}"
+                            IsEnabled="{Binding IsNotBusy}"
+                            Style="{StaticResource ClipboardHistoryButton}"
+                            Margin="8,0,0,0" />
+                </DockPanel>
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource ClipboardHistorySearchBox}"
+                         AutomationProperties.Name="Search clipboard history"
+                         ToolTip="Search captured text" />
+                <TextBlock Text="No clipboard entries are stored."
+                           Visibility="{Binding HasNoEntries, Converter={StaticResource BoolToVisibility}}"
+                           Margin="0,12,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource MutedTextBrush}" />
+                <TextBlock Text="No entries match the current search."
+                           Visibility="{Binding HasNoSearchResults, Converter={StaticResource BoolToVisibility}}"
+                           Margin="0,12,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource MutedTextBrush}" />
+                <Grid Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ListBox ItemsSource="{Binding FilteredEntries}"
+                             SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                             MinHeight="220"
+                             MaxHeight="360"
+                             Background="{DynamicResource EditorSurfaceBrush}"
+                             BorderBrush="{DynamicResource OutlineBrush}"
+                             BorderThickness="1"
+                             AutomationProperties.Name="Clipboard history entries">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="10">
+                                    <StackPanel>
+                                        <DockPanel>
+                                            <TextBlock Text="{Binding CapturedAt, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"
+                                                       FontSize="10"
+                                                       Foreground="{DynamicResource MutedTextBrush}" />
+                                            <TextBlock DockPanel.Dock="Right"
+                                                       Text="PINNED"
+                                                       Visibility="{Binding IsPinned, Converter={StaticResource BoolToVisibility}}"
+                                                       FontSize="9"
+                                                       FontWeight="Bold"
+                                                       Foreground="{DynamicResource AmberDeepBrush}" />
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding Text}"
+                                                   Margin="0,4,0,0"
+                                                   MaxHeight="40"
+                                                   TextWrapping="Wrap"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Selected text"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,8" />
+                        <TextBox Text="{Binding SelectedEntry.Text, Mode=OneWay}"
+                                 MinHeight="220"
+                                 MaxHeight="360"
+                                 Padding="11"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 IsReadOnly="True"
+                                 Background="{DynamicResource EditorSurfaceBrush}"
+                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                 BorderBrush="{DynamicResource OutlineBrush}"
+                                 AutomationProperties.Name="Selected clipboard text" />
+                        <WrapPanel Margin="0,10,0,0">
+                            <Button Content="Copy"
+                                    Command="{Binding CopySelectedCommand}"
+                                    IsEnabled="{Binding CanUseSelectedEntry}"
+                                    Style="{StaticResource ClipboardHistoryButton}" />
+                            <Button Content="{Binding SelectedEntryPinAction}"
+                                    Command="{Binding TogglePinSelectedCommand}"
+                                    IsEnabled="{Binding CanUseSelectedEntry}"
+                                    Style="{StaticResource ClipboardHistoryButton}" />
+                            <Button Content="Delete entry"
+                                    Command="{Binding DeleteSelectedCommand}"
+                                    IsEnabled="{Binding CanUseSelectedEntry}"
+                                    Style="{StaticResource ClipboardHistoryButton}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>
