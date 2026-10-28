@@ -5,7 +5,7 @@
         Title="taskly.dev"
         WindowStyle="SingleBorderWindow"
         ResizeMode="CanResize"
-        WindowState="Normal"
+        WindowState="Maximized"
         ShowInTaskbar="True"
         Width="1320"
         Height="880"

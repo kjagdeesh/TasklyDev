@@ -37,7 +37,7 @@ public sealed class ShellWindowTests
                 Assert.Equal("taskly.dev", window.Title);
                 Assert.Equal(WindowStyle.SingleBorderWindow, window.WindowStyle);
                 Assert.Equal(ResizeMode.CanResize, window.ResizeMode);
-                Assert.Equal(WindowState.Normal, window.WindowState);
+                Assert.Equal(WindowState.Maximized, window.WindowState);
                 Assert.True(window.ShowInTaskbar);
                 Assert.Equal(1320, window.Width);
                 Assert.NotNull(base64View);
