@@ -3,6 +3,147 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FontFamily="Segoe UI">
     <UserControl.Resources>
+        <Style x:Key="RegexActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="RegexPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource RegexActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="RegexEditor" TargetType="TextBox">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="RegexSampleEditor" TargetType="TextBox" BasedOn="{StaticResource RegexEditor}">
+            <Setter Property="Height" Value="Auto" />
+            <Setter Property="MinHeight" Value="150" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+        </Style>
+        <Style x:Key="RegexFieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
+        <Style x:Key="RegexOptionCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckContainer"
+                                Background="{DynamicResource SubtleSurfaceBrush}"
+                                BorderBrush="{DynamicResource OutlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border x:Name="CheckIndicator"
+                                        Width="17"
+                                        Height="17"
+                                        CornerRadius="5"
+                                        Background="{DynamicResource CardSurfaceBrush}"
+                                        BorderBrush="{DynamicResource OutlineBrush}"
+                                        BorderThickness="1"
+                                        VerticalAlignment="Center">
+                                    <Path x:Name="CheckMark"
+                                          Data="M 3 8 L 6.5 11.5 L 13 4.5"
+                                          Width="11"
+                                          Height="9"
+                                          Stretch="Fill"
+                                          Stroke="{DynamicResource PrimaryTextBrush}"
+                                          StrokeThickness="1.8"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          Visibility="Collapsed"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                                </Border>
+                                <ContentPresenter Margin="8,0,0,0"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckContainer" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckIndicator" Property="Background" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="CheckIndicator" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="CheckContainer" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter TargetName="CheckContainer" Property="BorderBrush" Value="{DynamicResource WarmOutlineBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="CheckContainer" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <DataTemplate x:Key="RegexMatchTemplate">
             <Border Background="{DynamicResource CardSurfaceBrush}"
                     BorderBrush="{DynamicResource OutlineBrush}"
@@ -72,57 +213,41 @@
                 Margin="0,0,0,16">
             <StackPanel>
                 <TextBlock Text="Pattern"
-                           FontSize="12"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource RegexFieldLabel}"
                            Margin="0,0,0,7" />
                 <TextBox Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding IsNotBusy}"
-                         MinHeight="44"
-                         Padding="12,10"
-                         FontFamily="Consolas"
-                         FontSize="14"
-                         Background="{DynamicResource EditorSurfaceBrush}"
-                         Foreground="{DynamicResource PrimaryTextBrush}"
-                         BorderBrush="{DynamicResource OutlineBrush}"
-                         BorderThickness="1"
+                         Style="{StaticResource RegexEditor}"
                          AutomationProperties.Name="Regular expression pattern" />
                 <TextBlock Text="Sample text"
-                           FontSize="12"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource RegexFieldLabel}"
                            Margin="0,15,0,7" />
                 <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding IsNotBusy}"
-                         MinHeight="142"
-                         Padding="12"
-                         FontFamily="Consolas"
-                         FontSize="13"
+                         Style="{StaticResource RegexSampleEditor}"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto"
-                         Background="{DynamicResource EditorSurfaceBrush}"
-                         Foreground="{DynamicResource PrimaryTextBrush}"
-                         BorderBrush="{DynamicResource OutlineBrush}"
-                         BorderThickness="1"
                          AutomationProperties.Name="Regular expression sample text" />
 
                 <WrapPanel Margin="0,14,0,0">
                     <CheckBox Content="Ignore Case"
                               IsChecked="{Binding IgnoreCase}"
                               IsEnabled="{Binding IsNotBusy}"
-                              Margin="0,0,18,8"
-                              FontSize="12"
+                              Margin="0,0,10,8"
+                              Style="{StaticResource RegexOptionCheckBox}"
                               AutomationProperties.Name="Ignore case" />
                     <CheckBox Content="Multiline"
                               IsChecked="{Binding Multiline}"
                               IsEnabled="{Binding IsNotBusy}"
-                              Margin="0,0,18,8"
-                              FontSize="12"
+                              Margin="0,0,10,8"
+                              Style="{StaticResource RegexOptionCheckBox}"
                               AutomationProperties.Name="Multiline option" />
                     <CheckBox Content="Singleline"
                               IsChecked="{Binding Singleline}"
                               IsEnabled="{Binding IsNotBusy}"
                               Margin="0,0,0,8"
-                              FontSize="12"
+                              Style="{StaticResource RegexOptionCheckBox}"
                               AutomationProperties.Name="Singleline option" />
                 </WrapPanel>
 
@@ -131,47 +256,56 @@
                         <Button Content="Test pattern"
                                 Command="{Binding TestCommand}"
                                 IsEnabled="{Binding IsNotBusy}"
-                                Padding="16,9"
-                                Background="{DynamicResource AmberBrush}"
-                                Foreground="{DynamicResource PrimaryTextBrush}"
-                                BorderThickness="0"
-                                FontWeight="SemiBold"
-                                Cursor="Hand"
+                                Style="{StaticResource RegexPrimaryActionButton}"
                                 AutomationProperties.Name="Test regular expression" />
                         <Button Content="Load sample"
                                 Command="{Binding LoadSampleCommand}"
                                 IsEnabled="{Binding IsNotBusy}"
                                 Margin="8,0,0,0"
-                                Padding="12,8"
-                                Style="{StaticResource SecondaryActionButton}" />
+                                Style="{StaticResource RegexActionButton}" />
                         <Button Content="Clear"
                                 Command="{Binding ClearCommand}"
                                 IsEnabled="{Binding IsNotBusy}"
                                 Margin="8,0,0,0"
-                                Padding="12,8"
-                                Style="{StaticResource SecondaryActionButton}" />
+                                Style="{StaticResource RegexActionButton}" />
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Right"
+                               Margin="20,0,0,0"
                                Text="Finite 250 ms match timeout"
                                VerticalAlignment="Center"
                                FontSize="11"
                                Foreground="{DynamicResource MutedTextBrush}" />
                 </DockPanel>
-                <TextBlock Text="{Binding StatusMessage}"
-                           Margin="0,11,0,0"
-                           FontSize="12"
-                           TextWrapping="Wrap">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+                <Border CornerRadius="10"
+                        Padding="12,9"
+                        Margin="0,11,0,0"
+                        AutomationProperties.LiveSetting="Polite">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsError}" Value="True">
-                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                                    <Setter Property="Background" Value="{DynamicResource DangerSurfaceBrush}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                    </Border.Style>
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="12"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
             </StackPanel>
         </Border>
 
