@@ -3,6 +3,143 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FontFamily="Segoe UI">
     <UserControl.Resources>
+        <Style x:Key="GuidActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="GuidPrimaryActionButton" TargetType="Button" BasedOn="{StaticResource GuidActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="GuidCopyButton" TargetType="Button" BasedOn="{StaticResource GuidActionButton}">
+            <Setter Property="MinWidth" Value="64" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style x:Key="GuidQuantityEditor" TargetType="TextBox">
+            <Setter Property="Width" Value="84" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="GuidUppercaseCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckContainer"
+                                Background="{DynamicResource SubtleSurfaceBrush}"
+                                BorderBrush="{DynamicResource OutlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border x:Name="CheckIndicator"
+                                        Width="17"
+                                        Height="17"
+                                        CornerRadius="5"
+                                        Background="{DynamicResource CardSurfaceBrush}"
+                                        BorderBrush="{DynamicResource OutlineBrush}"
+                                        BorderThickness="1"
+                                        VerticalAlignment="Center">
+                                    <Path x:Name="CheckMark"
+                                          Data="M 3 8 L 6.5 11.5 L 13 4.5"
+                                          Width="11"
+                                          Height="9"
+                                          Stretch="Fill"
+                                          Stroke="{DynamicResource PrimaryTextBrush}"
+                                          StrokeThickness="1.8"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          Visibility="Collapsed"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                                </Border>
+                                <ContentPresenter Margin="8,0,0,0"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckContainer" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckIndicator" Property="Background" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="CheckIndicator" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="CheckContainer" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter TargetName="CheckContainer" Property="BorderBrush" Value="{DynamicResource WarmOutlineBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="CheckContainer" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <DataTemplate x:Key="GuidRowTemplate">
             <Border Background="{DynamicResource SubtleSurfaceBrush}"
                     CornerRadius="12"
@@ -21,9 +158,8 @@
                                AutomationProperties.Name="{Binding}" />
                     <Button Grid.Column="1"
                             Content="Copy"
-                            Padding="10,5"
                             Margin="12,0,0,0"
-                            Style="{StaticResource SecondaryActionButton}"
+                            Style="{StaticResource GuidCopyButton}"
                             Command="{Binding DataContext.CopyItemCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{Binding}"
                             ToolTip="Copy this GUID"
@@ -89,42 +225,39 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Quantity"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,8,0" />
-                        <TextBox Width="72"
-                                 Height="34"
-                                 Text="{Binding QuantityInput, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="8,5"
-                                 VerticalContentAlignment="Center"
-                                 AutomationProperties.Name="GUID quantity" />
-                        <TextBlock Text="1–500"
+                        <StackPanel Margin="0,0,14,0">
+                            <TextBlock Text="Quantity"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       Margin="0,0,0,5" />
+                            <TextBox Text="{Binding QuantityInput, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource GuidQuantityEditor}"
+                                     AutomationProperties.Name="GUID quantity" />
+                        </StackPanel>
+                        <TextBlock Text="(1–500)"
                                    FontSize="11"
                                    Foreground="{DynamicResource MutedTextBrush}"
                                    VerticalAlignment="Center"
-                                   Margin="8,0,16,0" />
-                        <CheckBox Content="UPPERCASE"
+                                   Margin="0,13,16,0" />
+                        <CheckBox Content="Uppercase output"
                                   IsChecked="{Binding Uppercase}"
                                   VerticalAlignment="Center"
-                                  FontSize="11"
-                                  FontWeight="SemiBold"
-                                  Foreground="{DynamicResource SecondaryTextBrush}"
+                                  Margin="0,13,0,0"
+                                  Style="{StaticResource GuidUppercaseCheckBox}"
                                   AutomationProperties.Name="Uppercase GUID output" />
                     </StackPanel>
                     <Button Grid.Column="1"
                             Content="Reset"
                             Command="{Binding ResetCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
+                            Style="{StaticResource GuidActionButton}"
+                            VerticalAlignment="Center"
                             Margin="0,0,8,0" />
                     <Button Grid.Column="2"
                             Content="Generate GUIDs"
                             Command="{Binding GenerateCommand}"
-                            Background="{DynamicResource AmberBrush}"
-                            BorderBrush="{DynamicResource AmberBrush}"
-                            FontWeight="SemiBold"
-                            Style="{StaticResource SecondaryActionButton}" />
+                            Style="{StaticResource GuidPrimaryActionButton}"
+                            VerticalAlignment="Center" />
                 </Grid>
             </StackPanel>
         </Border>
@@ -178,11 +311,9 @@
                     </StackPanel>
                     <Button DockPanel.Dock="Right"
                             Content="Copy all"
+                            Width="200"
                             Command="{Binding CopyAllCommand}"
-                            Style="{StaticResource SecondaryActionButton}"
-                            Background="{DynamicResource AmberBrush}"
-                            BorderBrush="{DynamicResource AmberBrush}"
-                            FontWeight="SemiBold"
+                            Style="{StaticResource GuidPrimaryActionButton}"
                             VerticalAlignment="Center" />
                 </DockPanel>
 
