@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using TasklyDev.Windows.Processes;
 
 namespace TasklyDev.ViewModels;
@@ -10,6 +12,7 @@ namespace TasklyDev.ViewModels;
 public sealed class ProcessLookupViewModel : INotifyPropertyChanged
 {
     private readonly IProcessSnapshotService _service;
+    private readonly Dispatcher? _dispatcher = Application.Current?.Dispatcher;
     private readonly List<ProcessSnapshotEntry> _snapshot = [];
     private string _searchText = string.Empty;
     private string _statusMessage = "Refresh to capture a read-only snapshot of running processes.";
@@ -105,49 +108,61 @@ public sealed class ProcessLookupViewModel : INotifyPropertyChanged
 
         try
         {
-            var snapshot = await Task.Run(_service.GetSnapshot);
-            _snapshot.Clear();
-            _snapshot.AddRange(snapshot);
-            HasSnapshot = true;
-            ApplyFilter();
-            StatusMessage = SearchText.Length == 0
-                ? $"Showing {Processes.Count} of {_snapshot.Count} running processes."
-                : $"Showing {Processes.Count} of {_snapshot.Count} running processes matching the search.";
+            var snapshot = await Task.Run(_service.GetSnapshot).ConfigureAwait(false);
+            await InvokeOnDispatcherAsync(() =>
+            {
+                _snapshot.Clear();
+                _snapshot.AddRange(snapshot);
+                HasSnapshot = true;
+                ApplyFilter();
+                StatusMessage = SearchText.Length == 0
+                    ? $"Showing {Processes.Count} of {_snapshot.Count} running processes."
+                    : $"Showing {Processes.Count} of {_snapshot.Count} running processes matching the search.";
+            });
         }
         catch (UnauthorizedAccessException)
         {
-            Processes.Clear();
-            _snapshot.Clear();
-            HasSnapshot = false;
-            IsError = true;
-            StatusMessage = "Access was denied while reading the running process list. No elevation was requested.";
-            OnPropertyChanged(nameof(HasResults));
-            OnPropertyChanged(nameof(SnapshotCount));
+            await InvokeOnDispatcherAsync(() => FailRefresh(
+                "Access was denied while reading the running process list. No elevation was requested."));
         }
         catch (Win32Exception)
         {
-            Processes.Clear();
-            _snapshot.Clear();
-            HasSnapshot = false;
-            IsError = true;
-            StatusMessage = "Windows could not provide the running process snapshot. Try refreshing again.";
-            OnPropertyChanged(nameof(HasResults));
-            OnPropertyChanged(nameof(SnapshotCount));
+            await InvokeOnDispatcherAsync(() =>
+                FailRefresh("Windows could not provide the running process snapshot. Try refreshing again."));
         }
         catch (InvalidOperationException)
         {
-            Processes.Clear();
-            _snapshot.Clear();
-            HasSnapshot = false;
-            IsError = true;
-            StatusMessage = "The running process snapshot could not be read. Try refreshing again.";
-            OnPropertyChanged(nameof(HasResults));
-            OnPropertyChanged(nameof(SnapshotCount));
+            await InvokeOnDispatcherAsync(() =>
+                FailRefresh("The running process snapshot could not be read. Try refreshing again."));
         }
         finally
         {
-            IsBusy = false;
+            await InvokeOnDispatcherAsync(() => IsBusy = false);
         }
+    }
+
+    private void FailRefresh(string message)
+    {
+        Processes.Clear();
+        _snapshot.Clear();
+        HasSnapshot = false;
+        IsError = true;
+        StatusMessage = message;
+        OnPropertyChanged(nameof(HasResults));
+        OnPropertyChanged(nameof(SnapshotCount));
+    }
+
+    private Task InvokeOnDispatcherAsync(Action action)
+    {
+        if (_dispatcher is null || _dispatcher.CheckAccess())
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        return _dispatcher.HasShutdownStarted || _dispatcher.HasShutdownFinished
+            ? Task.CompletedTask
+            : _dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
     }
 
     private void ApplyFilter()

@@ -27,6 +27,9 @@ public sealed class ShellWindowTests
                 var numberBaseView = new NumberBaseView();
                 var unixTimestampView = new UnixTimestampView();
                 var guidGeneratorView = new GuidGeneratorView();
+                var guidParserView = new GuidParserView();
+                var urlCodecView = new UrlCodecView();
+                var jwtDecoderView = new JwtDecoderView();
                 var hashCalculatorView = new HashCalculatorView();
                 var colorConverterView = new ColorConverterView();
                 var regexTesterView = new RegexTesterView();
@@ -44,6 +47,9 @@ public sealed class ShellWindowTests
                 Assert.NotNull(numberBaseView);
                 Assert.NotNull(unixTimestampView);
                 Assert.NotNull(guidGeneratorView);
+                Assert.NotNull(guidParserView);
+                Assert.NotNull(urlCodecView);
+                Assert.NotNull(jwtDecoderView);
                 Assert.NotNull(hashCalculatorView);
                 Assert.NotNull(colorConverterView);
                 Assert.NotNull(regexTesterView);
@@ -54,7 +60,7 @@ public sealed class ShellWindowTests
                 window.Show();
                 foreach (var route in new[]
                          {
-                             "base64", "number-base", "timestamp", "guid", "hash",
+                             "base64", "number-base", "timestamp", "guid", "uuid-parser", "url-codec", "jwt-decoder", "hash",
                              "color", "regex", "process", "environment", "settings"
                          })
                 {

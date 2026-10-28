@@ -11,6 +11,7 @@ using TasklyDev.Core.Identifiers;
 using TasklyDev.Core.Hashing;
 using TasklyDev.Core.RegularExpressions;
 using TasklyDev.Core.Time;
+using TasklyDev.Core.Tokens;
 using TasklyDev.Models;
 using TasklyDev.Services;
 using TasklyDev.Windows.Environment;
@@ -30,6 +31,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         new("Hash Calculator", "Calculate MD5, SHA-256, or SHA-512 digests for text or files.", "hash", "#", "Developer Tools"),
         new("Color Converter", "Convert HEX, RGB, and HSL values or choose a color from the Windows color dialog.", "color", "RGB", "Developer Tools"),
         new("Regex Tester", "Test .NET regular expressions with captures and a finite timeout.", "regex", ".*", "Developer Tools"),
+        new("UUID / GUID Validator & Parser", "Validate, normalize, and inspect supported UUID/GUID formats.", "uuid-parser", "ID", "Developer Tools"),
+        new("URL Encoder / Decoder", "Encode or decode a full URL, URL component, or query value using explicit rules.", "url-codec", "URL", "Developer Tools"),
+        new("JWT Decoder & Inspector", "Decode JWT header and claims locally without verifying the signature.", "jwt-decoder", "JWT", "Developer Tools"),
         new("Process Lookup", "Search a read-only snapshot of running Windows processes.", "process", "PID", "System Diagnostics"),
         new("Environment Variables", "Browse process, user, and machine variables without editing them.", "environment", "$", "System Diagnostics")
     ];
@@ -70,6 +74,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         NumberBaseViewModel = new NumberBaseViewModel(new NumberBaseService(), clipboardService);
         UnixTimestampViewModel = new UnixTimestampViewModel(new TimestampService(), clipboardService);
         GuidGeneratorViewModel = new GuidGeneratorViewModel(new GuidService(), clipboardService);
+        GuidParserViewModel = new GuidParserViewModel(new GuidParserService(), clipboardService);
+        UrlCodecViewModel = new UrlCodecViewModel(new UrlCodecService(), clipboardService);
+        JwtDecoderViewModel = new JwtDecoderViewModel(new JwtDecoderService(), clipboardService);
         HashCalculatorViewModel = new HashCalculatorViewModel(
             new HashService(),
             clipboardService,
@@ -101,6 +108,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public NumberBaseViewModel NumberBaseViewModel { get; }
     public UnixTimestampViewModel UnixTimestampViewModel { get; }
     public GuidGeneratorViewModel GuidGeneratorViewModel { get; }
+    /// <summary>Gets the UUID/GUID validation and parsing screen model.</summary>
+    public GuidParserViewModel GuidParserViewModel { get; }
+    /// <summary>Gets the URL encoding and decoding screen model.</summary>
+    public UrlCodecViewModel UrlCodecViewModel { get; }
+    /// <summary>Gets the local JWT decoding and inspection screen model.</summary>
+    public JwtDecoderViewModel JwtDecoderViewModel { get; }
     public HashCalculatorViewModel HashCalculatorViewModel { get; }
     public ColorConverterViewModel ColorConverterViewModel { get; }
     public RegexTesterViewModel RegexTesterViewModel { get; }
@@ -145,13 +158,19 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsNumberBase => _currentRoute == "number-base";
     public bool IsTimestamp => _currentRoute == "timestamp";
     public bool IsGuidGenerator => _currentRoute == "guid";
+    /// <summary>Gets whether the UUID/GUID parser route is active.</summary>
+    public bool IsGuidParser => _currentRoute == "uuid-parser";
+    /// <summary>Gets whether the URL codec route is active.</summary>
+    public bool IsUrlCodec => _currentRoute == "url-codec";
+    /// <summary>Gets whether the JWT decoder route is active.</summary>
+    public bool IsJwtDecoder => _currentRoute == "jwt-decoder";
     public bool IsHashCalculator => _currentRoute == "hash";
     public bool IsColorConverter => _currentRoute == "color";
     public bool IsRegexTester => _currentRoute == "regex";
     public bool IsProcessLookup => _currentRoute == "process";
     public bool IsEnvironmentVariables => _currentRoute == "environment";
     public bool IsSettings => _currentRoute == "settings";
-    public bool IsPlaceholder => !IsHome && !IsBase64 && !IsNumberBase && !IsTimestamp && !IsGuidGenerator && !IsHashCalculator && !IsColorConverter && !IsRegexTester && !IsProcessLookup && !IsEnvironmentVariables && !IsSettings;
+    public bool IsPlaceholder => !IsHome && !IsBase64 && !IsNumberBase && !IsTimestamp && !IsGuidGenerator && !IsGuidParser && !IsUrlCodec && !IsJwtDecoder && !IsHashCalculator && !IsColorConverter && !IsRegexTester && !IsProcessLookup && !IsEnvironmentVariables && !IsSettings;
     public bool HasDeveloperTools => _developerTools.Count > 0;
     public bool HasSystemTools => _systemTools.Count > 0;
     public bool HasSearchResults => HasDeveloperTools || HasSystemTools;
@@ -236,6 +255,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsNumberBase));
         OnPropertyChanged(nameof(IsTimestamp));
         OnPropertyChanged(nameof(IsGuidGenerator));
+        OnPropertyChanged(nameof(IsGuidParser));
+        OnPropertyChanged(nameof(IsUrlCodec));
+        OnPropertyChanged(nameof(IsJwtDecoder));
         OnPropertyChanged(nameof(IsHashCalculator));
         OnPropertyChanged(nameof(IsColorConverter));
         OnPropertyChanged(nameof(IsRegexTester));

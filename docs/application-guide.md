@@ -47,6 +47,28 @@ Choose a standard .NET GUID output format, set a quantity from **1 to 500**, and
 
 GUIDs are identifiers and should not be used as passwords or secrets.
 
+### UUID / GUID Validator & Parser
+
+This tool is appended at the bottom of **Developer Tools**. Paste a value in one of the supported .NET formats (**D**, **N**, **B**, **P**, or **X**) and select **Validate and parse**. Valid input displays the detected format, a canonical lowercase D-format value, and a UUID version only when recognizable RFC variant/version bits are present. **Copy** copies the canonical value; **Clear** resets the input and result.
+
+Version reporting is conservative: **Unknown** does not imply invalid input, and a displayed version does not prove a value's origin, uniqueness, or security.
+
+### URL Encoder / Decoder
+
+This tool is appended at the bottom of **Developer Tools**. Choose **Encode** or **Decode**, then select a mode:
+
+- **Full URL** requires an absolute URL. Encoding preserves URL delimiters and existing valid percent escapes while escaping spaces and Unicode as UTF-8. Decoding converts escaped text but leaves percent-encoded reserved delimiters such as `%2F` encoded so they cannot silently change URL structure. Parsed scheme, authority, path, query, and fragment are shown when available.
+- **URL Component** encodes one value, preserving only RFC 3986 unreserved characters. When decoding, `+` remains a literal plus.
+- **Query Value** encodes one query value: spaces become `+`, literal plus signs become `%2B`, and query separators are escaped. Decoding converts `+` back to a space.
+
+Malformed percent escapes and invalid UTF-8 are reported instead of being silently replaced. **Swap** moves the output to the input and reverses the operation; **Copy output** copies the current result; **Clear** resets both fields.
+
+### JWT Decoder & Inspector
+
+This tool is appended at the bottom of **Developer Tools**. Paste a compact JWT and select **Decode locally** to display formatted header and payload JSON plus a summary of payload claims. The recognized numeric `exp`, `nbf`, and `iat` claims include informational UTC and local times. Nonnumeric or out-of-range time claims are identified without treating the token as malformed. Header and payload JSON can be copied separately; **Clear** removes the input and decoded data.
+
+The warning on the screen is intentional and remains visible: decoding does **not** validate the signature, issuer, audience, expiration policy, or token trustworthiness. The signature segment is only shown as present/empty and is never cryptographically checked. Parsing occurs locally, the token is not sent or persisted, and error messages do not include token contents.
+
 ### Hash Calculator
 
 Choose **Text** or **File** as the input type. In Text mode, enter text; the screen shows its UTF-8 byte count. In File mode, select **Browse…** and choose a local file. Select an algorithm (MD5, SHA-256, or SHA-512) and then **Calculate hashes**.

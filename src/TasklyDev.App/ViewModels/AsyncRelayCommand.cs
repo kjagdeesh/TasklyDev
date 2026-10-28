@@ -1,10 +1,13 @@
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace TasklyDev.ViewModels;
 
 /// <summary>Adapts an asynchronous operation to <see cref="ICommand"/> and prevents concurrent execution.</summary>
 public sealed class AsyncRelayCommand(Func<Task> execute) : ICommand
 {
+    private readonly Dispatcher? _dispatcher = Application.Current?.Dispatcher;
     private bool _isRunning;
 
     public event EventHandler? CanExecuteChanged;
@@ -21,7 +24,7 @@ public sealed class AsyncRelayCommand(Func<Task> execute) : ICommand
         }
 
         _isRunning = true;
-        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        RaiseCanExecuteChanged();
         try
         {
             await execute();
@@ -29,7 +32,23 @@ public sealed class AsyncRelayCommand(Func<Task> execute) : ICommand
         finally
         {
             _isRunning = false;
+            RaiseCanExecuteChanged();
+        }
+    }
+
+    private void RaiseCanExecuteChanged()
+    {
+        if (_dispatcher is null || _dispatcher.CheckAccess())
+        {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        if (!_dispatcher.HasShutdownStarted && !_dispatcher.HasShutdownFinished)
+        {
+            _dispatcher.BeginInvoke(
+                DispatcherPriority.DataBind,
+                new Action(() => CanExecuteChanged?.Invoke(this, EventArgs.Empty)));
         }
     }
 }

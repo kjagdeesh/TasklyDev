@@ -2,7 +2,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Security;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using TasklyDev.Services;
 using TasklyDev.Windows.Environment;
 
@@ -13,6 +15,7 @@ public sealed class EnvironmentVariableViewModel : INotifyPropertyChanged
 {
     private readonly IEnvironmentVariableService _service;
     private readonly IClipboardService _clipboard;
+    private readonly Dispatcher? _dispatcher = Application.Current?.Dispatcher;
     private readonly List<EnvironmentVariableEntry> _snapshot = [];
     private EnvironmentVariableScope _selectedScope = EnvironmentVariableScope.Process;
     private EnvironmentVariableEntry? _selectedVariable;
@@ -145,44 +148,60 @@ public sealed class EnvironmentVariableViewModel : INotifyPropertyChanged
         try
         {
             var scope = SelectedScope;
-            var variables = await Task.Run(() => _service.GetVariables(scope));
-            if (scope != SelectedScope)
+            var variables = await Task.Run(() => _service.GetVariables(scope)).ConfigureAwait(false);
+            await InvokeOnDispatcherAsync(() =>
             {
-                return;
-            }
+                if (scope != SelectedScope)
+                {
+                    return;
+                }
 
-            _snapshot.Clear();
-            _snapshot.AddRange(variables);
-            HasLoaded = true;
-            ApplyFilter();
-            StatusMessage = SearchText.Length == 0
-                ? $"Showing {Variables.Count} of {_snapshot.Count} {scope.ToString().ToLowerInvariant()} variables."
-                : $"Showing {Variables.Count} of {_snapshot.Count} {scope.ToString().ToLowerInvariant()} variables matching the search.";
+                _snapshot.Clear();
+                _snapshot.AddRange(variables);
+                HasLoaded = true;
+                ApplyFilter();
+                StatusMessage = SearchText.Length == 0
+                    ? $"Showing {Variables.Count} of {_snapshot.Count} {scope.ToString().ToLowerInvariant()} variables."
+                    : $"Showing {Variables.Count} of {_snapshot.Count} {scope.ToString().ToLowerInvariant()} variables matching the search.";
+            });
         }
         catch (UnauthorizedAccessException)
         {
-            FailRefresh("Access was denied while reading this scope. No elevation was requested.");
+            await InvokeOnDispatcherAsync(() => FailRefresh("Access was denied while reading this scope. No elevation was requested."));
         }
         catch (SecurityException)
         {
-            FailRefresh("Windows security policy prevented access to this scope.");
+            await InvokeOnDispatcherAsync(() => FailRefresh("Windows security policy prevented access to this scope."));
         }
         catch (NotSupportedException)
         {
-            FailRefresh("This environment variable scope is not supported on this system.");
+            await InvokeOnDispatcherAsync(() => FailRefresh("This environment variable scope is not supported on this system."));
         }
         catch (ArgumentException)
         {
-            FailRefresh("The selected environment variable scope is not supported.");
+            await InvokeOnDispatcherAsync(() => FailRefresh("The selected environment variable scope is not supported."));
         }
         catch (InvalidOperationException)
         {
-            FailRefresh("The environment variables could not be read. Try refreshing again.");
+            await InvokeOnDispatcherAsync(() => FailRefresh("The environment variables could not be read. Try refreshing again."));
         }
         finally
         {
-            IsBusy = false;
+            await InvokeOnDispatcherAsync(() => IsBusy = false);
         }
+    }
+
+    private Task InvokeOnDispatcherAsync(Action action)
+    {
+        if (_dispatcher is null || _dispatcher.CheckAccess())
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        return _dispatcher.HasShutdownStarted || _dispatcher.HasShutdownFinished
+            ? Task.CompletedTask
+            : _dispatcher.InvokeAsync(action, DispatcherPriority.DataBind).Task;
     }
 
     private void FailRefresh(string message)

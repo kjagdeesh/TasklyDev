@@ -1,0 +1,270 @@
+<UserControl x:Class="TasklyDev.Views.UrlCodecView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:core="clr-namespace:TasklyDev.Core.Encoding;assembly=TasklyDev.Core"
+             FontFamily="Segoe UI">
+    <UserControl.Resources>
+        <Style x:Key="UrlActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="UrlPrimaryButton" TargetType="Button" BasedOn="{StaticResource UrlActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="UrlEditor" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="190" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style x:Key="UrlModeRadioButton" TargetType="RadioButton">
+            <Setter Property="Padding" Value="14,9" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="ModeBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ModeBorder" Property="Background" Value="{DynamicResource AmberBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="16"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <RadioButton Content="Encode"
+                                 GroupName="UrlOperation"
+                                 IsChecked="{Binding IsEncoding, Mode=TwoWay}"
+                                 Style="{StaticResource UrlModeRadioButton}"
+                                 AutomationProperties.Name="URL encode mode" />
+                    <RadioButton Content="Decode"
+                                 GroupName="UrlOperation"
+                                 IsChecked="{Binding IsDecoding, Mode=TwoWay}"
+                                 Style="{StaticResource UrlModeRadioButton}"
+                                 AutomationProperties.Name="URL decode mode" />
+                </StackPanel>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="Mode"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0" />
+                    <ComboBox Width="180"
+                              SelectedValue="{Binding SelectedMode}"
+                              SelectedValuePath="Tag"
+                              AutomationProperties.Name="URL processing mode">
+                        <ComboBoxItem Content="Full URL" Tag="{x:Static core:UrlEncodingMode.FullUrl}" />
+                        <ComboBoxItem Content="URL Component" Tag="{x:Static core:UrlEncodingMode.UrlComponent}" />
+                        <ComboBoxItem Content="Query Value" Tag="{x:Static core:UrlEncodingMode.QueryValue}" />
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{Binding ModeDescription}"
+                   Margin="2,0,2,14"
+                   FontSize="12"
+                   Foreground="{DynamicResource MutedTextBrush}"
+                   TextWrapping="Wrap" />
+
+        <Border CornerRadius="10"
+                Padding="14,10"
+                Margin="0,0,0,16"
+                AutomationProperties.LiveSetting="Polite">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource DangerSurfaceBrush}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="12"
+                       TextWrapping="Wrap">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsError}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Border>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0"
+                    Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{Binding InputLabel}"
+                               FontSize="14"
+                               FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding InputCharacterCount, StringFormat={}{0} characters}"
+                               Margin="0,4,0,10"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBox Grid.Row="2"
+                             Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource UrlEditor}"
+                             AutomationProperties.Name="{Binding InputLabel}" />
+                    <StackPanel Grid.Row="3"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,12,0,0">
+                        <Button Content="Clear"
+                                Command="{Binding ClearCommand}"
+                                Style="{StaticResource UrlActionButton}"
+                                Margin="0,0,8,0" />
+                        <Button Content="Swap"
+                                Command="{Binding SwapCommand}"
+                                Style="{StaticResource UrlActionButton}"
+                                Margin="0,0,8,0" />
+                        <Button Content="{Binding PrimaryActionLabel}"
+                                Command="{Binding RunCommand}"
+                                Style="{StaticResource UrlPrimaryButton}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{Binding OutputLabel}"
+                               FontSize="14"
+                               FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding OutputCharacterCount, StringFormat={}{0} characters}"
+                               Margin="0,4,0,10"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBox Grid.Row="2"
+                             IsReadOnly="True"
+                             Text="{Binding OutputText, Mode=OneWay}"
+                             Style="{StaticResource UrlEditor}"
+                             AutomationProperties.Name="{Binding OutputLabel}" />
+                    <Button Grid.Row="3"
+                            Content="Copy output"
+                            Command="{Binding CopyOutputCommand}"
+                            Style="{StaticResource UrlActionButton}"
+                            HorizontalAlignment="Right"
+                            Margin="0,12,0,0" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,16,0,0"
+                Visibility="{Binding HasComponents, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="Parsed URL components"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,12" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Scheme" Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Components.Scheme}" TextWrapping="Wrap" />
+                    <TextBlock Grid.Column="2" Text="Authority" Foreground="{DynamicResource MutedTextBrush}" />
+                    <TextBlock Grid.Column="3" Text="{Binding Components.Authority}" TextWrapping="Wrap" />
+                    <TextBlock Grid.Row="1" Text="Path" Foreground="{DynamicResource MutedTextBrush}" Margin="0,8,0,0" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Components.Path}" TextWrapping="Wrap" Margin="0,8,12,0" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Query" Foreground="{DynamicResource MutedTextBrush}" Margin="0,8,0,0" />
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Components.Query}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                    <TextBlock Grid.Row="2" Text="Fragment" Foreground="{DynamicResource MutedTextBrush}" Margin="0,8,0,0" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Components.Fragment}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

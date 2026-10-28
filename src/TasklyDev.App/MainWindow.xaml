@@ -22,6 +22,9 @@
         <Geometry x:Key="NumberBaseIconGeometry">M5 3.5 H19 V20.5 H5 Z M8 7 H16 M8 11 H10 M14 11 H16 M8 15 H10 M14 15 H16 M8 18 H10 M14 18 H16</Geometry>
         <Geometry x:Key="TimestampIconGeometry">M12 3.5 A8.5 8.5 0 1 0 12 20.5 A8.5 8.5 0 1 0 12 3.5 Z M12 7 V12 L15.5 14</Geometry>
         <Geometry x:Key="GuidIconGeometry">M4 5 H20 V19 H4 Z M9 10 A2 2 0 1 0 9 14 A2 2 0 1 0 9 10 Z M13 11 H17 M13 14 H17</Geometry>
+        <Geometry x:Key="GuidParserIconGeometry">M5 4 H19 V20 H5 Z M8 9 L10 11 L14 7 M8 15 H16 M8 17.5 H13</Geometry>
+        <Geometry x:Key="UrlIconGeometry">M9.5 14.5 L14.5 9.5 M7.5 16.5 L5.8 18.2 A3.2 3.2 0 0 1 1.3 13.7 L5.5 9.5 A3.2 3.2 0 0 1 10 9.5 M16.5 7.5 L18.2 5.8 A3.2 3.2 0 0 1 22.7 10.3 L18.5 14.5 A3.2 3.2 0 0 1 14 14.5</Geometry>
+        <Geometry x:Key="JwtIconGeometry">M12 3 L19 6 V11 C19 15.5 16 19 12 21 C8 19 5 15.5 5 11 V6 Z M9 10 H15 M9 13 H15 M9 16 H13</Geometry>
         <Geometry x:Key="HashIconGeometry">M9 4 L7 20 M17 4 L15 20 M4 9 H20 M3 15 H19</Geometry>
         <Geometry x:Key="ColorIconGeometry">M12 3.5 C7.2 3.5 3.5 7.2 3.5 12 C3.5 16.7 7.3 20.5 12 20.5 H14.2 C16.2 20.5 16.8 18.2 15.4 16.9 C14.2 15.8 15 13.8 16.6 13.8 H18.2 C19.6 13.8 20.5 12.8 20.5 11.4 C20.5 7 16.7 3.5 12 3.5 Z M8 9 A1 1 0 1 0 8 11 A1 1 0 1 0 8 9 Z M12 6.5 A1 1 0 1 0 12 8.5 A1 1 0 1 0 12 6.5 Z M16 8.5 A1 1 0 1 0 16 10.5 A1 1 0 1 0 16 8.5 Z</Geometry>
         <Geometry x:Key="RegexIconGeometry">M7 4 H5 V20 H7 M17 4 H19 V20 H17 M9 13 L12 7 L15 13 M12 15 V20 M9 16.5 L15 19 M15 16.5 L9 19</Geometry>
@@ -45,6 +48,15 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="guid">
                     <Setter Property="Data" Value="{StaticResource GuidIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="uuid-parser">
+                    <Setter Property="Data" Value="{StaticResource GuidParserIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="url-codec">
+                    <Setter Property="Data" Value="{StaticResource UrlIconGeometry}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="jwt-decoder">
+                    <Setter Property="Data" Value="{StaticResource JwtIconGeometry}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="hash">
                     <Setter Property="Data" Value="{StaticResource HashIconGeometry}" />
@@ -524,6 +536,33 @@
                             <ContentControl.ContentTemplate>
                                 <DataTemplate>
                                     <views:GuidGeneratorView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding GuidParserViewModel}"
+                                        Visibility="{Binding IsGuidParser, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:GuidParserView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding UrlCodecViewModel}"
+                                        Visibility="{Binding IsUrlCodec, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:UrlCodecView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding JwtDecoderViewModel}"
+                                        Visibility="{Binding IsJwtDecoder, Converter={StaticResource BoolToVisibility}}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate>
+                                    <views:JwtDecoderView />
                                 </DataTemplate>
                             </ContentControl.ContentTemplate>
                         </ContentControl>

@@ -1,0 +1,295 @@
+<UserControl x:Class="TasklyDev.Views.JwtDecoderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <UserControl.Resources>
+        <Style x:Key="JwtActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="13,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="JwtPrimaryButton" TargetType="Button" BasedOn="{StaticResource JwtActionButton}">
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="JwtJsonEditor" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="190" />
+            <Setter Property="MaxHeight" Value="310" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <Border Background="{DynamicResource DangerSurfaceBrush}"
+                BorderBrush="{DynamicResource ErrorBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="16"
+                Margin="0,0,0,16"
+                AutomationProperties.LiveSetting="Polite">
+            <StackPanel>
+                <TextBlock Text="Untrusted token data"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource ErrorBrush}" />
+                <TextBlock Text="{Binding UntrustedDataWarning}"
+                           Margin="0,5,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <DockPanel>
+                    <TextBlock Text="Compact JWT"
+                               FontSize="15"
+                               FontWeight="SemiBold" />
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="{Binding InputCharacterCount, StringFormat={}{0:N0} characters}"
+                               FontSize="11"
+                               Foreground="{DynamicResource MutedTextBrush}" />
+                </DockPanel>
+                <TextBlock Grid.Row="1"
+                           Text="Decoding stays on this device. The token is not sent, saved, or written to diagnostics."
+                           Margin="0,5,0,10"
+                           FontSize="11"
+                           Foreground="{DynamicResource MutedTextBrush}"
+                           TextWrapping="Wrap" />
+                <TextBox Grid.Row="2"
+                         Text="{Binding TokenText, UpdateSourceTrigger=PropertyChanged}"
+                         MinHeight="86"
+                         MaxHeight="150"
+                         Padding="12"
+                         FontFamily="Consolas"
+                         FontSize="12"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         Background="{DynamicResource EditorSurfaceBrush}"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         BorderBrush="{DynamicResource OutlineBrush}"
+                         BorderThickness="1"
+                         AutomationProperties.Name="Compact JWT input" />
+                <StackPanel Grid.Row="3"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,12,0,0">
+                    <Button Content="Clear"
+                            Command="{Binding ClearCommand}"
+                            Style="{StaticResource JwtActionButton}"
+                            Margin="0,0,8,0" />
+                    <Button Content="Decode locally"
+                            Command="{Binding DecodeCommand}"
+                            Style="{StaticResource JwtPrimaryButton}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border CornerRadius="10"
+                Padding="14,10"
+                Margin="0,0,0,16"
+                AutomationProperties.LiveSetting="Polite">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource DangerSurfaceBrush}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="12"
+                       TextWrapping="Wrap">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsError}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="12"
+                Margin="0,0,0,16"
+                Visibility="{Binding HasDecodedContent, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Header · decoded"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AmberDeepBrush}"
+                           Margin="0,0,18,0" />
+                <TextBlock Text="Payload · decoded"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AmberDeepBrush}"
+                           Margin="0,0,18,0" />
+                <TextBlock Text="{Binding SignatureSegmentStatus}"
+                           FontSize="11"
+                           Foreground="{DynamicResource MutedTextBrush}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Grid Visibility="{Binding HasDecodedContent, Converter={StaticResource BoolToVisibility}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <DockPanel Margin="0,0,0,10">
+                        <TextBlock Text="Header"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+                        <Button DockPanel.Dock="Right"
+                                Content="Copy JSON"
+                                Command="{Binding CopyHeaderCommand}"
+                                Style="{StaticResource JwtActionButton}"
+                                MinHeight="30"
+                                Padding="10,5" />
+                    </DockPanel>
+                    <TextBox Grid.Row="1"
+                             Text="{Binding HeaderJson, Mode=OneWay}"
+                             IsReadOnly="True"
+                             Style="{StaticResource JwtJsonEditor}"
+                             AutomationProperties.Name="Decoded JWT header JSON" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource CardOutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="18"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <DockPanel Margin="0,0,0,10">
+                        <TextBlock Text="Payload"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+                        <Button DockPanel.Dock="Right"
+                                Content="Copy JSON"
+                                Command="{Binding CopyPayloadCommand}"
+                                Style="{StaticResource JwtActionButton}"
+                                MinHeight="30"
+                                Padding="10,5" />
+                    </DockPanel>
+                    <TextBox Grid.Row="1"
+                             Text="{Binding PayloadJson, Mode=OneWay}"
+                             IsReadOnly="True"
+                             Style="{StaticResource JwtJsonEditor}"
+                             AutomationProperties.Name="Decoded JWT payload JSON" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,16,0,0"
+                Visibility="{Binding HasDecodedContent, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="Payload claims"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10" />
+                <ScrollViewer MaxHeight="260"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Claims}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                                        BorderBrush="{DynamicResource OutlineBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10"
+                                        Padding="12"
+                                        Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="160" />
+                                            <ColumnDefinition Width="80" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontWeight="SemiBold"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding TimeInterpretation}"
+                                                       Margin="0,4,0,0"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource MutedTextBrush}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding JsonType}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Value}"
+                                                   FontFamily="Consolas"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

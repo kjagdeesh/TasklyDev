@@ -11,8 +11,9 @@ public sealed class ShellViewModelTests
         var viewModel = new MainWindowViewModel();
 
         Assert.True(viewModel.IsHome);
-        Assert.Equal(7, viewModel.DeveloperTools.Count);
+        Assert.Equal(10, viewModel.DeveloperTools.Count);
         Assert.Equal(2, viewModel.SystemTools.Count);
+        Assert.Equal("jwt-decoder", viewModel.DeveloperNavigation.Last().Route);
         Assert.True(viewModel.OverviewNavigation.IsActive);
     }
 
@@ -69,6 +70,45 @@ public sealed class ShellViewModelTests
         Assert.True(viewModel.IsGuidGenerator);
         Assert.False(viewModel.IsPlaceholder);
         Assert.Equal("GUID Generator", viewModel.CurrentPageTitle);
+    }
+
+    [Fact]
+    public void GuidParserRouteOpensTheUuidGuidParserScreen()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenRouteCommand.Execute("uuid-parser");
+
+        Assert.True(viewModel.IsGuidParser);
+        Assert.False(viewModel.IsPlaceholder);
+        Assert.Equal("UUID / GUID Validator & Parser", viewModel.CurrentPageTitle);
+        Assert.True(viewModel.DeveloperNavigation.Single(item => item.Route == "uuid-parser").IsActive);
+    }
+
+    [Fact]
+    public void UrlCodecRouteOpensUrlEncoderDecoderAndFollowsExistingDeveloperTools()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenRouteCommand.Execute("url-codec");
+
+        Assert.True(viewModel.IsUrlCodec);
+        Assert.False(viewModel.IsPlaceholder);
+        Assert.Equal("URL Encoder / Decoder", viewModel.CurrentPageTitle);
+        Assert.True(viewModel.DeveloperNavigation.Single(item => item.Route == "url-codec").IsActive);
+    }
+
+    [Fact]
+    public void JwtDecoderRouteOpensTheLocalInspectorAndIsLastDeveloperTool()
+    {
+        var viewModel = new MainWindowViewModel();
+
+        viewModel.OpenRouteCommand.Execute("jwt-decoder");
+
+        Assert.True(viewModel.IsJwtDecoder);
+        Assert.False(viewModel.IsPlaceholder);
+        Assert.Equal("JWT Decoder & Inspector", viewModel.CurrentPageTitle);
+        Assert.Equal("jwt-decoder", viewModel.DeveloperNavigation.Last().Route);
     }
 
     [Fact]
