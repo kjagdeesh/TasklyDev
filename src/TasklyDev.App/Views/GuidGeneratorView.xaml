@@ -257,6 +257,7 @@
                             Content="Generate GUIDs"
                             Command="{Binding GenerateCommand}"
                             Style="{StaticResource GuidPrimaryActionButton}"
+                            FontWeight="SemiBold"
                             VerticalAlignment="Center" />
                 </Grid>
             </StackPanel>
@@ -314,6 +315,7 @@
                             Width="200"
                             Command="{Binding CopyAllCommand}"
                             Style="{StaticResource GuidPrimaryActionButton}"
+                            FontWeight="SemiBold"
                             VerticalAlignment="Center" />
                 </DockPanel>
 

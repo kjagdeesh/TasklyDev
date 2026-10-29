@@ -289,7 +289,7 @@
                                 Margin="0,0,8,0" />
                         <Button Content="Clear"
                                 Command="{Binding ClearCommand}"
-                                Style="{StaticResource Base64ActionButton}" />
+                                Style="{StaticResource WarningActionButton}" />
                         <TextBlock DockPanel.Dock="Right"
                                    Text="{Binding InputByteCount, StringFormat={}{0} UTF-8 bytes}"
                                    FontSize="11"

@@ -257,6 +257,7 @@
                                 Command="{Binding TestCommand}"
                                 IsEnabled="{Binding IsNotBusy}"
                                 Style="{StaticResource RegexPrimaryActionButton}"
+                                FontWeight="SemiBold"
                                 AutomationProperties.Name="Test regular expression" />
                         <Button Content="Load sample"
                                 Command="{Binding LoadSampleCommand}"
@@ -267,7 +268,7 @@
                                 Command="{Binding ClearCommand}"
                                 IsEnabled="{Binding IsNotBusy}"
                                 Margin="8,0,0,0"
-                                Style="{StaticResource RegexActionButton}" />
+                                Style="{StaticResource WarningActionButton}" />
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Right"
                                Margin="20,0,0,0"
@@ -316,6 +317,7 @@
             <TextBlock DockPanel.Dock="Right"
                        Text="{Binding Matches.Count, StringFormat={}{0} shown}"
                        FontSize="11"
+                       Margin="20,2,0,0"
                        Foreground="{DynamicResource MutedTextBrush}" />
         </DockPanel>
         <ItemsControl ItemsSource="{Binding Matches}"

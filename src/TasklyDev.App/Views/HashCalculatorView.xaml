@@ -253,6 +253,7 @@
                             Command="{Binding CalculateCommand}"
                             IsEnabled="{Binding IsNotBusy}"
                             Style="{StaticResource HashPrimaryActionButton}"
+                            FontWeight="SemiBold"
                             Margin="0,0,8,0" />
                     <Button Grid.Column="4"
                             Content="Cancel"
@@ -262,7 +263,7 @@
                     <Button Grid.Column="5"
                             Content="Clear"
                             Command="{Binding ClearCommand}"
-                            Style="{StaticResource HashActionButton}" />
+                            Style="{StaticResource WarningActionButton}" />
                 </Grid>
 
                 <TextBlock Text="MD5 is included for legacy checksum compatibility only. Do not use MD5 for security-sensitive integrity or password storage."

@@ -180,7 +180,7 @@
                                 Margin="0,0,8,0" />
                         <Button Content="Clear"
                                 Command="{Binding ClearCommand}"
-                                Style="{StaticResource NumberBaseActionButton}" />
+                                Style="{StaticResource WarningActionButton}" />
                     </StackPanel>
                     <Border Background="{DynamicResource SubtleSurfaceBrush}"
                             BorderBrush="{DynamicResource CardOutlineBrush}"
@@ -284,6 +284,7 @@
                         <Button Content="Convert"
                                 Command="{Binding ConvertCommand}"
                                 Style="{StaticResource NumberBasePrimaryButton}"
+                                FontWeight="SemiBold"
                                 Margin="0,0,8,0" />
                         <Button Content="Copy output"
                                 Command="{Binding CopyOutputCommand}"

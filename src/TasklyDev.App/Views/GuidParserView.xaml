@@ -165,11 +165,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Clear"
                             Command="{Binding ClearCommand}"
-                            Style="{StaticResource ParserActionButton}"
+                            Style="{StaticResource WarningActionButton}"
                             Margin="0,0,8,0" />
                     <Button Content="Validate and parse"
                             Command="{Binding ParseCommand}"
-                            Style="{StaticResource ParserPrimaryButton}" />
+                            Style="{StaticResource ParserPrimaryButton}"
+                            FontWeight="SemiBold"/>
                 </StackPanel>
             </StackPanel>
         </Border>

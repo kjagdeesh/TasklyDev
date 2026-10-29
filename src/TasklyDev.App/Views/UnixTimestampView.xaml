@@ -148,6 +148,7 @@
                     <Button Content="Now"
                             Command="{Binding NowCommand}"
                             Style="{StaticResource TimestampPrimaryActionButton}"
+                            FontWeight="SemiBold"
                             Margin="0,0,8,0" />
                     <Button Content="Load sample"
                             Command="{Binding LoadSampleCommand}"
@@ -155,7 +156,7 @@
                             Margin="0,0,8,0" />
                     <Button Content="Clear"
                             Command="{Binding ClearCommand}"
-                            Style="{StaticResource TimestampActionButton}" />
+                            Style="{StaticResource WarningActionButton}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -234,6 +235,7 @@
                             Command="{Binding ConvertTimestampCommand}"
                             Style="{StaticResource TimestampPrimaryActionButton}"
                             HorizontalAlignment="Left"
+                            FontWeight="SemiBold"
                             Margin="0,18,0,0" />
                     <TextBlock Text="UTC is used internally; local time is shown separately."
                                Margin="0,14,0,0"

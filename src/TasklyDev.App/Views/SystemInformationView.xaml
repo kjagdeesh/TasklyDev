@@ -200,7 +200,7 @@
                                        FontWeight="Bold"
                                        Margin="0,0,8,0"
                                        VerticalAlignment="Center" />
-                            <TextBlock VerticalAlignment="Center" FontWeight="Bold">
+                            <TextBlock VerticalAlignment="Center" FontWeight="SemiBold">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
                                         <Setter Property="Text" Value="Refresh" />

@@ -148,6 +148,7 @@
                                 IsEnabled="{Binding IsNotPickingColor}"
                                 Margin="0,0,8,7"
                                 Style="{StaticResource ColorPrimaryActionButton}"
+                                FontWeight="SemiBold"
                                 AutomationProperties.Name="Choose a color" />
                         <Button Content="Load sample"
                                 Command="{Binding LoadSampleCommand}"
@@ -156,7 +157,7 @@
                         <Button Content="Clear"
                                 Command="{Binding ClearCommand}"
                                 Margin="0,0,0,7"
-                                Style="{StaticResource ColorActionButton}" />
+                                Style="{StaticResource WarningActionButton}" />
                     </WrapPanel>
                 </StackPanel>
 

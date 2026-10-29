@@ -215,7 +215,8 @@
                     <Button Content="Choose certificate file…"
                             Command="{Binding BrowseCertificateCommand}"
                             IsEnabled="{Binding IsNotBusy}"
-                            Style="{StaticResource CertificatePrimaryButton}" />
+                            Style="{StaticResource CertificatePrimaryButton}"
+                            FontWeight="SemiBold"/>
                     <Border Background="{DynamicResource SubtleSurfaceBrush}"
                             BorderBrush="{DynamicResource OutlineBrush}"
                             BorderThickness="1"
@@ -255,7 +256,8 @@
                     <Button Content="Load certificates"
                             Command="{Binding LoadStoreCommand}"
                             IsEnabled="{Binding IsNotBusy}"
-                            Style="{StaticResource CertificatePrimaryButton}" />
+                            Style="{StaticResource CertificatePrimaryButton}" 
+                            FontWeight="SemiBold"/>
                     <Button Content="Inspect selected"
                             Command="{Binding InspectSelectedStoreCertificateCommand}"
                             IsEnabled="{Binding CanInspectSelectedStoreCertificate}"
