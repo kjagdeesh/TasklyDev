@@ -13,7 +13,10 @@ public sealed class CertificateInspectorViewModelTests
         var service = new FakeCertificateInspectorService();
         var viewModel = new CertificateInspectorViewModel(service, new FixedCertificateFilePicker(null));
 
+        Assert.False(viewModel.HasStoreCertificates);
+        Assert.False(viewModel.HasSelectedFilePath);
         await viewModel.LoadStoreAsync();
+        Assert.True(viewModel.HasStoreCertificates);
         viewModel.SelectedStoreCertificate = Assert.Single(viewModel.StoreCertificates);
         await viewModel.InspectSelectedStoreCertificateAsync();
 
@@ -21,6 +24,34 @@ public sealed class CertificateInspectorViewModelTests
         Assert.Equal("thumbprint", service.LastInspectedThumbprint);
         Assert.Equal("Windows Current User personal store", Assert.IsType<CertificateInspectionResult>(viewModel.Inspection).Source);
         Assert.False(viewModel.IsError);
+    }
+
+    [Fact]
+    public async Task HidesStoreListWhenSelectedStoreHasNoCertificates()
+    {
+        var service = new FakeCertificateInspectorService { StoreEntries = [] };
+        var viewModel = new CertificateInspectorViewModel(service, new FixedCertificateFilePicker(null));
+
+        await viewModel.LoadStoreAsync();
+
+        Assert.Empty(viewModel.StoreCertificates);
+        Assert.False(viewModel.HasStoreCertificates);
+        Assert.Contains("contains no certificates", viewModel.StatusMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task FilePathVisibilityTracksWhetherAFileIsSelected()
+    {
+        var viewModel = new CertificateInspectorViewModel(
+            new FakeCertificateInspectorService(),
+            new FixedCertificateFilePicker(@"C:\certificates\public.cer"));
+
+        Assert.False(viewModel.HasSelectedFilePath);
+
+        await viewModel.BrowseCertificateAsync();
+
+        Assert.True(viewModel.HasSelectedFilePath);
+        Assert.Equal(@"C:\certificates\public.cer", viewModel.SelectedFilePath);
     }
 
     [Fact]
@@ -64,6 +95,8 @@ public sealed class CertificateInspectorViewModelTests
     private sealed class FakeCertificateInspectorService : ICertificateInspectorService
     {
         public Exception? StoreError { get; init; }
+        public IReadOnlyList<CertificateListItem> StoreEntries { get; init; } =
+            [new CertificateListItem("thumbprint", "subject", "issuer", DateTimeOffset.Now, DateTimeOffset.Now.AddDays(1))];
         public CertificateStoreScope? LastStoreScope { get; private set; }
         public string? LastInspectedThumbprint { get; private set; }
 
@@ -82,8 +115,7 @@ public sealed class CertificateInspectorViewModelTests
                 return Task.FromException<IReadOnlyList<CertificateListItem>>(StoreError);
             }
 
-            return Task.FromResult<IReadOnlyList<CertificateListItem>>(
-                [new CertificateListItem("thumbprint", "subject", "issuer", DateTimeOffset.Now, DateTimeOffset.Now.AddDays(1))]);
+            return Task.FromResult(StoreEntries);
         }
 
         public Task<CertificateInspectionResult> InspectStoreCertificateAsync(

@@ -222,7 +222,8 @@
                             CornerRadius="10"
                             Padding="10,8"
                             Margin="0,0,0,8"
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Center"
+                            Visibility="{Binding HasSelectedFilePath, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding SelectedFilePath, TargetNullValue=No file selected}"
                                    Style="{StaticResource CertificateValueText}"
                                    Margin="0"
@@ -264,6 +265,7 @@
                          SelectedItem="{Binding SelectedStoreCertificate, Mode=TwoWay}"
                          Style="{StaticResource CertificateStoreList}"
                          ItemContainerStyle="{StaticResource CertificateStoreListItem}"
+                         Visibility="{Binding HasStoreCertificates, Converter={StaticResource BoolToVisibility}}"
                          AutomationProperties.Name="Certificates in selected Windows personal store">
                     <ListBox.ItemTemplate>
                         <DataTemplate>

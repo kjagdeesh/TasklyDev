@@ -31,6 +31,7 @@ public sealed class CertificateInspectorViewModel : INotifyPropertyChanged
     {
         _service = service;
         _filePicker = filePicker;
+        StoreCertificates.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasStoreCertificates));
         BrowseCertificateCommand = new AsyncRelayCommand(BrowseCertificateAsync);
         LoadStoreCommand = new AsyncRelayCommand(LoadStoreAsync);
         InspectSelectedStoreCertificateCommand = new AsyncRelayCommand(InspectSelectedStoreCertificateAsync);
@@ -40,6 +41,9 @@ public sealed class CertificateInspectorViewModel : INotifyPropertyChanged
 
     /// <summary>Gets the metadata entries from the selected personal store.</summary>
     public ObservableCollection<CertificateListItem> StoreCertificates { get; } = [];
+
+    /// <summary>Gets whether the selected store currently contains certificates to display.</summary>
+    public bool HasStoreCertificates => StoreCertificates.Count > 0;
 
     /// <summary>Gets available Windows personal-store scopes.</summary>
     public IReadOnlyList<CertificateStoreScope> StoreScopes { get; } =
@@ -98,7 +102,13 @@ public sealed class CertificateInspectorViewModel : INotifyPropertyChanged
     public string SelectedFilePath
     {
         get => _selectedFilePath;
-        private set => SetProperty(ref _selectedFilePath, value);
+        private set
+        {
+            if (SetProperty(ref _selectedFilePath, value))
+            {
+                OnPropertyChanged(nameof(HasSelectedFilePath));
+            }
+        }
     }
 
     /// <summary>Gets the current user-facing status.</summary>
@@ -134,6 +144,9 @@ public sealed class CertificateInspectorViewModel : INotifyPropertyChanged
 
     /// <summary>Gets whether a certificate has been inspected.</summary>
     public bool HasInspection => Inspection is not null;
+
+    /// <summary>Gets whether a certificate file path is selected.</summary>
+    public bool HasSelectedFilePath => !string.IsNullOrWhiteSpace(SelectedFilePath);
 
     /// <summary>Gets whether a store certificate is selected.</summary>
     public bool HasSelectedStoreCertificate => SelectedStoreCertificate is not null;
