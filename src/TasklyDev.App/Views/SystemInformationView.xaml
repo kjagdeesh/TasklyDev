@@ -162,7 +162,7 @@
             <StackPanel>
                 <TextBlock Text="Read-only system snapshot"
                            Style="{StaticResource SystemInfoNoticeTitle}" />
-                <TextBlock Text="Collects read-only Windows, processor, firmware, graphics, memory, storage, security, and .NET details. Device IDs, Product IDs, and the current account may appear in copied or exported reports; values are not redacted."
+                <TextBlock Text="Collects read-only Windows, processor, firmware, graphics, memory, storage, network, power, security, and .NET details. Device IDs, Product IDs, account/domain, and network adapter details may appear in copied or exported reports; values are not redacted."
                            Margin="0,5,0,0"
                            Style="{StaticResource SystemInfoSecondaryText}" />
             </StackPanel>

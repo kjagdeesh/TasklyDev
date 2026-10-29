@@ -7,11 +7,133 @@
             <Setter Property="MinHeight" Value="38" />
             <Setter Property="Padding" Value="15,8" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="ParserPrimaryButton" TargetType="Button" BasedOn="{StaticResource ParserActionButton}">
             <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="ParserInput" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="InputBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="Transparent"
+                                          Focusable="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="InputBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="InputBorder" Property="Opacity" Value="0.6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ParserBaseTextBlock" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}" />
+        <Style x:Key="ParserPageTitle" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="ParserDescription" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style x:Key="ParserFieldLabel" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
+        <Style x:Key="ParserHelpText" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style x:Key="ParserStatusText" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsError}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsError}" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ParserResultTitle" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="ParserResultLabel" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style x:Key="ParserResultValue" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="ParserCanonicalValue" TargetType="TextBlock" BasedOn="{StaticResource ParserBaseTextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="13" />
         </Style>
     </UserControl.Resources>
 
@@ -23,36 +145,22 @@
                 Padding="22"
                 Margin="0,0,0,16">
             <StackPanel>
-                <TextBlock Text="Validate and parse a UUID / GUID"
-                           FontSize="16"
-                           FontWeight="SemiBold" />
-                <TextBlock Text="Paste a value to check its .NET format, normalize it, and inspect recognizable UUID version bits."
-                           Margin="0,5,0,18"
-                           FontSize="12"
-                           Foreground="{DynamicResource MutedTextBrush}"
-                           TextWrapping="Wrap" />
+            <TextBlock Text="Validate and parse a UUID / GUID"
+                       Style="{StaticResource ParserPageTitle}" />
+            <TextBlock Text="Paste a value to check its .NET format, normalize it, and inspect recognizable UUID version bits."
+                       Margin="0,5,0,18"
+                       Style="{StaticResource ParserDescription}" />
 
-                <TextBlock Text="UUID / GUID value"
-                           Margin="0,0,0,6"
-                           FontSize="12"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource SecondaryTextBrush}" />
-                <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
-                         MinHeight="44"
-                         Padding="12,10"
-                         FontFamily="Consolas"
-                         FontSize="14"
-                         Background="{DynamicResource EditorSurfaceBrush}"
-                         Foreground="{DynamicResource PrimaryTextBrush}"
-                         BorderBrush="{DynamicResource OutlineBrush}"
-                         BorderThickness="1"
-                         VerticalContentAlignment="Center"
-                         AutomationProperties.Name="UUID or GUID input" />
+            <TextBlock Text="UUID / GUID value"
+                       Margin="0,0,0,6"
+                       Style="{StaticResource ParserFieldLabel}" />
+            <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource ParserInput}"
+                     AutomationProperties.Name="UUID or GUID input" />
 
-                <TextBlock Text="Accepted .NET formats: D, N, B, P, and X."
-                           Margin="0,7,0,16"
-                           FontSize="11"
-                           Foreground="{DynamicResource MutedTextBrush}" />
+            <TextBlock Text="Accepted .NET formats: D, N, B, P, and X."
+                       Margin="0,7,0,16"
+                       Style="{StaticResource ParserHelpText}" />
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Clear"
@@ -81,20 +189,7 @@
                 </Style>
             </Border.Style>
             <TextBlock Text="{Binding StatusMessage}"
-                       FontSize="12"
-                       Foreground="{DynamicResource AmberDeepBrush}"
-                       TextWrapping="Wrap">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsError}" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+                       Style="{StaticResource ParserStatusText}" />
         </Border>
 
         <Border Background="{DynamicResource CardSurfaceBrush}"
@@ -105,8 +200,7 @@
                 Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
                 <TextBlock Text="Inspection result"
-                           FontSize="16"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource ParserResultTitle}"
                            Margin="0,0,0,16" />
 
                 <Grid Margin="0,0,0,16">
@@ -122,11 +216,9 @@
                             Margin="0,0,8,0">
                         <StackPanel>
                             <TextBlock Text="Detected format"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource MutedTextBrush}" />
+                                       Style="{StaticResource ParserResultLabel}" />
                             <TextBlock Text="{Binding DetectedFormat, TargetNullValue=Unavailable}"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
+                                       Style="{StaticResource ParserResultValue}"
                                        Margin="0,5,0,0" />
                         </StackPanel>
                     </Border>
@@ -139,20 +231,16 @@
                             Margin="8,0,0,0">
                         <StackPanel>
                             <TextBlock Text="UUID version"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource MutedTextBrush}" />
+                                       Style="{StaticResource ParserResultLabel}" />
                             <TextBlock Text="{Binding VersionDescription}"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
+                                       Style="{StaticResource ParserResultValue}"
                                        Margin="0,5,0,0" />
                         </StackPanel>
                     </Border>
                 </Grid>
 
                 <TextBlock Text="Canonical value"
-                           FontSize="12"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           Style="{StaticResource ParserFieldLabel}"
                            Margin="0,0,0,6" />
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -166,9 +254,7 @@
                             Padding="12,10"
                             VerticalAlignment="Center">
                         <TextBlock Text="{Binding CanonicalValue}"
-                                   FontFamily="Consolas"
-                                   FontSize="13"
-                                   TextWrapping="Wrap"
+                                   Style="{StaticResource ParserCanonicalValue}"
                                    AutomationProperties.Name="Canonical UUID or GUID value" />
                     </Border>
                     <Button Grid.Column="1"
@@ -183,9 +269,7 @@
 
                 <TextBlock Text="Version reporting is based only on recognizable RFC variant and version bits. It does not prove a value's origin, uniqueness, or security."
                            Margin="0,14,0,0"
-                           FontSize="11"
-                           Foreground="{DynamicResource MutedTextBrush}"
-                           TextWrapping="Wrap" />
+                           Style="{StaticResource ParserHelpText}" />
             </StackPanel>
         </Border>
     </StackPanel>

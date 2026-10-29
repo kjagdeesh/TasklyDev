@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Principal;
@@ -21,6 +22,7 @@ public sealed class SystemInformationService : ISystemInformationService
     private const int RelationCache = 2;
     private const int ErrorInsufficientBuffer = 122;
     private static readonly string[] ByteUnits = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
+    private static readonly string[] BitRateUnits = ["bps", "Kbps", "Mbps", "Gbps", "Tbps"];
 
     /// <inheritdoc />
     public Task<SystemInformationSnapshot> GetSnapshotAsync(CancellationToken cancellationToken = default) =>
@@ -67,6 +69,8 @@ public sealed class SystemInformationService : ISystemInformationService
             ReadGraphicsGroup(),
             ReadMemoryGroup(),
             ReadStorageGroup(),
+            ReadNetworkGroup(),
+            ReadPowerGroup(),
             ReadEnvironmentGroup(),
             new("Uptime and .NET runtime", [
                 Available("System uptime", FormatUptime(System.Environment.TickCount64), "Environment.TickCount64"),
@@ -435,10 +439,15 @@ public sealed class SystemInformationService : ISystemInformationService
         var fields = new List<SystemInformationField>
         {
             ReadCurrentUserField(),
+            Available("User or domain context", System.Environment.UserDomainName, "Environment.UserDomainName"),
             Available("Interactive session", System.Environment.UserInteractive ? "Yes" : "No", "Environment.UserInteractive"),
             Available("System UI culture", CultureInfo.InstalledUICulture.Name, "CultureInfo.InstalledUICulture"),
             Available("Current user culture", CultureInfo.CurrentCulture.Name, "CultureInfo.CurrentCulture"),
             Available("Windows ANSI code page", CultureInfo.CurrentCulture.TextInfo.ANSICodePage.ToString(CultureInfo.InvariantCulture), "CultureInfo.TextInfo.ANSICodePage"),
+            Available("Time zone", TimeZoneInfo.Local.DisplayName, "TimeZoneInfo.Local"),
+            Available("Time zone identifier", TimeZoneInfo.Local.Id, "TimeZoneInfo.Local.Id"),
+            Available("Current UTC offset", TimeZoneInfo.Local.GetUtcOffset(DateTimeOffset.Now).ToString("c", CultureInfo.InvariantCulture), "TimeZoneInfo.Local"),
+            Available("Daylight saving time", TimeZoneInfo.Local.IsDaylightSavingTime(DateTimeOffset.Now) ? "Active" : "Not active", "TimeZoneInfo.Local"),
             Available("Windows directory", System.Environment.GetFolderPath(System.Environment.SpecialFolder.Windows), "Environment.GetFolderPath"),
             Available("System directory", System.Environment.SystemDirectory, "Environment.SystemDirectory"),
             ReadElevationField(),
@@ -449,6 +458,160 @@ public sealed class SystemInformationService : ISystemInformationService
 
         return new SystemInformationGroup("Environment, security, and virtualization", fields);
     }
+
+    private static SystemInformationGroup ReadNetworkGroup()
+    {
+        NetworkInterface[] adapters;
+        try
+        {
+            adapters = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(adapter => adapter.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .OrderBy(adapter => adapter.Name, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+        catch (Exception exception) when (exception is NetworkInformationException or PlatformNotSupportedException)
+        {
+            return new SystemInformationGroup("Network adapters", [
+                Unavailable("Network adapters", "NetworkInterface.GetAllNetworkInterfaces", exception.Message)
+            ]);
+        }
+
+        var fields = new List<SystemInformationField>
+        {
+            Available("Adapters detected", adapters.Length.ToString(CultureInfo.InvariantCulture), "NetworkInterface.GetAllNetworkInterfaces")
+        };
+        for (var index = 0; index < adapters.Length; index++)
+        {
+            var adapter = adapters[index];
+            try
+            {
+                var properties = adapter.GetIPProperties();
+                var ipv4 = properties.GetIPv4Properties();
+                var ipv6 = properties.GetIPv6Properties();
+                var details = new List<string>
+                {
+                    $"Status: {adapter.OperationalStatus}",
+                    $"Type: {adapter.NetworkInterfaceType}"
+                };
+                if (adapter.Speed > 0)
+                {
+                    details.Add($"Link: {FormatBitRate(adapter.Speed)}");
+                }
+
+                if (ipv4 is not null)
+                {
+                    details.Add($"IPv4 MTU: {ipv4.Mtu.ToString(CultureInfo.InvariantCulture)}");
+                }
+
+                if (ipv6 is not null)
+                {
+                    details.Add($"IPv6 MTU: {ipv6.Mtu.ToString(CultureInfo.InvariantCulture)}");
+                }
+
+                details.Add($"Address counts: {properties.UnicastAddresses.Count(address => address.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)} IPv4, {properties.UnicastAddresses.Count(address => address.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)} IPv6");
+                fields.Add(Available(
+                    $"Adapter {index + 1}: {adapter.Name}",
+                    string.IsNullOrWhiteSpace(adapter.Description) ? string.Join("; ", details) : $"{adapter.Description}; {string.Join("; ", details)}",
+                    "NetworkInterface"));
+            }
+            catch (Exception exception) when (exception is NetworkInformationException or PlatformNotSupportedException or InvalidOperationException)
+            {
+                fields.Add(Unavailable(
+                    $"Adapter {index + 1}: {adapter.Name}",
+                    "NetworkInterface.GetIPProperties",
+                    exception.Message));
+            }
+        }
+
+        return new SystemInformationGroup("Network adapters", fields);
+    }
+
+    private static string FormatBitRate(long bitsPerSecond)
+    {
+        var rate = (double)bitsPerSecond;
+        var unitIndex = 0;
+        while (rate >= 1000 && unitIndex < BitRateUnits.Length - 1)
+        {
+            rate /= 1000;
+            unitIndex++;
+        }
+
+        return $"{rate.ToString("N1", CultureInfo.InvariantCulture)} {BitRateUnits[unitIndex]}";
+    }
+
+    private static SystemInformationGroup ReadPowerGroup()
+    {
+        if (!GetSystemPowerStatus(out var status))
+        {
+            return new SystemInformationGroup("Power and battery", [
+                Unavailable("Power status", "GetSystemPowerStatus", FormatWin32Error(Marshal.GetLastWin32Error()))
+            ]);
+        }
+
+        var acPower = status.ACLineStatus switch
+        {
+            0 => "On battery",
+            1 => "AC power",
+            _ => "Unknown"
+        };
+        var fields = new List<SystemInformationField>
+        {
+            Available("Power source", acPower, "GetSystemPowerStatus"),
+            Available("Power saver", status.SystemStatusFlag == 1 ? "Enabled" : "Not active", "GetSystemPowerStatus")
+        };
+
+        if ((status.BatteryFlag & 128) != 0)
+        {
+            fields.Add(Available("Battery status", "No battery reported", "GetSystemPowerStatus"));
+            fields.Add(Available("Battery charge", "Not applicable", "GetSystemPowerStatus"));
+        }
+        else
+        {
+            fields.Add(Available("Battery status", GetBatteryStatus(status.BatteryFlag), "GetSystemPowerStatus"));
+            fields.Add(status.BatteryLifePercent == 255
+                ? Unavailable("Battery charge", "GetSystemPowerStatus", "Windows did not report the battery charge percentage.")
+                : Available(
+                    "Battery charge",
+                    $"{status.BatteryLifePercent.ToString(CultureInfo.InvariantCulture)}%",
+                    "GetSystemPowerStatus",
+                    status.BatteryLifePercent));
+            fields.Add(FormatBatteryLifetime("Estimated battery time remaining", status.BatteryLifeTime));
+            fields.Add(FormatBatteryLifetime("Estimated full-charge battery life", status.BatteryFullLifeTime));
+        }
+
+        return new SystemInformationGroup("Power and battery", fields);
+    }
+
+    private static string GetBatteryStatus(byte batteryFlag)
+    {
+        var statuses = new List<string>();
+        if ((batteryFlag & 1) != 0)
+        {
+            statuses.Add("High");
+        }
+
+        if ((batteryFlag & 2) != 0)
+        {
+            statuses.Add("Low");
+        }
+
+        if ((batteryFlag & 4) != 0)
+        {
+            statuses.Add("Critical");
+        }
+
+        if ((batteryFlag & 8) != 0)
+        {
+            statuses.Add("Charging");
+        }
+
+        return statuses.Count == 0 ? "Normal or unknown" : string.Join(", ", statuses);
+    }
+
+    private static SystemInformationField FormatBatteryLifetime(string name, uint seconds) =>
+        seconds == uint.MaxValue
+            ? Unavailable(name, "GetSystemPowerStatus", "Windows does not provide an estimate for this power state.")
+            : Available(name, TimeSpan.FromSeconds(seconds).ToString("c", CultureInfo.InvariantCulture), "GetSystemPowerStatus");
 
     private static SystemInformationField ReadCurrentUserField()
     {
@@ -644,6 +807,10 @@ public sealed class SystemInformationService : ISystemInformationService
 
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetSystemPowerStatus(out SystemPowerStatus status);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetPhysicallyInstalledSystemMemory(out ulong totalMemoryInKilobytes);
 
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -694,5 +861,16 @@ public sealed class SystemInformationService : ISystemInformationService
         public ulong TotalVirtual;
         public ulong AvailableVirtual;
         public ulong AvailableExtendedVirtual;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct SystemPowerStatus
+    {
+        public byte ACLineStatus;
+        public byte BatteryFlag;
+        public byte BatteryLifePercent;
+        public byte SystemStatusFlag;
+        public uint BatteryLifeTime;
+        public uint BatteryFullLifeTime;
     }
 }
