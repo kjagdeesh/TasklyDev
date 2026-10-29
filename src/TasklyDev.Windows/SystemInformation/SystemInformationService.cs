@@ -516,7 +516,22 @@ public sealed class SystemInformationService : ISystemInformationService
         {
             fields.Add(Available("Usable physical memory", FormatBytes(status.TotalPhysicalMemory), "GlobalMemoryStatusEx"));
             fields.Add(Available("Available physical memory", FormatBytes(status.AvailablePhysicalMemory), "GlobalMemoryStatusEx"));
-            fields.Add(Available("Memory load", $"{status.MemoryLoad.ToString(CultureInfo.InvariantCulture)}%", "GlobalMemoryStatusEx"));
+            fields.Add(Available(
+                "Memory load",
+                $"{status.MemoryLoad.ToString(CultureInfo.InvariantCulture)}% in use",
+                "GlobalMemoryStatusEx",
+                status.MemoryLoad));
+            var committedMemory = status.TotalPageFile >= status.AvailablePageFile
+                ? status.TotalPageFile - status.AvailablePageFile
+                : 0;
+            var commitPercent = status.TotalPageFile == 0
+                ? 0
+                : Math.Clamp((double)committedMemory / status.TotalPageFile * 100, 0, 100);
+            fields.Add(Available(
+                "Commit usage",
+                $"{FormatBytes(committedMemory)} of {FormatBytes(status.TotalPageFile)}",
+                "GlobalMemoryStatusEx",
+                commitPercent));
             fields.Add(Available("Commit limit", FormatBytes(status.TotalPageFile), "GlobalMemoryStatusEx"));
             fields.Add(Available("Available commit", FormatBytes(status.AvailablePageFile), "GlobalMemoryStatusEx"));
             fields.Add(Available(
@@ -578,8 +593,9 @@ public sealed class SystemInformationService : ISystemInformationService
                         : $"{volumeLabel} ({fileSystem})";
                     fields.Add(Available(
                         $"{drive.Name} {volumeDescription}",
-                        $"Type {drive.DriveType}; total {FormatBytes((ulong)totalSize)}; used {FormatBytes((ulong)usedSpace)} ({usagePercent.ToString("N1", CultureInfo.InvariantCulture)}%); free {FormatBytes((ulong)availableFreeSpace)}",
-                        "DriveInfo"));
+                        $"Used {FormatBytes((ulong)usedSpace)} of {FormatBytes((ulong)totalSize)}; {FormatBytes((ulong)availableFreeSpace)} free",
+                        "DriveInfo",
+                        usagePercent));
                 }
                 catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or SecurityException or ArgumentException)
                 {
@@ -600,8 +616,8 @@ public sealed class SystemInformationService : ISystemInformationService
         return new SystemInformationGroup("Storage", fields);
     }
 
-    private static SystemInformationField Available(string name, string value, string source) =>
-        new(name, value, source, true);
+    private static SystemInformationField Available(string name, string value, string source, double? progressPercent = null) =>
+        new(name, value, source, true, ProgressPercent: progressPercent);
 
     private static SystemInformationField Unavailable(string name, string source, string statusMessage) =>
         new(name, "Unavailable", source, false, statusMessage);

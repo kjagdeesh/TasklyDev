@@ -68,6 +68,15 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="SystemInfoProgressBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="7" />
+            <Setter Property="Minimum" Value="0" />
+            <Setter Property="Maximum" Value="100" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="Margin" Value="0,8,0,1" />
+        </Style>
     </UserControl.Resources>
 
     <StackPanel>
@@ -216,6 +225,7 @@
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
                                                 <TextBlock Text="{Binding Name}"
                                                            Style="{StaticResource SystemInfoFieldLabel}"
@@ -230,6 +240,12 @@
                                                            Text="{Binding StatusMessage}"
                                                            Margin="0,3,0,0"
                                                            Style="{StaticResource SystemInfoFieldStatus}" />
+                                                <ProgressBar Grid.Row="2"
+                                                             Grid.ColumnSpan="2"
+                                                             Value="{Binding ProgressPercent}"
+                                                             Visibility="{Binding HasProgress, Converter={StaticResource BoolToVisibility}}"
+                                                             Style="{StaticResource SystemInfoProgressBar}"
+                                                             ToolTip="{Binding Value}" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>

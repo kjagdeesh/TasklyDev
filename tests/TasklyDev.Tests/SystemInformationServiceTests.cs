@@ -32,6 +32,9 @@ public sealed class SystemInformationServiceTests
         Assert.Contains(fields, field => field.Name == "BIOS manufacturer");
         Assert.Contains(fields, field => field.Name == "System model");
         Assert.Contains(fields, field => field.Name == "Installed physical memory");
+        Assert.Contains(fields, field => field.Name == "Memory load" && field.HasProgress);
+        Assert.Contains(fields, field => field.Name == "Commit usage" && field.HasProgress);
+        Assert.Contains(snapshot.Groups.Single(group => group.Title == "Storage").Fields, field => field.HasProgress);
         Assert.True(fields.Single(field => field.Name == "Logical processors / threads").IsAvailable);
         Assert.True(fields.Single(field => field.Name == "Physical processor cores").IsAvailable);
         Assert.True(fields.Single(field => field.Name == "Processor cache memory").IsAvailable);
@@ -40,6 +43,10 @@ public sealed class SystemInformationServiceTests
             Assert.False(string.IsNullOrWhiteSpace(field.Name));
             Assert.False(string.IsNullOrWhiteSpace(field.Source));
             Assert.True(field.IsAvailable || !string.IsNullOrWhiteSpace(field.StatusMessage));
+            if (field.ProgressPercent is { } progress)
+            {
+                Assert.InRange(progress, 0, 100);
+            }
         });
         Assert.Contains(fields, field => field.IsAvailable);
     }
