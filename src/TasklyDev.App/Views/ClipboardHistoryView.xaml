@@ -47,6 +47,46 @@
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
+        <Style x:Key="ClipboardHistoryClearSearchButton" TargetType="Button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ClearButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ClearButtonBorder" Property="Opacity" Value="0.88" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ClearButtonBorder" Property="BorderBrush" Value="{DynamicResource AmberDeepBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ClearButtonBorder" Property="Opacity" Value="0.72" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasSearchText}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="ClipboardHistorySearchBox" TargetType="TextBox">
             <Setter Property="MinHeight" Value="42" />
             <Setter Property="Padding" Value="0" />
@@ -415,29 +455,20 @@
                         </Grid>
                     </Border>
                     <Button Grid.Column="1"
-                            Width="42"
-                            Height="42"
-                            Margin="10,0,0,0"
-                            Background="{DynamicResource AmberBrush}"
-                            Foreground="{DynamicResource PrimaryTextBrush}"
-                            BorderThickness="0"
-                            FontSize="21"
-                            FontWeight="Light"
-                            Content="×"
+                            Style="{StaticResource ClipboardHistoryClearSearchButton}"
+                            Margin="8,0,0,0"
                             Command="{Binding ClearSearchCommand}"
                             ToolTip="Clear search"
                             AutomationProperties.Name="Clear clipboard history search">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Setter Property="Cursor" Value="Hand" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasSearchText}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
+                        <Path Data="M3,3 L13,13 M13,3 L3,13"
+                              Width="12"
+                              Height="12"
+                              Stretch="Uniform"
+                              Stroke="#3B2B0D"
+                              StrokeThickness="2.2"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              StrokeLineJoin="Round" />
                     </Button>
                 </Grid>
                 <TextBlock Text="No clipboard entries are stored."
