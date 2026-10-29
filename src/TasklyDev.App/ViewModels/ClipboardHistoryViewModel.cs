@@ -16,7 +16,9 @@ public enum ClipboardHistorySortMode
     OldestFirst,
     ClipboardTextAscending,
     ClipboardTextDescending,
-    PinnedOnly
+    PinnedOnly,
+    LargestFirst,
+    SmallestFirst
 }
 
 public sealed record ClipboardHistorySortOption(string Label, ClipboardHistorySortMode Mode);
@@ -32,7 +34,9 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         new("Oldest first", ClipboardHistorySortMode.OldestFirst),
         new("Clipboard text A-Z", ClipboardHistorySortMode.ClipboardTextAscending),
         new("Clipboard text Z-A", ClipboardHistorySortMode.ClipboardTextDescending),
-        new("Pinned only", ClipboardHistorySortMode.PinnedOnly)
+        new("Pinned only", ClipboardHistorySortMode.PinnedOnly),
+        new("Largest first", ClipboardHistorySortMode.LargestFirst),
+        new("Smallest first", ClipboardHistorySortMode.SmallestFirst)
     ];
 
     private readonly IClipboardHistoryService _service;
@@ -41,6 +45,8 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     private readonly Queue<string> _pendingClipboardItems = new();
     private ClipboardHistoryEntry? _selectedEntry;
     private ClipboardHistoryEntry? _selectedListEntry;
+    private string? _copiedTextToSuppress;
+    private DateTimeOffset _copySuppressionExpiresAt;
     private string _actionFeedback = string.Empty;
     private bool _isActionError;
     private string _searchText = string.Empty;
@@ -279,6 +285,17 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
             return;
         }
 
+        if (_copiedTextToSuppress is { } copiedText)
+        {
+            var shouldSuppress = DateTimeOffset.UtcNow <= _copySuppressionExpiresAt &&
+                                 string.Equals(text, copiedText, StringComparison.Ordinal);
+            _copiedTextToSuppress = null;
+            if (shouldSuppress)
+            {
+                return;
+            }
+        }
+
         if (_pendingClipboardItems.Count >= MaximumPendingClipboardItems)
         {
             ReportClipboardReadFailure("The history writer is busy; this clipboard update was skipped.");
@@ -361,8 +378,11 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
             return;
         }
 
-        if (_clipboard.TrySetText(SelectedEntry.Text))
+        var text = SelectedEntry.Text;
+        if (_clipboard.TrySetText(text))
         {
+            _copiedTextToSuppress = text;
+            _copySuppressionExpiresAt = DateTimeOffset.UtcNow.AddSeconds(3);
             StatusMessage = "Selected text copied to the clipboard.";
             IsError = false;
             SetActionFeedback(StatusMessage, isError: false);
@@ -610,6 +630,8 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
                 matches.OrderBy(entry => entry.Text.TrimStart(), StringComparer.OrdinalIgnoreCase),
             ClipboardHistorySortMode.ClipboardTextDescending =>
                 matches.OrderByDescending(entry => entry.Text.TrimStart(), StringComparer.OrdinalIgnoreCase),
+            ClipboardHistorySortMode.LargestFirst => matches.OrderByDescending(entry => entry.Utf8ByteCount),
+            ClipboardHistorySortMode.SmallestFirst => matches.OrderBy(entry => entry.Utf8ByteCount),
             ClipboardHistorySortMode.PinnedOnly => matches.OrderByDescending(entry => entry.CapturedAt),
             _ => matches.OrderByDescending(entry => entry.CapturedAt)
         };

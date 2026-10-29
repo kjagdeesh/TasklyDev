@@ -34,6 +34,16 @@ public sealed class ClipboardHistoryViewModelTests
     }
 
     [Fact]
+    public void ClipboardHistorySizeFormatsBytesAndLargerUnits()
+    {
+        var converter = new ClipboardHistorySizeConverter();
+
+        Assert.Equal("4 B", converter.Convert(4L, typeof(string), null, CultureInfo.InvariantCulture));
+        Assert.Equal("1.00 KB", converter.Convert(1024L, typeof(string), null, CultureInfo.InvariantCulture));
+        Assert.Equal("1.00 MB", converter.Convert(1_048_576L, typeof(string), null, CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
     public async Task CaptureRequiresConsentAndPreviouslyOptedInStateResumesAfterReload()
     {
         var (directory, path) = CreateStoragePath();
@@ -115,7 +125,7 @@ public sealed class ClipboardHistoryViewModelTests
             Assert.Equal("2 of 2 entries", viewModel.HistoryCountSummary);
             Assert.True(viewModel.StorageUsageMegabytes > 0);
             Assert.InRange(viewModel.StorageUsageMegabytes, 0, 100);
-            Assert.Equal(5, viewModel.SortOptions.Count);
+            Assert.Equal(7, viewModel.SortOptions.Count);
 
             viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
                 option.Mode == ClipboardHistorySortMode.ClipboardTextAscending);
@@ -143,6 +153,45 @@ public sealed class ClipboardHistoryViewModelTests
             viewModel.ClearSearchCommand.Execute(null);
             Assert.Empty(viewModel.SearchText);
             Assert.False(viewModel.HasSearchText);
+        }
+        finally
+        {
+            DeleteTestDirectory(directory);
+        }
+    }
+
+    [Fact]
+    public async Task StorageSortOrdersByUtf8SizeAndKeepsPinnedEntriesFirst()
+    {
+        var (directory, path) = CreateStoragePath();
+        try
+        {
+            var viewModel = CreateViewModel(path);
+            await viewModel.InitializeAsync();
+            viewModel.ConsentConfirmed = true;
+            await viewModel.StartCaptureAsync();
+            await viewModel.CaptureTextAsync("a");
+            await viewModel.CaptureTextAsync("medium");
+            await viewModel.CaptureTextAsync("😀");
+
+            var pinnedEntry = viewModel.Entries.Single(entry => entry.Text == "a");
+            viewModel.SelectedEntry = pinnedEntry;
+            await viewModel.TogglePinSelectedAsync();
+
+            viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
+                option.Mode == ClipboardHistorySortMode.LargestFirst);
+
+            Assert.Equal(
+                ["a", "medium", "😀"],
+                viewModel.FilteredEntries.Select(entry => entry.Text));
+            Assert.Equal(4, viewModel.Entries.Single(entry => entry.Text == "😀").Utf8ByteCount);
+
+            viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
+                option.Mode == ClipboardHistorySortMode.SmallestFirst);
+
+            Assert.Equal(
+                ["a", "😀", "medium"],
+                viewModel.FilteredEntries.Select(entry => entry.Text));
         }
         finally
         {
@@ -289,6 +338,16 @@ public sealed class ClipboardHistoryViewModelTests
             Assert.Equal("copy this content", clipboard.LastSetText);
             Assert.Contains("copied", viewModel.ActionFeedback, StringComparison.OrdinalIgnoreCase);
             Assert.True(viewModel.HasSelectedEntry);
+
+            await viewModel.CaptureTextAsync("copy this content");
+
+            Assert.Single(viewModel.Entries);
+            Assert.Contains("copied", viewModel.ActionFeedback, StringComparison.OrdinalIgnoreCase);
+
+            await viewModel.CaptureTextAsync("another clipboard value");
+            await viewModel.CaptureTextAsync("copy this content");
+
+            Assert.Equal(3, viewModel.Entries.Count);
         }
         finally
         {
