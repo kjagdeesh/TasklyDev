@@ -15,6 +15,59 @@
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
+        <Style x:Key="SystemInfoBaseTextBlock" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}" />
+        <Style x:Key="SystemInfoNoticeTitle" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+        </Style>
+        <Style x:Key="SystemInfoSectionTitle" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="SystemInfoStatusText" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="SystemInfoSecondaryText" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
+        <Style x:Key="SystemInfoCaption" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style x:Key="SystemInfoSmallCaption" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style x:Key="SystemInfoFieldLabel" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoSmallCaption}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="SystemInfoFieldValue" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style x:Key="SystemInfoSummaryValue" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoBaseTextBlock}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="SystemInfoSummaryFieldValue" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoSummaryValue}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style x:Key="SystemInfoFieldStatus" TargetType="TextBlock" BasedOn="{StaticResource SystemInfoSmallCaption}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsAvailable}" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <StackPanel>
@@ -26,14 +79,10 @@
                 Margin="0,0,0,16">
             <StackPanel>
                 <TextBlock Text="Read-only system snapshot"
-                           FontSize="13"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource AmberDeepBrush}" />
+                           Style="{StaticResource SystemInfoNoticeTitle}" />
                 <TextBlock Text="Collects read-only Windows, processor, firmware, graphics, memory, storage, security, and .NET details. Device IDs, Product IDs, and the current account may appear in copied or exported reports; values are not redacted."
                            Margin="0,5,0,0"
-                           FontSize="12"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
-                           TextWrapping="Wrap" />
+                           Style="{StaticResource SystemInfoSecondaryText}" />
             </StackPanel>
         </Border>
 
@@ -47,13 +96,10 @@
                 <DockPanel>
                     <StackPanel>
                         <TextBlock Text="{Binding StatusMessage}"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   TextWrapping="Wrap" />
+                                   Style="{StaticResource SystemInfoStatusText}" />
                         <TextBlock Text="{Binding GeneratedAt, StringFormat=Generated: {0:yyyy-MM-dd HH:mm:ss zzz}, TargetNullValue=Not generated}"
                                    Margin="0,5,0,0"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource MutedTextBrush}" />
+                                   Style="{StaticResource SystemInfoCaption}" />
                     </StackPanel>
                     <Button DockPanel.Dock="Right"
                             Content="Refresh"
@@ -89,35 +135,29 @@
                 Visibility="{Binding HasLoaded, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
                 <TextBlock Text="At a glance"
-                           FontSize="15"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource SystemInfoSectionTitle}"
                            Margin="0,0,0,12" />
                 <ItemsControl ItemsSource="{Binding SummaryFields}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel />
+                            <UniformGrid Columns="6" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Width="165"
-                                    MinHeight="76"
+                            <Border MinHeight="76"
                                     Background="{DynamicResource SubtleSurfaceBrush}"
                                     BorderBrush="{DynamicResource OutlineBrush}"
                                     BorderThickness="1"
                                     CornerRadius="12"
-                                    Padding="12"
-                                    Margin="0,0,10,10">
+                                    Padding="10"
+                                    Margin="0,0,8,8">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="10"
-                                               Foreground="{DynamicResource MutedTextBrush}"
-                                               TextWrapping="Wrap" />
+                                               Style="{StaticResource SystemInfoSmallCaption}" />
                                     <TextBlock Text="{Binding Value}"
                                                Margin="0,6,0,0"
-                                               FontSize="12"
-                                               FontWeight="SemiBold"
-                                               TextWrapping="Wrap" />
+                                               Style="{StaticResource SystemInfoSummaryFieldValue}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
@@ -135,17 +175,19 @@
                 Visibility="{Binding HasNoAvailableInformation, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
                 <TextBlock Text="No system information is available"
-                           FontSize="15"
-                           FontWeight="SemiBold" />
+                           Style="{StaticResource SystemInfoSectionTitle}" />
                 <TextBlock Text="Field-level details below explain which sources could not be read."
                            Margin="0,6,0,0"
-                           FontSize="12"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
-                           TextWrapping="Wrap" />
+                           Style="{StaticResource SystemInfoSecondaryText}" />
             </StackPanel>
         </Border>
 
         <ItemsControl ItemsSource="{Binding Groups}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border Background="{DynamicResource CardSurfaceBrush}"
@@ -153,57 +195,42 @@
                             BorderThickness="1"
                             CornerRadius="18"
                             Padding="18"
-                            Margin="0,0,0,16">
+                            Margin="0,0,12,16"
+                            Width="380">
                         <StackPanel>
                             <TextBlock Text="{Binding Title}"
-                                       FontSize="15"
-                                       FontWeight="SemiBold"
+                                       Style="{StaticResource SystemInfoSectionTitle}"
                                        Margin="0,0,0,12" />
                             <ItemsControl ItemsSource="{Binding Fields}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="2" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{DynamicResource SubtleSurfaceBrush}"
-                                                BorderBrush="{DynamicResource OutlineBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="10"
-                                                Padding="12"
-                                                Margin="0,0,8,8">
-                                            <StackPanel>
+                                        <Border BorderBrush="{DynamicResource OutlineBrush}"
+                                                BorderThickness="0,0,0,1"
+                                                Padding="4,9"
+                                                ToolTip="{Binding Source}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="0.8*" />
+                                                    <ColumnDefinition Width="1.2*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
                                                 <TextBlock Text="{Binding Name}"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           TextWrapping="Wrap" />
-                                                <TextBlock Text="{Binding Value}"
-                                                           Margin="0,5,0,0"
-                                                           FontSize="12"
+                                                           Style="{StaticResource SystemInfoFieldLabel}"
                                                            VerticalAlignment="Top"
-                                                           TextWrapping="Wrap" />
-                                                <TextBlock Text="{Binding Source, StringFormat=Source: {0}}"
-                                                           Margin="0,6,0,0"
-                                                           FontSize="10"
-                                                           Foreground="{DynamicResource MutedTextBrush}"
-                                                           TextWrapping="Wrap" />
-                                                <TextBlock Text="{Binding StatusMessage}"
-                                                           Margin="0,4,0,0"
-                                                           FontSize="11"
-                                                           TextWrapping="Wrap">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsAvailable}" Value="False">
-                                                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </StackPanel>
+                                                           Grid.RowSpan="2" />
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Value}"
+                                                           Style="{StaticResource SystemInfoFieldValue}"
+                                                           VerticalAlignment="Top" />
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="1"
+                                                           Text="{Binding StatusMessage}"
+                                                           Margin="0,3,0,0"
+                                                           Style="{StaticResource SystemInfoFieldStatus}" />
+                                            </Grid>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
