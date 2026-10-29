@@ -112,6 +112,12 @@ The application follows a presentation/service split: WPF views bind to view mod
 - GUIDs/UUIDs are identifiers, not passwords or secrets.
 - Theme selection is session-only and is not saved after closing the application.
 
+
+<p align="center">
+    <img src="https://github.com/kjagdeesh/TasklyDev/blob/main/Taskly.Dev%20Poster.png?raw=true" alt="Taskly.Dev Poster"  />
+</p>
+
+
 ## License and third-party notices
 
 See [LICENSE](LICENSE). Release distributions include applicable third-party license notices.
