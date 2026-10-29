@@ -103,6 +103,12 @@ public sealed class ClipboardHistoryViewModelTests
             await viewModel.ClearAllAsync();
             Assert.Empty(viewModel.Entries);
             Assert.Equal(ClipboardCaptureState.Capturing, viewModel.CaptureState);
+
+            viewModel.SearchText = "ALPHA";
+            Assert.True(viewModel.HasSearchText);
+            viewModel.ClearSearchCommand.Execute(null);
+            Assert.Empty(viewModel.SearchText);
+            Assert.False(viewModel.HasSearchText);
         }
         finally
         {

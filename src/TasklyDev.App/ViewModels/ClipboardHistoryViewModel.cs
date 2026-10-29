@@ -45,6 +45,7 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         PauseCaptureCommand = new AsyncRelayCommand(PauseCaptureAsync);
         ResumeCaptureCommand = new AsyncRelayCommand(ResumeCaptureAsync);
         DisableCaptureCommand = new AsyncRelayCommand(DisableCaptureAsync);
+        ClearSearchCommand = new RelayCommand(_ => SearchText = string.Empty);
         CopySelectedCommand = new RelayCommand(_ => CopySelected());
         TogglePinSelectedCommand = new AsyncRelayCommand(TogglePinSelectedAsync);
         DeleteSelectedCommand = new AsyncRelayCommand(DeleteSelectedAsync);
@@ -65,6 +66,7 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     public ICommand PauseCaptureCommand { get; }
     public ICommand ResumeCaptureCommand { get; }
     public ICommand DisableCaptureCommand { get; }
+    public ICommand ClearSearchCommand { get; }
     public ICommand CopySelectedCommand { get; }
     public ICommand TogglePinSelectedCommand { get; }
     public ICommand DeleteSelectedCommand { get; }
@@ -78,10 +80,14 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         {
             if (SetProperty(ref _searchText, value))
             {
+                OnPropertyChanged(nameof(HasSearchText));
                 ApplyFilter();
             }
         }
     }
+
+    /// <summary>Gets whether a search query is available to clear.</summary>
+    public bool HasSearchText => SearchText.Length > 0;
 
     /// <summary>Gets or sets explicit confirmation of the capture disclosure.</summary>
     public bool ConsentConfirmed
@@ -199,6 +205,9 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
 
     /// <summary>Gets whether a non-empty search query matches no entries.</summary>
     public bool HasNoSearchResults => HasLoaded && Entries.Count > 0 && FilteredEntries.Count == 0 && SearchText.Length > 0;
+
+    /// <summary>Gets whether the current filter has entries to display.</summary>
+    public bool HasFilteredEntries => FilteredEntries.Count > 0;
 
     /// <summary>Loads saved history and resumes capture only for a prior explicit opt-in.</summary>
     public Task InitializeAsync() => RefreshAsync();
@@ -374,6 +383,7 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
             if (SetProperty(ref _selectedEntry, value))
             {
                 OnPropertyChanged(nameof(HasSelectedEntry));
+                OnPropertyChanged(nameof(HasNoSelectedEntry));
                 OnPropertyChanged(nameof(SelectedEntryIsPinned));
                 OnPropertyChanged(nameof(SelectedEntryPinAction));
                 OnPropertyChanged(nameof(CanUseSelectedEntry));
@@ -383,6 +393,9 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
 
     /// <summary>Gets whether an entry is selected.</summary>
     public bool HasSelectedEntry => SelectedEntry is not null;
+
+    /// <summary>Gets whether no entry is selected for preview.</summary>
+    public bool HasNoSelectedEntry => !HasSelectedEntry;
 
     /// <summary>Gets whether the selected entry is pinned.</summary>
     public bool SelectedEntryIsPinned => SelectedEntry?.IsPinned == true;
@@ -498,6 +511,7 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
 
         OnPropertyChanged(nameof(HasNoEntries));
         OnPropertyChanged(nameof(HasNoSearchResults));
+        OnPropertyChanged(nameof(HasFilteredEntries));
     }
 
     private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
