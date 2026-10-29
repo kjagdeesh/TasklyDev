@@ -50,6 +50,7 @@ public sealed class ShellWindowTests
                 var clipboardHistoryView = new ClipboardHistoryView();
                 var certificateInspectorView = new CertificateInspectorView();
                 var settingsView = new SettingsView();
+                var clearClipboardHistoryDialog = new ClearClipboardHistoryDialog();
 
                 Assert.Equal("taskly.dev", window.Title);
                 Assert.Equal(WindowStyle.SingleBorderWindow, window.WindowStyle);
@@ -74,6 +75,7 @@ public sealed class ShellWindowTests
                 Assert.NotNull(clipboardHistoryView);
                 Assert.NotNull(certificateInspectorView);
                 Assert.NotNull(settingsView);
+                Assert.NotNull(clearClipboardHistoryDialog);
 
                 window.Show();
                 foreach (var route in new[]

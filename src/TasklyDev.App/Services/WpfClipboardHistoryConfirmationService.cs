@@ -1,4 +1,5 @@
 using System.Windows;
+using TasklyDev.Views;
 
 namespace TasklyDev.Services;
 
@@ -6,11 +7,14 @@ namespace TasklyDev.Services;
 public sealed class WpfClipboardHistoryConfirmationService : IClipboardHistoryConfirmationService
 {
     /// <inheritdoc />
-    public bool ConfirmClearHistory() =>
-        MessageBox.Show(
-            "Delete all clipboard history entries? This cannot be undone.",
-            "Clear clipboard history",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning,
-            MessageBoxResult.No) == MessageBoxResult.Yes;
+    public bool ConfirmClearHistory()
+    {
+        var dialog = new ClearClipboardHistoryDialog();
+        if (Application.Current?.MainWindow is { } owner)
+        {
+            dialog.Owner = owner;
+        }
+
+        return dialog.ShowDialog() == true;
+    }
 }

@@ -1,0 +1,218 @@
+<Window x:Class="TasklyDev.Views.ClearClipboardHistoryDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Clear clipboard history"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style x:Key="ConfirmationCancelButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
+            <Setter Property="MinWidth" Value="92" />
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="CancelButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CancelButtonBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                                <Setter TargetName="CancelButtonBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="CancelButtonBorder" Property="Opacity" Value="0.8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="{DynamicResource CardSurfaceBrush}"
+            BorderBrush="{DynamicResource CardOutlineBrush}"
+            BorderThickness="1"
+            CornerRadius="18"
+            Margin="12">
+        <Border.Effect>
+            <DropShadowEffect Color="#99000000"
+                              BlurRadius="22"
+                              ShadowDepth="5"
+                              Opacity="0.22" />
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Border x:Name="TitleBar"
+                    Background="{DynamicResource SubtleSurfaceBrush}"
+                    CornerRadius="18,18,0,0"
+                    Padding="16,10"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="30"
+                            Height="30"
+                            CornerRadius="15"
+                            Background="{DynamicResource AmberTintBrush}">
+                        <Path Data="M6,5 H10 L12,7 H19 V20 H5 V5 Z M8,11 H16 M8,14 H16 M8,17 H13"
+                              Width="17"
+                              Height="17"
+                              Stroke="{DynamicResource AmberDeepBrush}"
+                              StrokeThickness="1.5"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              StrokeLineJoin="Round"
+                              Stretch="Uniform"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Grid.Column="1"
+                               Text="Clipboard History"
+                               Margin="10,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                    <Button Grid.Column="2"
+                            Width="32"
+                            Height="32"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Foreground="{DynamicResource MutedTextBrush}"
+                            Cursor="Hand"
+                            ToolTip="Close dialog"
+                            AutomationProperties.Name="Close confirmation dialog"
+                            Click="CloseWindow_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="CloseButtonBorder"
+                                        Background="{TemplateBinding Background}"
+                                        CornerRadius="9">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="CloseButtonBorder"
+                                                Property="Background"
+                                                Value="{DynamicResource CardHoverBrush}" />
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource PrimaryTextBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="CloseButtonBorder" Property="Opacity" Value="0.72" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Path Data="M4,4 L12,12 M12,4 L4,12"
+                              Width="11"
+                              Height="11"
+                              Stretch="Uniform"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.8"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1"
+                  Width="440"
+                  Margin="26,20,26,26">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,0,18">
+                    <Border Width="46"
+                            Height="46"
+                            CornerRadius="23"
+                            Background="{DynamicResource AmberTintBrush}"
+                            VerticalAlignment="Center">
+                        <Path Data="M10,4 L14,4 L13.4,13 L10.6,13 Z M10.5,16 H13.5 V19 H10.5 Z"
+                              Width="18"
+                              Height="18"
+                              Fill="#3B2B0D"
+                              Stretch="Uniform"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Margin="14,0,0,0"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Clear clipboard history?"
+                                   FontSize="19"
+                                   FontWeight="Bold" />
+                        <TextBlock Text="Please confirm this permanent change."
+                                   Margin="0,4,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource MutedTextBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                        Background="{DynamicResource SubtleSurfaceBrush}"
+                        BorderBrush="{DynamicResource OutlineBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="16"
+                        Margin="0,0,0,22">
+                    <StackPanel>
+                        <TextBlock Text="All saved clipboard entries on this device will be permanently deleted."
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Text="Clipboard capture will remain in its current state."
+                                   Margin="0,7,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource MutedTextBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="Cancel"
+                            IsCancel="True"
+                            Style="{StaticResource ConfirmationCancelButton}"
+                            Margin="0,0,10,0"
+                            Click="Cancel_Click" />
+                    <Button Content="Clear history"
+                            Style="{StaticResource WarningActionButton}"
+                            MinWidth="126"
+                            MinHeight="40"
+                            IsDefault="False"
+                            AutomationProperties.Name="Confirm clearing clipboard history"
+                            Click="Confirm_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
