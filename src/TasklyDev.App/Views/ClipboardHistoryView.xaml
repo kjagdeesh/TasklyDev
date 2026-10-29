@@ -154,6 +154,29 @@
         <Style x:Key="ClipboardHistoryFieldLabel" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
+        <Style x:Key="ClipboardHistoryPolicyHeading" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        </Style>
+        <Style x:Key="ClipboardHistoryPolicyLabel" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style x:Key="ClipboardHistoryPolicyValue" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        </Style>
+        <Style x:Key="ClipboardHistoryPolicyNoteHeading" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+        </Style>
+        <Style x:Key="ClipboardHistoryPolicyNote" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
         <Style x:Key="ClipboardHistoryStatusText" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -187,6 +210,14 @@
                     <Setter Property="Background" Value="{DynamicResource AmberTintBrush}" />
                 </DataTrigger>
             </Style.Triggers>
+        </Style>
+        <Style x:Key="ClipboardHistoryPolicyTile" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Margin" Value="4" />
         </Style>
         <Style x:Key="ClipboardHistoryStorageProgressBar" TargetType="ProgressBar">
             <Setter Property="Height" Value="8" />
@@ -429,34 +460,142 @@
                                     Command="{Binding StartCaptureCommand}"
                                     IsEnabled="{Binding CanStartCapture}"
                                     Style="{StaticResource ClipboardHistoryPrimaryButton}"
-                                    Visibility="{Binding IsCaptureDisabled, Converter={StaticResource BoolToVisibility}}" />
+                                    Visibility="{Binding IsCaptureDisabled, Converter={StaticResource BoolToVisibility}}" 
+                                    Margin="0,20,0,0"
+                                    FontWeight="SemiBold"/>
                             <Button Content="Pause"
                                     Command="{Binding PauseCaptureCommand}"
                                     IsEnabled="{Binding IsNotBusy}"
+                                    Margin="0,1,0,0"
                                     Style="{StaticResource ClipboardHistoryButton}"
                                     Visibility="{Binding IsCapturing, Converter={StaticResource BoolToVisibility}}" />
                             <Button Content="Resume"
                                     Command="{Binding ResumeCaptureCommand}"
                                     IsEnabled="{Binding IsNotBusy}"
                                     Style="{StaticResource ClipboardHistoryPrimaryButton}"
+                                    Margin="0,1,0,0"
                                     Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibility}}" />
                             <Button Content="Stop and disable"
                                     Command="{Binding DisableCaptureCommand}"
                                     IsEnabled="{Binding IsNotBusy}"
-                                    Style="{StaticResource ClipboardHistoryButton}"
+                                    Style="{StaticResource WarningActionButton}"
+                                    Height="36"
+                                    Margin="10,0,0,0"
                                     Visibility="{Binding IsCapturing, Converter={StaticResource BoolToVisibility}}" />
                             <Button Content="Stop and disable"
                                     Command="{Binding DisableCaptureCommand}"
                                     IsEnabled="{Binding IsNotBusy}"
-                                    Style="{StaticResource ClipboardHistoryButton}"
+                                    Height="38"
+                                    Margin="10,0,0,0"
+                                    Style="{StaticResource WarningActionButton}"
+                                    
                                     Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibility}}" />
                         </WrapPanel>
                     </StackPanel>
                 </Border>
 
-                <TextBlock Text="Policy: plain text only · 90 days · up to 5,000 entries · 1 MB per entry · 100 MB total. Pinned entries skip age cleanup but still count toward size and entry limits. When limits are reached, oldest unpinned entries are removed; if all entries are pinned, the incoming text is skipped."
-                           Margin="0,6,0,0"
-                           Style="{StaticResource ClipboardHistoryDescription}" />
+                <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                        BorderBrush="{DynamicResource OutlineBrush}"
+                        BorderThickness="1"
+                        CornerRadius="14"
+                        Padding="12"
+                        Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Storage policy"
+                                   Style="{StaticResource ClipboardHistoryPolicyHeading}" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0"
+                                    Grid.Column="0"
+                                    Style="{StaticResource ClipboardHistoryPolicyTile}">
+                                <StackPanel>
+                                    <TextBlock Text="Captured content"
+                                               Style="{StaticResource ClipboardHistoryPolicyLabel}" />
+                                    <TextBlock Text="Plain text only"
+                                               Margin="0,4,0,0"
+                                               Style="{StaticResource ClipboardHistoryPolicyValue}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Row="0"
+                                    Grid.Column="1"
+                                    Style="{StaticResource ClipboardHistoryPolicyTile}">
+                                <StackPanel>
+                                    <TextBlock Text="Retention"
+                                               Style="{StaticResource ClipboardHistoryPolicyLabel}" />
+                                    <TextBlock Text="90 days"
+                                               Margin="0,4,0,0"
+                                               Style="{StaticResource ClipboardHistoryPolicyValue}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Row="0"
+                                    Grid.Column="2"
+                                    Style="{StaticResource ClipboardHistoryPolicyTile}">
+                                <StackPanel>
+                                    <TextBlock Text="History limit"
+                                               Style="{StaticResource ClipboardHistoryPolicyLabel}" />
+                                    <TextBlock Text="5,000 entries"
+                                               Margin="0,4,0,0"
+                                               Style="{StaticResource ClipboardHistoryPolicyValue}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Row="1"
+                                    Grid.Column="0"
+                                    Style="{StaticResource ClipboardHistoryPolicyTile}">
+                                <StackPanel>
+                                    <TextBlock Text="Per-entry size"
+                                               Style="{StaticResource ClipboardHistoryPolicyLabel}" />
+                                    <TextBlock Text="1 MB maximum"
+                                               Margin="0,4,0,0"
+                                               Style="{StaticResource ClipboardHistoryPolicyValue}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Row="1"
+                                    Grid.Column="1"
+                                    Style="{StaticResource ClipboardHistoryPolicyTile}">
+                                <StackPanel>
+                                    <TextBlock Text="Storage limit"
+                                               Style="{StaticResource ClipboardHistoryPolicyLabel}" />
+                                    <TextBlock Text="100 MB maximum"
+                                               Margin="0,4,0,0"
+                                               Style="{StaticResource ClipboardHistoryPolicyValue}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Row="1"
+                                    Grid.Column="2"
+                                    Style="{StaticResource ClipboardHistoryPolicyTile}">
+                                <StackPanel>
+                                    <TextBlock Text="Pinned entries"
+                                               Style="{StaticResource ClipboardHistoryPolicyLabel}" />
+                                    <TextBlock Text="Skip age cleanup; count toward limits"
+                                               Margin="0,4,0,0"
+                                               Style="{StaticResource ClipboardHistoryPolicyValue}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        <Border Background="{DynamicResource AmberTintBrush}"
+                                BorderBrush="{DynamicResource WarmOutlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="12"
+                                Margin="4,8,4,0">
+                            <StackPanel>
+                                <TextBlock Text="When limits are reached"
+                                           Style="{StaticResource ClipboardHistoryPolicyNoteHeading}" />
+                                <TextBlock Text="The oldest unpinned entries are removed to make room. If all entries are pinned, new clipboard text is skipped. Text over 1 MB is not saved."
+                                           Margin="0,4,0,0"
+                                           Style="{StaticResource ClipboardHistoryPolicyNote}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
                 <TextBlock Text="{Binding StoragePath}"
                            Margin="0,8,0,0"
                            FontFamily="Consolas"
