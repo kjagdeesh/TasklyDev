@@ -14,6 +14,7 @@ namespace TasklyDev.ViewModels;
 public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
 {
     private const int MaximumPendingClipboardItems = 32;
+    private const double MaximumStorageMegabytes = 100;
     private readonly IClipboardHistoryService _service;
     private readonly IClipboardService _clipboard;
     private readonly IClipboardHistoryConfirmationService _confirmation;
@@ -23,6 +24,7 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     private string _statusMessage = "Clipboard capture is off. Start capture only after reviewing the disclosure.";
     private string _storagePath = string.Empty;
     private string _storageUsage = "History storage not loaded.";
+    private double _storageUsageMegabytes;
     private DateTimeOffset? _lastUpdatedAt;
     private ClipboardCaptureState _captureState;
     private bool _isBusy;
@@ -154,6 +156,16 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         get => _storageUsage;
         private set => SetProperty(ref _storageUsage, value);
     }
+
+    /// <summary>Gets the stored history size in megabytes, capped at the storage limit.</summary>
+    public double StorageUsageMegabytes
+    {
+        get => _storageUsageMegabytes;
+        private set => SetProperty(ref _storageUsageMegabytes, value);
+    }
+
+    /// <summary>Gets the filtered and total history entry counts.</summary>
+    public string HistoryCountSummary => $"{FilteredEntries.Count:N0} of {Entries.Count:N0} entries";
 
     /// <summary>Gets the time at which history was most recently updated.</summary>
     public DateTimeOffset? LastUpdatedAt
@@ -477,7 +489,8 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         }
 
         StoragePath = snapshot.StoragePath;
-        StorageUsage = $"{Entries.Count:N0} entries · {snapshot.StorageSizeBytes / 1024d / 1024d:N2} MB of 100 MB";
+        StorageUsageMegabytes = Math.Clamp(snapshot.StorageSizeBytes / 1024d / 1024d, 0, MaximumStorageMegabytes);
+        StorageUsage = $"{StorageUsageMegabytes:N2} MB of {MaximumStorageMegabytes:N0} MB";
         LastUpdatedAt = DateTimeOffset.Now;
         StatusMessage = snapshot.StatusMessage;
         IsError = snapshot.StatusMessage.Contains("failed", StringComparison.OrdinalIgnoreCase) ||
@@ -512,6 +525,7 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasNoEntries));
         OnPropertyChanged(nameof(HasNoSearchResults));
         OnPropertyChanged(nameof(HasFilteredEntries));
+        OnPropertyChanged(nameof(HistoryCountSummary));
     }
 
     private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

@@ -88,7 +88,12 @@ public sealed class ClipboardHistoryViewModelTests
             await viewModel.CaptureTextAsync("alpha value");
             await viewModel.CaptureTextAsync("beta value");
 
+            Assert.Equal("2 of 2 entries", viewModel.HistoryCountSummary);
+            Assert.True(viewModel.StorageUsageMegabytes > 0);
+            Assert.InRange(viewModel.StorageUsageMegabytes, 0, 100);
+
             viewModel.SearchText = "ALPHA";
+            Assert.Equal("1 of 2 entries", viewModel.HistoryCountSummary);
             var selected = Assert.Single(viewModel.FilteredEntries);
             viewModel.SelectedEntry = selected;
             await viewModel.TogglePinSelectedAsync();
