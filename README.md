@@ -2,7 +2,7 @@
   <img src="https://github.com/kjagdeesh/TasklyDev/blob/main/src/TasklyDev.App/Assets/TasklyDevLogo.png?raw=true" alt="Taskly.Dev logo" width="112">
 </p>
 
-<h1 align="center">Taskly.Dev</h1>
+<h1 align="center">taskly<span style="color:#F5B942">.dev</span></h1>
 
 <p align="center">
   A Windows desktop workbench for common developer and system-diagnostic tasks.
