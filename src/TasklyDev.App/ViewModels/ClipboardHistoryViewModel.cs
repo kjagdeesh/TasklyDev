@@ -15,7 +15,8 @@ public enum ClipboardHistorySortMode
     NewestFirst,
     OldestFirst,
     ClipboardTextAscending,
-    ClipboardTextDescending
+    ClipboardTextDescending,
+    PinnedOnly
 }
 
 public sealed record ClipboardHistorySortOption(string Label, ClipboardHistorySortMode Mode);
@@ -30,7 +31,8 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         new("Newest first", ClipboardHistorySortMode.NewestFirst),
         new("Oldest first", ClipboardHistorySortMode.OldestFirst),
         new("Clipboard text A-Z", ClipboardHistorySortMode.ClipboardTextAscending),
-        new("Clipboard text Z-A", ClipboardHistorySortMode.ClipboardTextDescending)
+        new("Clipboard text Z-A", ClipboardHistorySortMode.ClipboardTextDescending),
+        new("Pinned only", ClipboardHistorySortMode.PinnedOnly)
     ];
 
     private readonly IClipboardHistoryService _service;
@@ -38,6 +40,9 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     private readonly IClipboardHistoryConfirmationService _confirmation;
     private readonly Queue<string> _pendingClipboardItems = new();
     private ClipboardHistoryEntry? _selectedEntry;
+    private ClipboardHistoryEntry? _selectedListEntry;
+    private string _actionFeedback = string.Empty;
+    private bool _isActionError;
     private string _searchText = string.Empty;
     private string _statusMessage = "Clipboard capture is off. Start capture only after reviewing the disclosure.";
     private string _storagePath = string.Empty;
@@ -360,30 +365,34 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
         {
             StatusMessage = "Selected text copied to the clipboard.";
             IsError = false;
+            SetActionFeedback(StatusMessage, isError: false);
         }
         else
         {
             StatusMessage = "Clipboard access is unavailable; the selected text was not copied.";
             IsError = true;
+            SetActionFeedback(StatusMessage, isError: true);
         }
     }
 
     /// <summary>Updates the selected entry's pin state.</summary>
-    public Task TogglePinSelectedAsync()
+    public async Task TogglePinSelectedAsync()
     {
         if (SelectedEntry is null)
         {
             StatusMessage = "Select a history entry before changing its pin state.";
             IsError = true;
-            return Task.CompletedTask;
+            SetActionFeedback(StatusMessage, isError: true);
+            return;
         }
 
         var id = SelectedEntry.Id;
         var isPinned = !SelectedEntry.IsPinned;
-        return RunStoreOperationAsync(
+        await RunStoreOperationAsync(
             () => _service.SetPinnedAsync(id, isPinned),
             isPinned ? "History entry pinned." : "History entry unpinned.",
-            updateCaptureState: false);
+            updateCaptureState: false).ConfigureAwait(true);
+        SetActionFeedback(StatusMessage, IsError);
     }
 
     /// <summary>Deletes the selected entry from local encrypted storage.</summary>
@@ -442,6 +451,42 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    /// <summary>Gets or sets the entry currently selected in the visible list.</summary>
+    public ClipboardHistoryEntry? SelectedListEntry
+    {
+        get => _selectedListEntry;
+        set
+        {
+            if (SetProperty(ref _selectedListEntry, value) && value is not null)
+            {
+                SelectedEntry = value;
+            }
+        }
+    }
+
+    /// <summary>Gets the most recent copy or pin action feedback.</summary>
+    public string ActionFeedback
+    {
+        get => _actionFeedback;
+        private set
+        {
+            if (SetProperty(ref _actionFeedback, value))
+            {
+                OnPropertyChanged(nameof(HasActionFeedback));
+            }
+        }
+    }
+
+    /// <summary>Gets whether the most recent copy or pin action failed.</summary>
+    public bool IsActionError
+    {
+        get => _isActionError;
+        private set => SetProperty(ref _isActionError, value);
+    }
+
+    /// <summary>Gets whether copy or pin feedback is available.</summary>
+    public bool HasActionFeedback => ActionFeedback.Length > 0;
 
     /// <summary>Gets whether an entry is selected.</summary>
     public bool HasSelectedEntry => SelectedEntry is not null;
@@ -553,28 +598,48 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     private void ApplyFilter()
     {
         var term = SearchText.Trim();
+        var selectedId = SelectedEntry?.Id;
+        var pinnedOnly = SelectedSortOption.Mode == ClipboardHistorySortMode.PinnedOnly;
         var matches = Entries.Where(entry =>
-            term.Length == 0 ||
-            entry.Text.Contains(term, StringComparison.OrdinalIgnoreCase));
-        IEnumerable<ClipboardHistoryEntry> filtered = SelectedSortOption.Mode switch
+            (!pinnedOnly || entry.IsPinned) &&
+            (term.Length == 0 || entry.Text.Contains(term, StringComparison.OrdinalIgnoreCase)));
+        var sorted = SelectedSortOption.Mode switch
         {
             ClipboardHistorySortMode.OldestFirst => matches.OrderBy(entry => entry.CapturedAt),
             ClipboardHistorySortMode.ClipboardTextAscending =>
                 matches.OrderBy(entry => entry.Text.TrimStart(), StringComparer.OrdinalIgnoreCase),
             ClipboardHistorySortMode.ClipboardTextDescending =>
                 matches.OrderByDescending(entry => entry.Text.TrimStart(), StringComparer.OrdinalIgnoreCase),
+            ClipboardHistorySortMode.PinnedOnly => matches.OrderByDescending(entry => entry.CapturedAt),
             _ => matches.OrderByDescending(entry => entry.CapturedAt)
         };
+        var filtered = pinnedOnly ? sorted : sorted.OrderByDescending(entry => entry.IsPinned);
+        var visibleEntries = filtered.ToList();
+
         FilteredEntries.Clear();
-        foreach (var entry in filtered)
+        foreach (var entry in visibleEntries)
         {
             FilteredEntries.Add(entry);
+        }
+
+        SelectedListEntry = selectedId is null
+            ? null
+            : visibleEntries.FirstOrDefault(entry => entry.Id == selectedId);
+        if (selectedId is not null && SelectedEntry?.Id == selectedId)
+        {
+            SelectedEntry = Entries.FirstOrDefault(entry => entry.Id == selectedId) ?? SelectedEntry;
         }
 
         OnPropertyChanged(nameof(HasNoEntries));
         OnPropertyChanged(nameof(HasNoSearchResults));
         OnPropertyChanged(nameof(HasFilteredEntries));
         OnPropertyChanged(nameof(HistoryCountSummary));
+    }
+
+    private void SetActionFeedback(string message, bool isError)
+    {
+        ActionFeedback = message;
+        IsActionError = isError;
     }
 
     private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

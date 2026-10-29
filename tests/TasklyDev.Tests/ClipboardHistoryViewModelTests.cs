@@ -103,7 +103,7 @@ public sealed class ClipboardHistoryViewModelTests
             Assert.Equal("2 of 2 entries", viewModel.HistoryCountSummary);
             Assert.True(viewModel.StorageUsageMegabytes > 0);
             Assert.InRange(viewModel.StorageUsageMegabytes, 0, 100);
-            Assert.Equal(4, viewModel.SortOptions.Count);
+            Assert.Equal(5, viewModel.SortOptions.Count);
 
             viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
                 option.Mode == ClipboardHistorySortMode.ClipboardTextAscending);
@@ -131,6 +131,66 @@ public sealed class ClipboardHistoryViewModelTests
             viewModel.ClearSearchCommand.Execute(null);
             Assert.Empty(viewModel.SearchText);
             Assert.False(viewModel.HasSearchText);
+        }
+        finally
+        {
+            DeleteTestDirectory(directory);
+        }
+    }
+
+    [Fact]
+    public async Task PinnedEntriesStayAtTopAndPinnedOnlySortFiltersTheList()
+    {
+        var (directory, path) = CreateStoragePath();
+        try
+        {
+            var viewModel = CreateViewModel(path);
+            await viewModel.InitializeAsync();
+            viewModel.ConsentConfirmed = true;
+            await viewModel.StartCaptureAsync();
+            await viewModel.CaptureTextAsync("Zulu unpinned");
+            await viewModel.CaptureTextAsync("Beta pinned");
+            await viewModel.CaptureTextAsync("Alpha pinned");
+
+            foreach (var text in new[] { "Beta pinned", "Alpha pinned" })
+            {
+                viewModel.SelectedEntry = viewModel.Entries.Single(entry => entry.Text == text);
+                await viewModel.TogglePinSelectedAsync();
+            }
+
+            foreach (var sortOption in viewModel.SortOptions.Where(option =>
+                         option.Mode != ClipboardHistorySortMode.PinnedOnly))
+            {
+                viewModel.SelectedSortOption = sortOption;
+
+                Assert.Equal(2, viewModel.FilteredEntries.TakeWhile(entry => entry.IsPinned).Count());
+                Assert.DoesNotContain(viewModel.FilteredEntries.SkipWhile(entry => entry.IsPinned), entry => entry.IsPinned);
+            }
+
+            viewModel.SelectedEntry = viewModel.Entries.Single(entry => entry.Text == "Alpha pinned");
+            viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
+                option.Mode == ClipboardHistorySortMode.PinnedOnly);
+            await viewModel.TogglePinSelectedAsync();
+
+            Assert.True(viewModel.HasSelectedEntry);
+            Assert.Null(viewModel.SelectedListEntry);
+            Assert.Contains("unpinned", viewModel.ActionFeedback, StringComparison.OrdinalIgnoreCase);
+
+            await viewModel.TogglePinSelectedAsync();
+            Assert.True(viewModel.HasSelectedEntry);
+            Assert.True(viewModel.SelectedEntryIsPinned);
+
+            viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
+                option.Mode == ClipboardHistorySortMode.NewestFirst);
+            viewModel.SelectedListEntry = viewModel.Entries.Single(entry => entry.Text == "Zulu unpinned");
+            viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
+                option.Mode == ClipboardHistorySortMode.PinnedOnly);
+
+            Assert.Equal(2, viewModel.FilteredEntries.Count);
+            Assert.All(viewModel.FilteredEntries, entry => Assert.True(entry.IsPinned));
+            Assert.Equal("2 of 3 entries", viewModel.HistoryCountSummary);
+            Assert.True(viewModel.HasSelectedEntry);
+            Assert.Null(viewModel.SelectedListEntry);
         }
         finally
         {
@@ -189,7 +249,34 @@ public sealed class ClipboardHistoryViewModelTests
 
             Assert.True(viewModel.IsError);
             Assert.Contains("not copied", viewModel.StatusMessage, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("not copied", viewModel.ActionFeedback, StringComparison.OrdinalIgnoreCase);
             Assert.Single(viewModel.Entries);
+        }
+        finally
+        {
+            DeleteTestDirectory(directory);
+        }
+    }
+
+    [Fact]
+    public async Task SuccessfulCopyShowsFeedbackAndKeepsThePreviewSelected()
+    {
+        var (directory, path) = CreateStoragePath();
+        try
+        {
+            var clipboard = new TestClipboardService();
+            var viewModel = CreateViewModel(path, clipboard: clipboard);
+            await viewModel.InitializeAsync();
+            viewModel.ConsentConfirmed = true;
+            await viewModel.StartCaptureAsync();
+            await viewModel.CaptureTextAsync("copy this content");
+            viewModel.SelectedEntry = Assert.Single(viewModel.Entries);
+
+            viewModel.CopySelected();
+
+            Assert.Equal("copy this content", clipboard.LastSetText);
+            Assert.Contains("copied", viewModel.ActionFeedback, StringComparison.OrdinalIgnoreCase);
+            Assert.True(viewModel.HasSelectedEntry);
         }
         finally
         {
@@ -231,8 +318,18 @@ public sealed class ClipboardHistoryViewModelTests
     private sealed class TestClipboardService : IClipboardService
     {
         public bool CanSetText { get; init; } = true;
+        public string? LastSetText { get; private set; }
 
-        public bool TrySetText(string text) => CanSetText;
+        public bool TrySetText(string text)
+        {
+            if (!CanSetText)
+            {
+                return false;
+            }
+
+            LastSetText = text;
+            return true;
+        }
     }
 
     private sealed class TestConfirmationService : IClipboardHistoryConfirmationService

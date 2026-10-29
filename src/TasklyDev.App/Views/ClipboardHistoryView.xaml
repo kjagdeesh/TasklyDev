@@ -174,6 +174,29 @@
             <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         </Style>
+        <Style x:Key="ClipboardHistoryActionFeedbackText" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource SuccessTextBrush}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActionError}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ClipboardHistoryActionFeedbackSurface" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SuccessSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActionError}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DangerSurfaceBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource ErrorBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="ClipboardHistoryPolicyHeading" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
             <Setter Property="FontSize" Value="15" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -772,7 +795,7 @@
                         </Border>
                         <ListBox Grid.Row="1"
                                  ItemsSource="{Binding FilteredEntries}"
-                                 SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                                 SelectedItem="{Binding SelectedListEntry, Mode=TwoWay}"
                                  Style="{StaticResource ClipboardHistoryList}"
                                  ItemContainerStyle="{StaticResource ClipboardHistoryListItem}"
                                  AutomationProperties.Name="Clipboard history table">
@@ -785,14 +808,21 @@
                                         </Grid.ColumnDefinitions>
                                         <Grid VerticalAlignment="Center">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <Border Width="18"
+                                            <TextBlock Text="{Binding Text, Converter={StaticResource ClipboardHistoryTitleConverter}}"
+                                                       VerticalAlignment="Center"
+                                                       TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Text}"
+                                                       Style="{StaticResource ClipboardHistoryEntryText}" />
+                                            <Border Grid.Column="1"
+                                                    Width="18"
                                                     Height="18"
                                                     CornerRadius="9"
                                                     Background="{DynamicResource AmberTintBrush}"
-                                                    Margin="0,0,8,0"
+                                                    Margin="8,0,0,0"
                                                     Visibility="{Binding IsPinned, Converter={StaticResource BoolToVisibility}}"
                                                     ToolTip="Pinned entry">
                                                 <Path Data="M8,3 H16 L15,7 L18,10 V11 H13 V17 L12,18 L11,17 V11 H6 V10 L9,7 Z M12,18 V22"
@@ -803,13 +833,6 @@
                                                       HorizontalAlignment="Center"
                                                       VerticalAlignment="Center" />
                                             </Border>
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding Text, Converter={StaticResource ClipboardHistoryTitleConverter}}"
-                                                       VerticalAlignment="Center"
-                                                       TextWrapping="NoWrap"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Text}"
-                                                       Style="{StaticResource ClipboardHistoryEntryText}" />
                                         </Grid>
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding CapturedAt, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"
@@ -867,6 +890,12 @@
                                     Style="{StaticResource ClipboardHistoryButton}"
                                     Visibility="{Binding HasSelectedEntry, Converter={StaticResource BoolToVisibility}}" />
                         </WrapPanel>
+                        <Border Style="{StaticResource ClipboardHistoryActionFeedbackSurface}"
+                                Visibility="{Binding HasActionFeedback, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding ActionFeedback}"
+                                       TextWrapping="Wrap"
+                                       Style="{StaticResource ClipboardHistoryActionFeedbackText}" />
+                        </Border>
                     </StackPanel>
                 </Grid>
             </StackPanel>
