@@ -113,7 +113,6 @@
             <Setter Property="FontSize" Value="12" />
         </Style>
         <Style x:Key="ClipboardHistoryTextEditor" TargetType="TextBox" BasedOn="{StaticResource ClipboardHistorySearchBox}">
-            <Setter Property="MinHeight" Value="220" />
             <Setter Property="MaxHeight" Value="360" />
             <Setter Property="Padding" Value="12" />
             <Setter Property="FontFamily" Value="Consolas" />
@@ -770,6 +769,7 @@
                             BorderThickness="1"
                             CornerRadius="12"
                             ClipToBounds="True"
+                            VerticalAlignment="Top"
                             Visibility="{Binding HasFilteredEntries, Converter={StaticResource BoolToVisibility}}">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -815,7 +815,7 @@
                                                        VerticalAlignment="Center"
                                                        TextWrapping="NoWrap"
                                                        TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Text}"
+                                                       ToolTip="{Binding Text, Converter={StaticResource ClipboardHistoryTitleConverter}}"
                                                        Style="{StaticResource ClipboardHistoryEntryText}" />
                                             <Border Grid.Column="1"
                                                     Width="18"
@@ -851,6 +851,7 @@
                             <TextBlock Text="Selected text"
                                        Style="{StaticResource ClipboardHistoryFieldLabel}" />
                             <TextBlock DockPanel.Dock="Right"
+                                       Margin="20,1,0,0"
                                        Text="{Binding SelectedEntry.CapturedAt, StringFormat={}{0:yyyy-MM-dd HH:mm}}"
                                        Style="{StaticResource ClipboardHistoryCaption}" />
                         </DockPanel>

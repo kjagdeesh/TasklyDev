@@ -22,6 +22,18 @@ public sealed class ClipboardHistoryViewModelTests
     }
 
     [Fact]
+    public void ClipboardHistoryTitleBoundsLongSingleLineText()
+    {
+        var converter = new ClipboardHistoryTitleConverter();
+
+        var title = converter.Convert(new string('x', 1_048_576), typeof(string), null, CultureInfo.InvariantCulture);
+
+        var titleText = Assert.IsType<string>(title);
+        Assert.Equal(120, titleText.Length);
+        Assert.EndsWith("\u2026", titleText, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task CaptureRequiresConsentAndPreviouslyOptedInStateResumesAfterReload()
     {
         var (directory, path) = CreateStoragePath();

@@ -5,6 +5,8 @@ namespace TasklyDev.Views;
 
 public sealed class ClipboardHistoryTitleConverter : IValueConverter
 {
+    private const int MaximumTitleLength = 120;
+
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string text)
@@ -24,7 +26,14 @@ public sealed class ClipboardHistoryTitleConverter : IValueConverter
             title = title[..lineBreak];
         }
 
-        return title.Length == 0 ? "(Whitespace-only clipboard text)" : title;
+        if (title.Length == 0)
+        {
+            return "(Whitespace-only clipboard text)";
+        }
+
+        return title.Length <= MaximumTitleLength
+            ? title
+            : string.Concat(title.AsSpan(0, MaximumTitleLength - 1), "\u2026");
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>

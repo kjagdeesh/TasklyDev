@@ -142,6 +142,27 @@ public sealed class ClipboardHistoryServiceTests
     }
 
     [Fact]
+    public async Task CaptureAcceptsTextAtTheOneMiBEntryLimit()
+    {
+        var (directory, path) = CreateStoragePath();
+        try
+        {
+            var service = CreateService(path);
+            await service.SetCaptureStateAsync(ClipboardCaptureState.Capturing);
+            var text = new string('x', 1_048_576);
+
+            var result = await service.CaptureAsync(text);
+
+            Assert.Equal(text, Assert.Single(result.Entries).Text);
+            Assert.Contains("added", result.StatusMessage);
+        }
+        finally
+        {
+            DeleteTestDirectory(directory);
+        }
+    }
+
+    [Fact]
     public async Task TotalStorageCapEvictsOldestUnpinnedEntries()
     {
         var (directory, path) = CreateStoragePath();

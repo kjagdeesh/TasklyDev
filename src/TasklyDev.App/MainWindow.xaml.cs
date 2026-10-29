@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     private const int ClipboardUpdateMessage = 0x031D;
     private const int TrayCallbackMessage = 0x8000 + 0x36;
     private const int ClipboardUnicodeTextFormat = 13;
-    private const int MaximumClipboardUtf16Bytes = 2 * 1_048_576 + 2;
+    private const int MaximumClipboardUtf16Characters = 1_048_576;
     private const uint NotifyIconAdd = 0;
     private const uint NotifyIconDelete = 2;
     private const uint NotifyIconMessage = 1;
@@ -215,11 +215,6 @@ public partial class MainWindow : Window
             }
 
             var byteSize = GlobalSize(globalHandle).ToUInt64();
-            if (byteSize > MaximumClipboardUtf16Bytes)
-            {
-                return (null, true);
-            }
-
             if (byteSize < sizeof(char))
             {
                 return (null, false);
@@ -232,10 +227,22 @@ public partial class MainWindow : Window
             }
 
             isLocked = true;
-            var characterCount = checked((int)(byteSize / sizeof(char)));
+            var characterCount = (int)Math.Min(
+                byteSize / sizeof(char),
+                (ulong)MaximumClipboardUtf16Characters + 1);
             var clipboardText = Marshal.PtrToStringUni(pointer, characterCount);
             var terminatorIndex = clipboardText?.IndexOf('\0') ?? -1;
-            return (terminatorIndex >= 0 ? clipboardText![..terminatorIndex] : clipboardText, false);
+            if (terminatorIndex < 0)
+            {
+                if (characterCount > MaximumClipboardUtf16Characters)
+                {
+                    return (null, true);
+                }
+
+                throw new Win32Exception("Clipboard Unicode text was not null-terminated.");
+            }
+
+            return (clipboardText![..terminatorIndex], false);
         }
         finally
         {
