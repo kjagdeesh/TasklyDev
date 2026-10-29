@@ -50,6 +50,10 @@ dotnet test .\tests\TasklyDev.Tests\TasklyDev.Tests.csproj
 
 The test project uses xUnit and covers core services, view models, and WPF shell behavior.
 
+## Installer and releases
+
+Taskly.Dev ships as a self-contained MSI installer built with `installer\Build-Installer.ps1` and published through GitHub Actions. See [Building the installer and publishing a release](docs/releasing.md).
+
 ## Project layout
 
 ```text

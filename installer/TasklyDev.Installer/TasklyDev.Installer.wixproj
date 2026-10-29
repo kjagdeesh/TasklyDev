@@ -1,0 +1,28 @@
+<Project Sdk="WixToolset.Sdk/6.0.2">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+
+    <!-- Overridden by installer\Build-Installer.ps1 and the release workflow. MSI versions must be x.y.z. -->
+    <Version Condition="'$(Version)' == ''">1.0.0</Version>
+    <OutputName>TasklyDev-$(Version)-win-x64</OutputName>
+
+    <!-- Folder produced by "dotnet publish" (self-contained, win-x64). -->
+    <AppPublishDir Condition="'$(AppPublishDir)' == ''">$(MSBuildThisFileDirectory)..\..\artifacts\publish</AppPublishDir>
+    <AppPublishDirFull>$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(AppPublishDir)'))))</AppPublishDirFull>
+    <LicenseRtf Condition="'$(LicenseRtf)' == ''">$(MSBuildThisFileDirectory)License.rtf</LicenseRtf>
+
+    <DefineConstants>$(DefineConstants);Version=$(Version);PublishDir=$(AppPublishDirFull);LicenseRtf=$(LicenseRtf)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="6.0.2" />
+  </ItemGroup>
+
+  <Target Name="EnsurePublishOutputExists" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(AppPublishDirFull)TasklyDev.exe')"
+           Text="Published app not found at '$(AppPublishDirFull)'. Run installer\Build-Installer.ps1, or publish TasklyDev.App for win-x64 first." />
+    <Error Condition="!Exists('$(LicenseRtf)')"
+           Text="License file not found at '$(LicenseRtf)'. Run installer\Build-Installer.ps1 to generate it." />
+  </Target>
+</Project>

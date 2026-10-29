@@ -7,6 +7,8 @@
     <Nullable>enable</Nullable>
     <RootNamespace>TasklyDev</RootNamespace>
     <AssemblyName>TasklyDev</AssemblyName>
+    <Version>1.0.0</Version>
+    <Product>Taskly.Dev</Product>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 

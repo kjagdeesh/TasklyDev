@@ -1,20 +1,22 @@
 TasklyDev
 =========
 
-This is a portable, framework-dependent Windows release folder. Keep all files
-together when copying or moving the application.
-If you downloaded the ZIP, extract the entire ZIP to a folder before starting
-TasklyDev.exe. Do not run the executable from inside the ZIP preview.
+This is a self-contained Windows build of TasklyDev, installed by the Windows
+Installer (.msi) package. It includes the .NET 10 runtime it needs, so no
+separate .NET installation is required.
 
 Requirements
 ------------
 
 - 64-bit Windows supported by .NET 10.
-- The .NET 10 Windows Desktop Runtime (x64) must be installed.
+- Installing needs administrator approval because TasklyDev is installed for all
+  users under Program Files. Running TasklyDev does not require administrator
+  privileges.
 
-If the runtime is missing, install the .NET 10 Desktop Runtime from Microsoft's
-.NET download page, then run TasklyDev.exe.
+Start and remove
+----------------
 
-The application does not require administrator privileges. To remove this
-portable copy, close the application and delete its folder. This package does
-not include an installer or the .NET runtime.
+- Start TasklyDev from the Start menu shortcut.
+- To uninstall, close TasklyDev (choose Quit from its system-tray menu if it is
+  running in the tray), then remove it from Settings > Apps > Installed apps.
+- To upgrade, run the newer installer; it replaces the installed version.

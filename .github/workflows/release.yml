@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  # Pushing a version tag such as v1.0.0 builds the installer and creates a GitHub release.
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  # Manual run: builds and uploads the installer as a workflow artifact only (no release).
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, for example 1.0.0'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  # 'true' creates the release as a draft so you can review the notes and publish it manually.
+  # Set to 'false' to publish releases immediately when a tag is pushed.
+  RELEASE_AS_DRAFT: 'true'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install .NET SDK from global.json
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $tag = $env:GITHUB_REF_NAME
+          } else {
+            $tag = "v$($env:INPUT_VERSION)"
+          }
+
+          if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+)(?<suffix>-[0-9A-Za-z.-]+)?$') {
+            throw "'$tag' is not a valid version tag. Use v<major>.<minor>.<patch>, for example v1.0.0 or v1.0.0-beta.1."
+          }
+
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "version=$($Matches.version)" >> $env:GITHUB_OUTPUT
+          "prerelease=$([string]::IsNullOrEmpty($Matches.suffix) -eq $false)".ToLowerInvariant() >> $env:GITHUB_OUTPUT
+
+      - name: Run tests
+        shell: pwsh
+        run: dotnet test tests/TasklyDev.Tests/TasklyDev.Tests.csproj --configuration Release
+
+      - name: Build MSI installer
+        shell: pwsh
+        run: ./installer/Build-Installer.ps1 -Version '${{ steps.version.outputs.version }}'
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TasklyDev-${{ steps.version.outputs.version }}-win-x64
+          path: |
+            artifacts/TasklyDev-${{ steps.version.outputs.version }}-win-x64.msi
+            artifacts/TasklyDev-${{ steps.version.outputs.version }}-win-x64.msi.sha256
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          IS_PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          $msi = "artifacts/TasklyDev-$($env:VERSION)-win-x64.msi"
+          $arguments = @(
+            'release', 'create', $env:TAG,
+            $msi, "$msi.sha256",
+            '--title', "Taskly.Dev $($env:TAG)",
+            '--generate-notes',
+            '--verify-tag'
+          )
+          if ($env:RELEASE_AS_DRAFT -eq 'true') { $arguments += '--draft' }
+          if ($env:IS_PRERELEASE -eq 'true') { $arguments += '--prerelease' }
+
+          & gh @arguments
+          if ($LASTEXITCODE -ne 0) { throw "gh release create failed with exit code $LASTEXITCODE." }
