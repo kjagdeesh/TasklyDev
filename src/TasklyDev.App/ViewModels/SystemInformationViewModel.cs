@@ -10,6 +10,16 @@ namespace TasklyDev.ViewModels;
 /// <summary>Coordinates system-information refresh, copy, and report-export actions.</summary>
 public sealed class SystemInformationViewModel : INotifyPropertyChanged
 {
+    private static readonly string[] SummaryFieldNames =
+    [
+        "Windows edition",
+        "Machine name",
+        "OS architecture",
+        "Processor",
+        "Installed physical memory",
+        "System uptime"
+    ];
+
     private readonly ISystemInformationService _service;
     private readonly IClipboardService _clipboard;
     private readonly ISystemInformationReportExportService _exportService;
@@ -40,6 +50,9 @@ public sealed class SystemInformationViewModel : INotifyPropertyChanged
 
     /// <summary>Gets the collected information grouped by category.</summary>
     public ObservableCollection<SystemInformationGroup> Groups { get; } = [];
+
+    /// <summary>Gets key values from the current snapshot for the overview cards.</summary>
+    public ObservableCollection<SystemInformationField> SummaryFields { get; } = [];
 
     /// <summary>Gets the action that refreshes machine information.</summary>
     public ICommand RefreshCommand { get; }
@@ -126,6 +139,17 @@ public sealed class SystemInformationViewModel : INotifyPropertyChanged
             foreach (var group in snapshot.Groups)
             {
                 Groups.Add(group);
+            }
+
+            SummaryFields.Clear();
+            var snapshotFields = snapshot.Groups.SelectMany(group => group.Fields).ToArray();
+            foreach (var fieldName in SummaryFieldNames)
+            {
+                var field = snapshotFields.FirstOrDefault(value => value.Name == fieldName);
+                if (field is not null)
+                {
+                    SummaryFields.Add(field);
+                }
             }
 
             GeneratedAt = snapshot.GeneratedAt;

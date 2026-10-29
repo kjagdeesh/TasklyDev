@@ -29,7 +29,7 @@
                            FontSize="13"
                            FontWeight="Bold"
                            Foreground="{DynamicResource AmberDeepBrush}" />
-                <TextBlock Text="Collects available Windows, hardware, storage, uptime, and .NET runtime details. No settings are changed. Copy and exported reports contain the collected values without redaction."
+                <TextBlock Text="Collects read-only Windows, processor, firmware, graphics, memory, storage, security, and .NET details. Device IDs, Product IDs, and the current account may appear in copied or exported reports; values are not redacted."
                            Margin="0,5,0,0"
                            FontSize="12"
                            Foreground="{DynamicResource SecondaryTextBrush}"
@@ -86,6 +86,52 @@
                 CornerRadius="18"
                 Padding="18"
                 Margin="0,0,0,16"
+                Visibility="{Binding HasLoaded, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="At a glance"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,12" />
+                <ItemsControl ItemsSource="{Binding SummaryFields}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Width="165"
+                                    MinHeight="76"
+                                    Background="{DynamicResource SubtleSurfaceBrush}"
+                                    BorderBrush="{DynamicResource OutlineBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12"
+                                    Padding="12"
+                                    Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="10"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Value}"
+                                               Margin="0,6,0,0"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource CardSurfaceBrush}"
+                BorderBrush="{DynamicResource CardOutlineBrush}"
+                BorderThickness="1"
+                CornerRadius="18"
+                Padding="18"
+                Margin="0,0,0,16"
                 Visibility="{Binding HasNoAvailableInformation, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
                 <TextBlock Text="No system information is available"
@@ -114,6 +160,11 @@
                                        FontWeight="SemiBold"
                                        Margin="0,0,0,12" />
                             <ItemsControl ItemsSource="{Binding Fields}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="2" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="{DynamicResource SubtleSurfaceBrush}"
@@ -121,22 +172,17 @@
                                                 BorderThickness="1"
                                                 CornerRadius="10"
                                                 Padding="12"
-                                                Margin="0,0,0,8">
+                                                Margin="0,0,8,8">
                                             <StackPanel>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="190" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Name}"
-                                                               FontWeight="SemiBold"
-                                                               VerticalAlignment="Top"
-                                                               TextWrapping="Wrap" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="{Binding Value}"
-                                                               VerticalAlignment="Top"
-                                                               TextWrapping="Wrap" />
-                                                </Grid>
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+                                                <TextBlock Text="{Binding Value}"
+                                                           Margin="0,5,0,0"
+                                                           FontSize="12"
+                                                           VerticalAlignment="Top"
+                                                           TextWrapping="Wrap" />
                                                 <TextBlock Text="{Binding Source, StringFormat=Source: {0}}"
                                                            Margin="0,6,0,0"
                                                            FontSize="10"

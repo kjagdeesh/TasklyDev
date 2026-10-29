@@ -20,6 +20,7 @@ public sealed class SystemInformationViewModelTests
         Assert.True(viewModel.HasUnavailableInformation);
         Assert.Contains("some fields are unavailable", viewModel.StatusMessage);
         Assert.Single(viewModel.Groups);
+        Assert.Equal(6, viewModel.SummaryFields.Count);
         Assert.Equal(snapshot.GeneratedAt, viewModel.GeneratedAt);
     }
 
@@ -98,6 +99,11 @@ public sealed class SystemInformationViewModelTests
             [
                 new SystemInformationGroup("Machine", [
                     new SystemInformationField("Machine name", "QA-WORKSTATION", "Environment.MachineName", true),
+                    new SystemInformationField("Windows edition", "Professional", "Registry", true),
+                    new SystemInformationField("OS architecture", "X64", "RuntimeInformation", true),
+                    new SystemInformationField("Processor", "Test CPU", "Registry", true),
+                    new SystemInformationField("Installed physical memory", "16.00 GB", "Windows API", true),
+                    new SystemInformationField("System uptime", "1.00:00:00", "Environment.TickCount64", true),
                     new SystemInformationField("CPU model", "Unavailable", "Registry", false, "Access denied.")
                 ])
             ]);

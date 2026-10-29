@@ -103,9 +103,9 @@ The page shows the resolved host paths, discovered SDK/runtime versions and inst
 
 ### System Information
 
-This tool is appended to **System Diagnostics** and collects a read-only, timestamped snapshot of Windows product/release/build, OS and process architecture, machine name, processor model/count, physical memory, fixed-volume capacity, system uptime, and .NET runtime/version. Each field identifies its source and explicitly reports when data is unavailable or partial; the app does not request elevation.
+This tool is appended to **System Diagnostics** and collects a read-only, timestamped snapshot of Windows product, edition, release, build, installation date, Product ID, and Machine GUID; machine and processor details including physical cores, logical threads, and cache; BIOS, motherboard, and graphics-adapter details; installed and usable memory, page-file/commit data, fixed-volume labels/filesystems/capacity, session and elevation state, Secure Boot and virtualization state, system uptime, and .NET runtime/version. Values are grouped into cards, with each field showing its source and any unavailable or partial status. The app does not request elevation, so some fields may be unavailable.
 
-Select **Refresh** to collect a new snapshot. **Copy summary** copies the current report to the clipboard. **Export TXT** and **Export JSON** open a Windows Save As dialog and write the chosen report locally. As selected for this feature, neither screen values, clipboard summaries, nor exported reports redact collected values. Reports can include machine names and storage details; check the contents and destination before sharing. Nothing is exported unless the user chooses an action and destination.
+Select **Refresh** to collect a new snapshot. **Copy summary** copies the current report to the clipboard. **Export TXT** and **Export JSON** open a Windows Save As dialog and write the chosen report locally. As selected for this feature, neither screen values, clipboard summaries, nor exported reports redact collected values. Reports can include a stable device identifier, Windows Product ID, current account name, machine name, and storage details; check the contents and destination before copying or sharing. Nothing is exported unless the user chooses an action and destination.
 
 ### Clipboard History
 

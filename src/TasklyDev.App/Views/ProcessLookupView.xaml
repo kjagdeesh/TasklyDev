@@ -247,7 +247,7 @@
                             <TextBlock VerticalAlignment="Center">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="Refresh Snapshot" />
+                                        <Setter Property="Text" Value="Refresh" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsBusy}" Value="True">
                                                 <Setter Property="Text" Value="Refreshing..." />
