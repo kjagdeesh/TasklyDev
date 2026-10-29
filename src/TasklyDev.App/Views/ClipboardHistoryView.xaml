@@ -175,18 +175,18 @@
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         </Style>
         <Style x:Key="ClipboardHistorySizeTag" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource SubtleSurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="Background" Value="{DynamicResource AmberTintBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource WarmOutlineBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="7" />
-            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="7,3" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="Margin" Value="0,4,0,0" />
         </Style>
         <Style x:Key="ClipboardHistorySizeTagText" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
-            <Setter Property="FontSize" Value="10" />
-            <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
         </Style>
         <Style x:Key="ClipboardHistoryActionFeedbackText" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
             <Setter Property="FontSize" Value="11" />
@@ -833,8 +833,23 @@
                                                            ToolTip="{Binding Text, Converter={StaticResource ClipboardHistoryTitleConverter}}"
                                                            Style="{StaticResource ClipboardHistoryEntryText}" />
                                                 <Border Style="{StaticResource ClipboardHistorySizeTag}">
-                                                    <TextBlock Text="{Binding Utf8ByteCount, Converter={StaticResource ClipboardHistorySizeConverter}}"
-                                                               Style="{StaticResource ClipboardHistorySizeTagText}" />
+                                                    <StackPanel Orientation="Horizontal"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip="Size of stored clipboard text">
+                                                        <Path Data="M12,2 L21,6.5 L12,11 L3,6.5 Z M3,11.5 L12,16 L21,11.5 M3,16.5 L12,21 L21,16.5"
+                                                              Width="11"
+                                                              Height="11"
+                                                              Margin="0,0,5,0"
+                                                              Stretch="Uniform"
+                                                              Stroke="{DynamicResource AmberDeepBrush}"
+                                                              StrokeThickness="1.5"
+                                                              StrokeStartLineCap="Round"
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round"
+                                                              VerticalAlignment="Center" />
+                                                        <TextBlock Text="{Binding Utf8ByteCount, Converter={StaticResource ClipboardHistorySizeConverter}}"
+                                                                   Style="{StaticResource ClipboardHistorySizeTagText}" />
+                                                    </StackPanel>
                                                 </Border>
                                             </StackPanel>
                                             <Border Grid.Column="1"
