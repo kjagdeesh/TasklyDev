@@ -4,21 +4,185 @@
              FontFamily="Segoe UI">
     <UserControl.Resources>
         <Style x:Key="CertificateActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
-            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="MinHeight" Value="38" />
             <Setter Property="Padding" Value="13,8" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,0,8,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ActionBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                                <Setter TargetName="ActionBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ActionBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ActionBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="CertificatePrimaryButton" TargetType="Button" BasedOn="{StaticResource CertificateActionButton}">
             <Setter Property="Background" Value="{DynamicResource AmberBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
-        <Style x:Key="CertificateValueText" TargetType="TextBlock">
+        <Style x:Key="CertificateBaseText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}" />
+        <Style x:Key="CertificateNoticeTitle" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+        </Style>
+        <Style x:Key="CertificateDescription" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
+        <Style x:Key="CertificateSectionTitle" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="CertificateDetailTitle" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="FontSize" Value="17" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="CertificateFieldLabel" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        </Style>
+        <Style x:Key="CertificateCaption" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style x:Key="CertificateValueText" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
+        <Style x:Key="CertificateMonoValueText" TargetType="TextBlock" BasedOn="{StaticResource CertificateValueText}">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style x:Key="CertificateValidityText" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="Margin" Value="0,0,0,3" />
+        </Style>
+        <Style x:Key="CertificateDateStatusText" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="CertificateOperationStatusText" TargetType="TextBlock" BasedOn="{StaticResource CertificateBaseText}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsError}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsError}" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource AmberDeepBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CertificateStatusCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AmberTintBrush}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsError}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DangerSurfaceBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CertificateStoreList" TargetType="ListBox">
+            <Setter Property="MaxHeight" Value="190" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <Border x:Name="StoreListBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer Padding="{TemplateBinding Padding}"
+                                          Focusable="False"
+                                          CanContentScroll="True"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="StoreListBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CertificateStoreListItem" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="ItemBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="CertificateTagTemplate">
+            <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                    BorderBrush="{DynamicResource OutlineBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="9,5"
+                    Margin="0,0,6,6">
+                <TextBlock Text="{Binding}" />
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <StackPanel>
@@ -30,14 +194,10 @@
                 Margin="0,0,0,16">
             <StackPanel>
                 <TextBlock Text="Public certificate inspection"
-                           FontSize="13"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource AmberDeepBrush}" />
+                           Style="{StaticResource CertificateNoticeTitle}" />
                 <TextBlock Text="Reads public certificate fields only. Validity dates and local Windows chain trust are reported separately. Revocation and network checks are disabled; private keys are never imported or exported."
                            Margin="0,5,0,0"
-                           FontSize="12"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
-                           TextWrapping="Wrap" />
+                           Style="{StaticResource CertificateDescription}" />
             </StackPanel>
         </Border>
 
@@ -49,23 +209,28 @@
                 Margin="0,0,0,16">
             <StackPanel>
                 <TextBlock Text="Inspect a public certificate file"
-                           FontSize="15"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource CertificateSectionTitle}"
                            Margin="0,0,0,10" />
                 <WrapPanel>
                     <Button Content="Choose certificate file…"
                             Command="{Binding BrowseCertificateCommand}"
                             IsEnabled="{Binding IsNotBusy}"
                             Style="{StaticResource CertificatePrimaryButton}" />
-                    <TextBlock Text="{Binding SelectedFilePath, TargetNullValue=No file selected}"
-                               VerticalAlignment="Center"
-                               TextWrapping="Wrap"
-                               MaxWidth="720" />
+                    <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                            BorderBrush="{DynamicResource OutlineBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="10,8"
+                            Margin="0,0,0,8"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedFilePath, TargetNullValue=No file selected}"
+                                   Style="{StaticResource CertificateValueText}"
+                                   Margin="0"
+                                   MaxWidth="720" />
+                    </Border>
                 </WrapPanel>
                 <TextBlock Text="Supported public formats: .cer, .crt, .der, and .pem. PEM files containing private-key material are rejected."
-                           FontSize="11"
-                           Foreground="{DynamicResource MutedTextBrush}"
-                           TextWrapping="Wrap" />
+                           Style="{StaticResource CertificateCaption}" />
             </StackPanel>
         </Border>
 
@@ -77,8 +242,7 @@
                 Margin="0,0,0,16">
             <StackPanel>
                 <TextBlock Text="Browse a Windows personal store"
-                           FontSize="15"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource CertificateSectionTitle}"
                            Margin="0,0,0,10" />
                 <WrapPanel>
                     <ComboBox ItemsSource="{Binding StoreScopes}"
@@ -98,23 +262,18 @@
                 </WrapPanel>
                 <ListBox ItemsSource="{Binding StoreCertificates}"
                          SelectedItem="{Binding SelectedStoreCertificate, Mode=TwoWay}"
-                         MaxHeight="190"
-                         Background="{DynamicResource EditorSurfaceBrush}"
-                         Foreground="{DynamicResource PrimaryTextBrush}"
-                         BorderBrush="{DynamicResource OutlineBrush}"
-                         BorderThickness="1"
+                         Style="{StaticResource CertificateStoreList}"
+                         ItemContainerStyle="{StaticResource CertificateStoreListItem}"
                          AutomationProperties.Name="Certificates in selected Windows personal store">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="4">
-                                <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding Subject}"
+                                           Style="{StaticResource CertificateFieldLabel}" />
                                 <TextBlock Text="{Binding Thumbprint, StringFormat=Thumbprint: {0}}"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource MutedTextBrush}"
-                                           TextWrapping="Wrap" />
+                                           Style="{StaticResource CertificateMonoValueText}" />
                                 <TextBlock Text="{Binding NotAfter, StringFormat=Expires: {0:yyyy-MM-dd}}"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource MutedTextBrush}" />
+                                           Style="{StaticResource CertificateCaption}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -122,7 +281,7 @@
             </StackPanel>
         </Border>
 
-        <Border Background="{DynamicResource CardSurfaceBrush}"
+        <Border Style="{StaticResource CertificateStatusCard}"
                 BorderBrush="{DynamicResource CardOutlineBrush}"
                 BorderThickness="1"
                 CornerRadius="18"
@@ -130,14 +289,10 @@
                 Margin="0,0,0,16">
             <StackPanel>
                 <TextBlock Text="{Binding StatusMessage}"
-                           FontSize="13"
-                           FontWeight="SemiBold"
-                           TextWrapping="Wrap" />
+                           Style="{StaticResource CertificateOperationStatusText}" />
                 <TextBlock Text="Local chain building does not contact the network. A successful date check does not imply a trusted chain."
                            Margin="0,5,0,0"
-                           FontSize="11"
-                           Foreground="{DynamicResource MutedTextBrush}"
-                           TextWrapping="Wrap" />
+                           Style="{StaticResource CertificateCaption}" />
             </StackPanel>
         </Border>
 
@@ -149,12 +304,11 @@
                 Visibility="{Binding HasInspection, Converter={StaticResource BoolToVisibility}}">
             <StackPanel DataContext="{Binding Inspection}">
                 <TextBlock Text="Certificate details"
-                           FontSize="17"
-                           FontWeight="Bold"
+                           Style="{StaticResource CertificateDetailTitle}"
                            Margin="0,0,0,14" />
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="160" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -169,44 +323,81 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Source" FontWeight="SemiBold" />
+                    <TextBlock Text="Source" Style="{StaticResource CertificateFieldLabel}" />
                     <TextBlock Grid.Column="1" Text="{Binding Source}" Style="{StaticResource CertificateValueText}" />
-                    <TextBlock Grid.Row="1" Text="Subject" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="1" Text="Subject" Style="{StaticResource CertificateFieldLabel}" />
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Subject}" Style="{StaticResource CertificateValueText}" />
-                    <TextBlock Grid.Row="2" Text="Issuer" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="2" Text="Issuer" Style="{StaticResource CertificateFieldLabel}" />
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Issuer}" Style="{StaticResource CertificateValueText}" />
-                    <TextBlock Grid.Row="3" Text="Thumbprint" FontWeight="SemiBold" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Thumbprint}" Style="{StaticResource CertificateValueText}" />
-                    <TextBlock Grid.Row="4" Text="Validity dates" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="3" Text="Thumbprint" Style="{StaticResource CertificateFieldLabel}" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Thumbprint}" Style="{StaticResource CertificateMonoValueText}" />
+                    <TextBlock Grid.Row="4" Text="Validity dates" Style="{StaticResource CertificateFieldLabel}" />
                     <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,8">
-                        <TextBlock Text="{Binding NotBefore, StringFormat=Not before: {0:yyyy-MM-dd HH:mm:ss zzz}}" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding NotAfter, StringFormat=Not after: {0:yyyy-MM-dd HH:mm:ss zzz}}" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding DateValidityStatus}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding NotBefore, StringFormat=Not before: {0:yyyy-MM-dd HH:mm:ss zzz}}"
+                                   Style="{StaticResource CertificateValidityText}" />
+                        <TextBlock Text="{Binding NotAfter, StringFormat=Not after: {0:yyyy-MM-dd HH:mm:ss zzz}}"
+                                   Style="{StaticResource CertificateValidityText}" />
+                        <TextBlock Text="{Binding DateValidityStatus}"
+                                   Style="{StaticResource CertificateDateStatusText}" />
                     </StackPanel>
-                    <TextBlock Grid.Row="5" Text="Local chain trust" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="5" Text="Local chain trust" Style="{StaticResource CertificateFieldLabel}" />
                     <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ChainTrustStatus}" Style="{StaticResource CertificateValueText}" />
-                    <TextBlock Grid.Row="6" Text="Revocation" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="6" Text="Revocation" Style="{StaticResource CertificateFieldLabel}" />
                     <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding RevocationStatus}" Style="{StaticResource CertificateValueText}" />
-                    <TextBlock Grid.Row="7" Text="Public key / signature" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="7" Text="Public key / signature" Style="{StaticResource CertificateFieldLabel}" />
                     <StackPanel Grid.Row="7" Grid.Column="1" Margin="0,0,0,8">
-                        <TextBlock Text="{Binding PublicKeyAlgorithm, StringFormat=Public key: {0}}" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding SignatureAlgorithm, StringFormat=Signature: {0}}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding PublicKeyAlgorithm, StringFormat=Public key: {0}}"
+                                   Style="{StaticResource CertificateValidityText}" />
+                        <TextBlock Text="{Binding SignatureAlgorithm, StringFormat=Signature: {0}}"
+                                   Style="{StaticResource CertificateValidityText}" />
                     </StackPanel>
-                    <TextBlock Grid.Row="8" Text="Subject Alternative Names" FontWeight="SemiBold" />
-                    <ItemsControl Grid.Row="8" Grid.Column="1" ItemsSource="{Binding SubjectAlternativeNames}" Margin="0,0,0,8" />
-                    <TextBlock Grid.Row="9" Text="Key Usage" FontWeight="SemiBold" />
-                    <ItemsControl Grid.Row="9" Grid.Column="1" ItemsSource="{Binding KeyUsages}" Margin="0,0,0,8" />
+                    <TextBlock Grid.Row="8" Text="Subject Alternative Names" Style="{StaticResource CertificateFieldLabel}" />
+                    <ItemsControl Grid.Row="8"
+                                  Grid.Column="1"
+                                  ItemsSource="{Binding SubjectAlternativeNames}"
+                                  ItemTemplate="{StaticResource CertificateTagTemplate}"
+                                  Margin="0,0,0,8">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <TextBlock Grid.Row="9" Text="Key Usage" Style="{StaticResource CertificateFieldLabel}" />
+                    <ItemsControl Grid.Row="9"
+                                  Grid.Column="1"
+                                  ItemsSource="{Binding KeyUsages}"
+                                  ItemTemplate="{StaticResource CertificateTagTemplate}"
+                                  Margin="0,0,0,8">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </Grid>
                 <TextBlock Text="Chain status"
-                           FontSize="13"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource CertificateFieldLabel}"
                            Margin="0,8,0,6" />
-                <ItemsControl ItemsSource="{Binding ChainStatuses}" />
+                <ItemsControl ItemsSource="{Binding ChainStatuses}"
+                              ItemTemplate="{StaticResource CertificateTagTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
                 <TextBlock Text="Chain subjects"
-                           FontSize="13"
-                           FontWeight="SemiBold"
+                           Style="{StaticResource CertificateFieldLabel}"
                            Margin="0,8,0,6" />
-                <ItemsControl ItemsSource="{Binding ChainSubjects}" />
+                <ItemsControl ItemsSource="{Binding ChainSubjects}"
+                              ItemTemplate="{StaticResource CertificateTagTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
             </StackPanel>
         </Border>
     </StackPanel>
