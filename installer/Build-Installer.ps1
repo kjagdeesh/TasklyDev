@@ -45,9 +45,9 @@ Invoke-DotNet publish (Join-Path $repoRoot 'src\TasklyDev.App\TasklyDev.App.cspr
     --self-contained true `
     --output $publishDir `
     "-p:Version=$Version" `
-    -p:DebugType=None `
-    -p:DebugSymbols=false `
-    -p:SatelliteResourceLanguages=en
+    "-p:DebugType=None" `
+    "-p:DebugSymbols=false" `
+    "-p:SatelliteResourceLanguages=en"
 
 Write-Host '==> Generating installer license text'
 $licenseText = (Get-Content (Join-Path $repoRoot 'LICENSE') -Raw) -replace '\\', '\\\\' -replace '\{', '\{' -replace '\}', '\}'
