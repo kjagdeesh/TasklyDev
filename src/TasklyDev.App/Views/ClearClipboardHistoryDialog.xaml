@@ -166,10 +166,10 @@
                     </Border>
                     <StackPanel Margin="14,0,0,0"
                                 VerticalAlignment="Center">
-                        <TextBlock Text="Clear clipboard history?"
+                        <TextBlock x:Name="ConfirmationTitle"
                                    FontSize="19"
                                    FontWeight="Bold" />
-                        <TextBlock Text="Please confirm this permanent change."
+                        <TextBlock x:Name="ConfirmationSubtitle"
                                    Margin="0,4,0,0"
                                    FontSize="12"
                                    Foreground="{DynamicResource MutedTextBrush}" />
@@ -184,11 +184,11 @@
                         Padding="16"
                         Margin="0,0,0,22">
                     <StackPanel>
-                        <TextBlock Text="All saved clipboard entries on this device will be permanently deleted."
+                        <TextBlock x:Name="ConfirmationMessage"
                                    FontSize="13"
                                    FontWeight="SemiBold"
                                    TextWrapping="Wrap" />
-                        <TextBlock Text="Clipboard capture will remain in its current state."
+                        <TextBlock x:Name="ConfirmationDetail"
                                    Margin="0,7,0,0"
                                    FontSize="12"
                                    Foreground="{DynamicResource MutedTextBrush}"
@@ -204,12 +204,11 @@
                             Style="{StaticResource ConfirmationCancelButton}"
                             Margin="0,0,10,0"
                             Click="Cancel_Click" />
-                    <Button Content="Clear history"
+                    <Button x:Name="ConfirmButton"
                             Style="{StaticResource WarningActionButton}"
                             MinWidth="126"
                             MinHeight="40"
                             IsDefault="False"
-                            AutomationProperties.Name="Confirm clearing clipboard history"
                             Click="Confirm_Click" />
                 </StackPanel>
             </Grid>

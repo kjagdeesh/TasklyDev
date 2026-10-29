@@ -1,8 +1,10 @@
 <UserControl x:Class="TasklyDev.Views.ClipboardHistoryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:TasklyDev.Views"
              FontFamily="Segoe UI">
     <UserControl.Resources>
+        <local:ClipboardHistoryTitleConverter x:Key="ClipboardHistoryTitleConverter" />
         <Style x:Key="ClipboardHistoryButton" TargetType="Button" BasedOn="{StaticResource SecondaryActionButton}">
             <Setter Property="MinHeight" Value="38" />
             <Setter Property="Padding" Value="13,8" />
@@ -97,6 +99,19 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
+        <Style x:Key="ClipboardHistorySortComboBox"
+               TargetType="ComboBox"
+               BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="MinWidth" Value="180" />
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Background" Value="{DynamicResource CardSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
         <Style x:Key="ClipboardHistoryTextEditor" TargetType="TextBox" BasedOn="{StaticResource ClipboardHistorySearchBox}">
             <Setter Property="MinHeight" Value="220" />
             <Setter Property="MaxHeight" Value="360" />
@@ -153,6 +168,11 @@
         </Style>
         <Style x:Key="ClipboardHistoryFieldLabel" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
             <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="ClipboardHistoryEntryText" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         </Style>
         <Style x:Key="ClipboardHistoryPolicyHeading" TargetType="TextBlock" BasedOn="{StaticResource ClipboardHistoryBaseText}">
             <Setter Property="FontSize" Value="15" />
@@ -285,59 +305,58 @@
             </Setter>
         </Style>
         <Style x:Key="ClipboardHistoryList" TargetType="ListBox">
+            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="ClipToBounds" Value="True" />
             <Setter Property="MinHeight" Value="220" />
             <Setter Property="MaxHeight" Value="360" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Background" Value="{DynamicResource EditorSurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource OutlineBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBox">
-                        <Border x:Name="HistoryListBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="12"
-                                SnapsToDevicePixels="True">
-                            <ScrollViewer Padding="{TemplateBinding Padding}"
-                                          Focusable="False"
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="0,0,11,11"
+                                ClipToBounds="True">
+                            <ScrollViewer Focusable="False"
                                           CanContentScroll="True"
-                                          VerticalScrollBarVisibility="Auto"
-                                          HorizontalScrollBarVisibility="Disabled">
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}">
                                 <ItemsPresenter />
                             </ScrollViewer>
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter TargetName="HistoryListBorder" Property="BorderBrush" Value="{DynamicResource AmberBrush}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
         <Style x:Key="ClipboardHistoryListItem" TargetType="ListBoxItem">
-            <Setter Property="Padding" Value="10,9" />
-            <Setter Property="Margin" Value="2" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="ClipToBounds" Value="True" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="EntryBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="9"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        <Grid Background="Transparent" ClipToBounds="True">
+                        <Border x:Name="EntryBackground"
+                                Background="Transparent"
+                                BorderBrush="{DynamicResource OutlineBrush}"
+                                BorderThickness="0,0,0,1" />
+                            <Border x:Name="SelectionMarker"
+                                    Width="3"
+                                    HorizontalAlignment="Left"
+                                    Background="{DynamicResource AmberBrush}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="14,10,12,10"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                        </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="EntryBorder" Property="Background" Value="{DynamicResource CardHoverBrush}" />
+                                <Setter TargetName="EntryBackground" Property="Background" Value="{DynamicResource CardHoverBrush}" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="EntryBorder" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter TargetName="EntryBackground" Property="Background" Value="{DynamicResource AmberTintBrush}" />
+                                <Setter TargetName="SelectionMarker" Property="Visibility" Value="Visible" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -611,15 +630,34 @@
                 Padding="18"
                 Margin="0,0,0,16">
             <StackPanel>
-                <DockPanel Margin="0,0,0,12">
-                    <TextBlock Text="History"
-                               Margin="0,8,0,0"
+                <TextBlock Text="History"
+                               Margin="0,8,0,20"
                                Style="{StaticResource ClipboardHistorySectionTitle}" />
+                <DockPanel Margin="0,0,0,12">
+
+                    <ComboBox DockPanel.Dock="Left"
+                              ItemsSource="{Binding SortOptions}"
+                              SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}"
+                              Style="{StaticResource ClipboardHistorySortComboBox}"
+                              Margin="0,0,8,0"
+                              ToolTip="Sort clipboard history"
+                              AutomationProperties.Name="Sort clipboard history">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Label}"
+                                           FontFamily="Segoe UI"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource PrimaryTextBrush}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding HistoryCountSummary}"
                                Margin="12,0,0,0"
                                VerticalAlignment="Center"
                                Style="{StaticResource ClipboardHistoryCaption}" />
+
                     <Button DockPanel.Dock="Right"
                             Content="Clear all"
                             Width="150"
@@ -699,49 +737,92 @@
                            Style="{StaticResource ClipboardHistoryCaption}" />
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
                         <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2*" />
                     </Grid.ColumnDefinitions>
-                    <ListBox ItemsSource="{Binding FilteredEntries}"
-                             SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
-                             Style="{StaticResource ClipboardHistoryList}"
-                             ItemContainerStyle="{StaticResource ClipboardHistoryListItem}"
-                             Visibility="{Binding HasFilteredEntries, Converter={StaticResource BoolToVisibility}}"
-                             AutomationProperties.Name="Clipboard history entries">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{DynamicResource OutlineBrush}"
-                                        BorderThickness="0,0,0,1"
-                                        Padding="2,6">
-                                    <StackPanel>
-                                        <Grid>
+                    <Border Grid.Column="0"
+                        Background="{DynamicResource CardSurfaceBrush}"
+                            BorderBrush="{DynamicResource OutlineBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            ClipToBounds="True"
+                            Visibility="{Binding HasFilteredEntries, Converter={StaticResource BoolToVisibility}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Background="{DynamicResource SubtleSurfaceBrush}"
+                                BorderBrush="{DynamicResource OutlineBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="14,11">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="155" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Clipboard"
+                                           Style="{StaticResource ClipboardHistoryFieldLabel}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="Date &amp; time"
+                                           TextAlignment="Right"
+                                           Style="{StaticResource ClipboardHistoryFieldLabel}" />
+                            </Grid>
+                        </Border>
+                        <ListBox Grid.Row="1"
+                                 ItemsSource="{Binding FilteredEntries}"
+                                 SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                                 Style="{StaticResource ClipboardHistoryList}"
+                                 ItemContainerStyle="{StaticResource ClipboardHistoryListItem}"
+                                 AutomationProperties.Name="Clipboard history table">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="155" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid VerticalAlignment="Center">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding CapturedAt, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"
-                                                       Style="{StaticResource ClipboardHistoryCaption}" />
-                                            <Border Grid.Column="1"
+                                            <Border Width="18"
+                                                    Height="18"
+                                                    CornerRadius="9"
                                                     Background="{DynamicResource AmberTintBrush}"
-                                                    CornerRadius="7"
-                                                    Padding="7,3"
-                                                    Visibility="{Binding IsPinned, Converter={StaticResource BoolToVisibility}}">
-                                                <TextBlock Text="PINNED"
-                                                           FontSize="9"
-                                                           FontWeight="Bold"
-                                                           Foreground="{DynamicResource AmberDeepBrush}" />
+                                                    Margin="0,0,8,0"
+                                                    Visibility="{Binding IsPinned, Converter={StaticResource BoolToVisibility}}"
+                                                    ToolTip="Pinned entry">
+                                                <Path Data="M8,3 H16 L15,7 L18,10 V11 H13 V17 L12,18 L11,17 V11 H6 V10 L9,7 Z M12,18 V22"
+                                                      Width="11"
+                                                      Height="11"
+                                                      Fill="{DynamicResource AmberDeepBrush}"
+                                                      Stretch="Uniform"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
                                             </Border>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Text, Converter={StaticResource ClipboardHistoryTitleConverter}}"
+                                                       VerticalAlignment="Center"
+                                                       TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Text}"
+                                                       Style="{StaticResource ClipboardHistoryEntryText}" />
                                         </Grid>
-                                        <TextBlock Text="{Binding Text}"
-                                                   Margin="0,4,0,0"
-                                                   MaxHeight="40"
-                                                   TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CapturedAt, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"
+                                                   VerticalAlignment="Center"
+                                                   TextAlignment="Right"
+                                                   TextWrapping="NoWrap"
+                                                   Style="{StaticResource ClipboardHistoryCaption}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
                     <StackPanel Grid.Column="2">
                         <DockPanel Margin="0,0,0,8">
                             <TextBlock Text="Selected text"

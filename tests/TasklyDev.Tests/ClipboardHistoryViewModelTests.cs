@@ -1,7 +1,9 @@
 using System.Text;
+using System.Globalization;
 using TasklyDev.Core.ClipboardHistory;
 using TasklyDev.Services;
 using TasklyDev.ViewModels;
+using TasklyDev.Views;
 using TasklyDev.Windows.ClipboardHistory;
 using Xunit;
 
@@ -9,6 +11,16 @@ namespace TasklyDev.Tests;
 
 public sealed class ClipboardHistoryViewModelTests
 {
+    [Fact]
+    public void ClipboardHistoryTitleTrimsLeadingWhitespaceAndUsesTheFirstLine()
+    {
+        var converter = new ClipboardHistoryTitleConverter();
+
+        var title = converter.Convert("   Clipboard title\r\nAdditional details", typeof(string), null, CultureInfo.InvariantCulture);
+
+        Assert.Equal("Clipboard title", title);
+    }
+
     [Fact]
     public async Task CaptureRequiresConsentAndPreviouslyOptedInStateResumesAfterReload()
     {
@@ -85,12 +97,17 @@ public sealed class ClipboardHistoryViewModelTests
             await viewModel.InitializeAsync();
             viewModel.ConsentConfirmed = true;
             await viewModel.StartCaptureAsync();
-            await viewModel.CaptureTextAsync("alpha value");
+            await viewModel.CaptureTextAsync("   alpha value");
             await viewModel.CaptureTextAsync("beta value");
 
             Assert.Equal("2 of 2 entries", viewModel.HistoryCountSummary);
             Assert.True(viewModel.StorageUsageMegabytes > 0);
             Assert.InRange(viewModel.StorageUsageMegabytes, 0, 100);
+            Assert.Equal(4, viewModel.SortOptions.Count);
+
+            viewModel.SelectedSortOption = viewModel.SortOptions.Single(option =>
+                option.Mode == ClipboardHistorySortMode.ClipboardTextAscending);
+            Assert.Equal("   alpha value", viewModel.FilteredEntries[0].Text);
 
             viewModel.SearchText = "ALPHA";
             Assert.Equal("1 of 2 entries", viewModel.HistoryCountSummary);
@@ -114,6 +131,39 @@ public sealed class ClipboardHistoryViewModelTests
             viewModel.ClearSearchCommand.Execute(null);
             Assert.Empty(viewModel.SearchText);
             Assert.False(viewModel.HasSearchText);
+        }
+        finally
+        {
+            DeleteTestDirectory(directory);
+        }
+    }
+
+    [Fact]
+    public async Task DeleteSelectedRequiresConfirmationAndRemovesOnlySelectedEntry()
+    {
+        var (directory, path) = CreateStoragePath();
+        try
+        {
+            var confirmation = new TestConfirmationService { ShouldConfirm = false };
+            var viewModel = CreateViewModel(path, confirmation);
+            await viewModel.InitializeAsync();
+            viewModel.ConsentConfirmed = true;
+            await viewModel.StartCaptureAsync();
+            await viewModel.CaptureTextAsync("keep this entry");
+            await viewModel.CaptureTextAsync("delete this entry");
+            viewModel.SelectedEntry = viewModel.Entries.Single(entry => entry.Text == "delete this entry");
+
+            await viewModel.DeleteSelectedAsync();
+
+            Assert.Equal(2, viewModel.Entries.Count);
+            Assert.Contains("canceled", viewModel.StatusMessage, StringComparison.OrdinalIgnoreCase);
+
+            confirmation.ShouldConfirm = true;
+            await viewModel.DeleteSelectedAsync();
+
+            Assert.Single(viewModel.Entries);
+            Assert.Equal("keep this entry", viewModel.Entries[0].Text);
+            Assert.Null(viewModel.SelectedEntry);
         }
         finally
         {
@@ -188,6 +238,8 @@ public sealed class ClipboardHistoryViewModelTests
     private sealed class TestConfirmationService : IClipboardHistoryConfirmationService
     {
         public bool ShouldConfirm { get; set; }
+
+        public bool ConfirmDeleteSelectedEntry() => ShouldConfirm;
 
         public bool ConfirmClearHistory() => ShouldConfirm;
     }

@@ -126,6 +126,8 @@ public sealed class ShellWindowTests
 
     private sealed class TestClipboardHistoryConfirmationService : IClipboardHistoryConfirmationService
     {
+        public bool ConfirmDeleteSelectedEntry() => true;
+
         public bool ConfirmClearHistory() => true;
     }
 }

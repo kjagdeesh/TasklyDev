@@ -10,11 +10,29 @@ using TasklyDev.Services;
 
 namespace TasklyDev.ViewModels;
 
+public enum ClipboardHistorySortMode
+{
+    NewestFirst,
+    OldestFirst,
+    ClipboardTextAscending,
+    ClipboardTextDescending
+}
+
+public sealed record ClipboardHistorySortOption(string Label, ClipboardHistorySortMode Mode);
+
 /// <summary>Coordinates explicit clipboard capture, encrypted history, search, and entry actions.</summary>
 public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
 {
     private const int MaximumPendingClipboardItems = 32;
     private const double MaximumStorageMegabytes = 100;
+    private static readonly IReadOnlyList<ClipboardHistorySortOption> AvailableSortOptions =
+    [
+        new("Newest first", ClipboardHistorySortMode.NewestFirst),
+        new("Oldest first", ClipboardHistorySortMode.OldestFirst),
+        new("Clipboard text A-Z", ClipboardHistorySortMode.ClipboardTextAscending),
+        new("Clipboard text Z-A", ClipboardHistorySortMode.ClipboardTextDescending)
+    ];
+
     private readonly IClipboardHistoryService _service;
     private readonly IClipboardService _clipboard;
     private readonly IClipboardHistoryConfirmationService _confirmation;
@@ -26,6 +44,7 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     private string _storageUsage = "History storage not loaded.";
     private double _storageUsageMegabytes;
     private DateTimeOffset? _lastUpdatedAt;
+    private ClipboardHistorySortOption _selectedSortOption = AvailableSortOptions[0];
     private ClipboardCaptureState _captureState;
     private bool _isBusy;
     private bool _hasLoaded;
@@ -63,12 +82,26 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     /// <summary>Gets the history entries that match the search query.</summary>
     public ObservableCollection<ClipboardHistoryEntry> FilteredEntries { get; } = [];
 
+    public IReadOnlyList<ClipboardHistorySortOption> SortOptions => AvailableSortOptions;
+
     public ICommand RefreshCommand { get; }
     public ICommand StartCaptureCommand { get; }
     public ICommand PauseCaptureCommand { get; }
     public ICommand ResumeCaptureCommand { get; }
     public ICommand DisableCaptureCommand { get; }
     public ICommand ClearSearchCommand { get; }
+    public ClipboardHistorySortOption SelectedSortOption
+    {
+        get => _selectedSortOption;
+        set
+        {
+            if (SetProperty(ref _selectedSortOption, value))
+            {
+                ApplyFilter();
+            }
+        }
+    }
+
     public ICommand CopySelectedCommand { get; }
     public ICommand TogglePinSelectedCommand { get; }
     public ICommand DeleteSelectedCommand { get; }
@@ -363,6 +396,13 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
             return Task.CompletedTask;
         }
 
+        if (!_confirmation.ConfirmDeleteSelectedEntry())
+        {
+            StatusMessage = "Delete entry was canceled.";
+            IsError = false;
+            return Task.CompletedTask;
+        }
+
         var id = SelectedEntry.Id;
         return RunStoreOperationAsync(
             () => _service.DeleteAsync(id),
@@ -513,9 +553,18 @@ public sealed class ClipboardHistoryViewModel : INotifyPropertyChanged
     private void ApplyFilter()
     {
         var term = SearchText.Trim();
-        var filtered = Entries.Where(entry =>
+        var matches = Entries.Where(entry =>
             term.Length == 0 ||
             entry.Text.Contains(term, StringComparison.OrdinalIgnoreCase));
+        IEnumerable<ClipboardHistoryEntry> filtered = SelectedSortOption.Mode switch
+        {
+            ClipboardHistorySortMode.OldestFirst => matches.OrderBy(entry => entry.CapturedAt),
+            ClipboardHistorySortMode.ClipboardTextAscending =>
+                matches.OrderBy(entry => entry.Text.TrimStart(), StringComparer.OrdinalIgnoreCase),
+            ClipboardHistorySortMode.ClipboardTextDescending =>
+                matches.OrderByDescending(entry => entry.Text.TrimStart(), StringComparer.OrdinalIgnoreCase),
+            _ => matches.OrderByDescending(entry => entry.CapturedAt)
+        };
         FilteredEntries.Clear();
         foreach (var entry in filtered)
         {
