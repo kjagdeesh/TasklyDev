@@ -12,6 +12,18 @@
   <strong>WPF · .NET 10 · Windows x64</strong>
 </p>
 
+
+## ⬇️ Download Taskly.Dev
+
+| Version | Platform | Download |
+|:---:|:---:|:---:|
+| **v1.0.0** | Windows x64 | **[⬇️ Download MSI Installer](https://github.com/kjagdeesh/TasklyDev/releases/download/v1.0.0/TasklyDev-1.0.0-win-x64.msi)** |
+
+**Quick install:** Download the MSI installer, run it, and follow the setup instructions.
+
+[**View all releases →**](https://github.com/kjagdeesh/TasklyDev/releases)
+
+
 Taskly.Dev is a Windows desktop workbench for common developer and system-diagnostic tasks. It is built with WPF and .NET 10. Utility operations run locally; the application does not send telemetry or upload tool inputs.
 
 ## Features
