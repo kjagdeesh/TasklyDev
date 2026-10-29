@@ -9,6 +9,7 @@
     <AssemblyName>TasklyDev</AssemblyName>
     <Version>1.0.0</Version>
     <Product>Taskly.Dev</Product>
+    <ApplicationIcon>Assets\TasklyDev.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
@@ -23,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\TasklyDev.ico" />
     <Content Include="Assets\TasklyDevLogo.png" Condition="Exists('Assets\TasklyDevLogo.png')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
